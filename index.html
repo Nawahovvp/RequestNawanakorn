@@ -52,11 +52,23 @@
         max-width: 400px;
         text-align: center;
         animation: fadeInUp 0.4s ease;
+        position: relative;
+      }
+      .login-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #42a5f5, #2196f3);
+        border-radius: 12px 12px 0 0;
       }
       .login-content h2 {
         color: #1a3c87;
         margin-bottom: 20px;
         font-family: "Itim", cursive;
+        font-size: 24px;
       }
       .login-content input {
         width: 100%;
@@ -66,11 +78,13 @@
         border-radius: 6px;
         font-size: 16px;
         box-sizing: border-box;
+        transition: all 0.3s ease;
       }
       .login-content input:focus {
         border-color: #2196f3;
         outline: none;
         box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+        transform: translateY(-1px);
       }
       .login-content .password-container {
         position: relative;
@@ -83,6 +97,7 @@
         cursor: pointer;
         color: #666;
         font-size: 16px;
+        transition: color 0.3s ease;
       }
       .login-content .password-container i:hover {
         color: #2196f3;
@@ -90,19 +105,23 @@
       .login-content .remember-me {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: space-between;
         margin: 15px 0;
         font-size: 14px;
         text-align: left;
+        padding: 0 4px;
       }
       .login-content .remember-me input[type="checkbox"] {
         margin-right: 8px;
         transform: scale(1.2);
+        margin-left: 0;
       }
       .login-content .remember-me label {
         cursor: pointer;
         font-family: "Poppins", sans-serif;
         font-weight: 400;
+        margin: 0;
+        flex-shrink: 0;
       }
       .login-content button {
         width: 100%;
@@ -115,16 +134,27 @@
         cursor: pointer;
         margin-top: 10px;
         transition: all 0.3s ease;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .login-content button:hover {
         background: linear-gradient(135deg, #1976d2, #1565c0);
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      }
+      .login-content button:active {
+        transform: translateY(0);
       }
       .login-content .error {
         color: #ef5350;
         font-size: 14px;
         margin-top: 10px;
         display: none;
+        background: #ffebee;
+        padding: 8px;
+        border-radius: 4px;
+        border-left: 3px solid #ef5350;
       }
       .logout-btn {
         background: linear-gradient(135deg, #f44336, #d32f2f);
@@ -1332,9 +1362,9 @@
     <div id="loginModal" class="login-modal active">
       <div class="login-content">
         <h2>เข้าสู่ระบบ</h2>
-        <input type="text" id="username" placeholder="รหัสพนักงาน (เช่น 75XXXXX)" />
+        <input type="text" id="username" placeholder="รหัสพนักงาน (เช่น 7512411)" />
         <div class="password-container">
-          <input type="password" id="password" placeholder="รหัสผ่าน คิดสิ" />
+          <input type="password" id="password" placeholder="รหัสผ่าน (คิดสิ)" />
           <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
         </div>
         <div class="remember-me">
@@ -1362,7 +1392,7 @@
       <div class="container">
         <!-- Added disclaimer to clarify this is an internal tool -->
         <div class="disclaimer">
-          ⚠️ ระบบนี้สำหรับพนักงานคลังสินค้า วิภาวดี 62 เท่านั้น | ข้อมูลถูกส่งไปยัง Google Forms อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลัวสินค้าวิภาวดี 62 
+          ⚠️ ระบบนี้สำหรับคลังสินค้าวิภาวดี 62 เท่านั้น | ข้อมูลถูกส่งไปยัง Google Forms อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62
         </div>
         <div class="tabs">
           <button class="tab-button active" id="tab-parts" onclick="showTab('parts')">
