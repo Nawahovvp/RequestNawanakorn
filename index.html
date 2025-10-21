@@ -500,6 +500,9 @@
       #parts td:nth-child(3), #today td:nth-child(4) {
         text-align: left;
       }
+      #parts td:nth-child(4) {
+        text-align: left;
+      }
       #parts th:nth-child(4), #parts td:nth-child(4) {
         min-width: 300px;
       }
@@ -1356,6 +1359,9 @@
       }
       /* Responsive adjustments for mobile devices */
       @media screen and (max-width: 768px) {
+        body {
+          font-size: 14px; /* Smaller base font size */
+        }
         .header {
           padding: 8px 15px;
           flex-wrap: wrap;
@@ -1363,7 +1369,7 @@
           justify-content: space-between;
         }
         .header h1 {
-          font-size: 20px; /* Reduce font size for better fit */
+          font-size: 18px; /* Further reduced for compactness */
           white-space: normal; /* Allow wrapping to prevent overflow */
           text-align: left; /* Align left for better space usage */
           flex-grow: 1;
@@ -1389,14 +1395,47 @@
           overflow: hidden;
           text-overflow: ellipsis;
         }
+        .tabs {
+          flex-direction: column; /* Stack tabs vertically for mobile */
+          gap: 5px;
+        }
+        .tab-button {
+          font-size: 14px; /* Smaller tab font */
+          padding: 10px;
+        }
+        #parts th, #parts td, #today th, #today td {
+          padding: 6px 4px; /* Compact padding */
+          font-size: 12px; /* Smaller table font */
+        }
+        #parts table, #today table {
+          min-width: 600px; /* Reduced min-width for mobile */
+        }
+        #parts #searchInput, #today #searchInputToday {
+          font-size: 14px;
+          max-width: 100%; /* Full width on mobile */
+        }
+        .container {
+          padding: 10px; /* Smaller container padding */
+        }
+        .tab-content {
+          padding: 10px; /* Compact tab content */
+        }
+        .disclaimer {
+          font-size: 12px; /* Smaller disclaimer */
+          padding: 8px;
+        }
       }
       @media screen and (max-width: 480px) {
         .header h1 {
-          font-size: 18px; /* Even smaller on very small screens */
+          font-size: 16px; /* Even smaller on very small screens */
         }
         .header-right {
           flex-direction: column; /* Stack vertically if still too tight */
           align-items: flex-end;
+        }
+        #parts th, #parts td, #today th, #today td {
+          padding: 4px 2px; /* Even more compact */
+          font-size: 11px;
         }
       }
     </style>
