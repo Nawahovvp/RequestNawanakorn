@@ -2414,6 +2414,20 @@
                     setTimeout(() => {
                       Swal.close();
                       showTab('today');
+                      // Fix for mobile scroll lock after tab switch
+                      setTimeout(() => {
+                        document.body.style.overflow = 'auto';
+                        const searchInputToday = document.getElementById('searchInputToday');
+                        if (searchInputToday) {
+                          searchInputToday.focus();
+                          searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
+                        }
+                        // Simulate a touch event to unlock scroll
+                        if ('ontouchstart' in window) {
+                          const event = new Event('touchstart', { bubbles: true });
+                          document.body.dispatchEvent(event);
+                        }
+                      }, 100);
                     }, 2000);
                   }
                 });
@@ -2727,6 +2741,14 @@
           document.getElementById("loading").style.display = "none";
           document.getElementById("loadingToday").style.display = "none";
           document.getElementById("data-table-today").style.display = "table";
+          // Fix for mobile scroll after loading
+          setTimeout(() => {
+            document.body.style.overflow = 'auto';
+            if ('ontouchstart' in window) {
+              const event = new Event('touchstart', { bubbles: true });
+              document.body.dispatchEvent(event);
+            }
+          }, 100);
         } catch (error) {
           console.error("Error loading today data:", error);
           document.getElementById("loading").style.display = "none";
