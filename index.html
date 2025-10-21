@@ -26,12 +26,143 @@
         background-color: #eceff1;
         font-family: "Kanit", sans-serif;
       }
-      .header {
+      /* Login Modal Styles */
+      .login-modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+      }
+      .login-modal.active {
         display: flex;
         justify-content: center;
         align-items: center;
+      }
+      .login-content {
+        background: linear-gradient(135deg, #ffffff, #f5f7fa);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        animation: fadeInUp 0.4s ease;
+      }
+      .login-content h2 {
         color: #1a3c87;
-        padding: 10px 0;
+        margin-bottom: 20px;
+        font-family: "Itim", cursive;
+      }
+      .login-content input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      .login-content input:focus {
+        border-color: #2196f3;
+        outline: none;
+        box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+      }
+      .login-content .password-container {
+        position: relative;
+      }
+      .login-content .password-container i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #666;
+        font-size: 16px;
+      }
+      .login-content .password-container i:hover {
+        color: #2196f3;
+      }
+      .login-content .remember-me {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin: 15px 0;
+        font-size: 14px;
+        text-align: left;
+      }
+      .login-content .remember-me input[type="checkbox"] {
+        margin-right: 8px;
+        transform: scale(1.2);
+      }
+      .login-content .remember-me label {
+        cursor: pointer;
+        font-family: "Poppins", sans-serif;
+        font-weight: 400;
+      }
+      .login-content button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #42a5f5, #2196f3);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+      }
+      .login-content button:hover {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        transform: translateY(-2px);
+      }
+      .login-content .error {
+        color: #ef5350;
+        font-size: 14px;
+        margin-top: 10px;
+        display: none;
+      }
+      .logout-btn {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 10px;
+        transition: all 0.3s ease;
+      }
+      .logout-btn:hover {
+        background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        transform: translateY(-1px);
+      }
+      .app-content {
+        display: none;
+      }
+      .app-content.logged-in {
+        display: block;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #1a3c87;
+        padding: 10px 20px;
         border-bottom: 2px solid #ff80ab;
         border-radius: 12px;
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
@@ -41,30 +172,33 @@
         background: linear-gradient(135deg, #fff3e0, #ffebee);
         margin: 10px auto;
         max-width: 1500px;
-        height: 52px;
         transition: transform 0.3s ease;
       }
       .header:hover {
         transform: translateY(-2px);
       }
-      @keyframes slideRight {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-      }
-      h1 {
+      .header h1 {
         color: #1a3c87;
         margin: 0;
         font-size: 30px;
         font-weight: normal;
         text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
-        animation: slideRight 20s linear infinite;
         white-space: nowrap;
-        position: absolute;
-  left: 0; /* ✅ เริ่มจากซ้ายสุด */
-  width: 100%; /* ✅ ให้ข้อความใช้ความกว้างเต็ม */
-  text-align: center; /* ✅ จัดกึ่งกลาง */
-  animation: slideRight 7s linear infinite;
-  white-space: nowrap;
+        text-align: center;
+        flex-grow: 1;
+      }
+      .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+      .user-name-small {
+        font-size: 12px;
+        color: #e91e63;
+        font-weight: bold;
+        text-align: right;
+        white-space: nowrap;
       }
       .container {
         max-width: 1500px;
@@ -82,28 +216,43 @@
       }
       .tab-button {
         flex: 1;
-        padding: 10px;
+        padding: 12px 16px;
         text-align: center;
-        background: linear-gradient(135deg, #42a5f5, #2196f3);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         cursor: pointer;
         border: none;
         outline: none;
-        font-size: 18px;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        font-family: "Kanit", sans-serif;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 50px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      .tab-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+      .tab-button:hover::before {
+        left: 100%;
       }
       .tab-button:hover {
-        background: linear-gradient(135deg, #1976d2, #1565c0);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
       }
       .tab-button.active {
-        background: linear-gradient(135deg, #f06292, #ec407a);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        transform: translateY(-2px);
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+        transform: translateY(-3px) scale(1.02);
       }
       .tab-content {
         display: none;
@@ -837,12 +986,6 @@
         #all tr:nth-child(odd) {
           animation-delay: 0.2s;
         }
-        @keyframes fadeInUp {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
         /* Modal Animation */
         #all .all-modal-content {
           animation: zoomIn 0.4s ease;
@@ -1185,242 +1328,390 @@
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</h1>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal active">
+      <div class="login-content">
+        <h2>เข้าสู่ระบบ</h2>
+        <input type="text" id="username" placeholder="รหัสพนักงาน (เช่น 7512411)" />
+        <div class="password-container">
+          <input type="password" id="password" placeholder="รหัสผ่าน (4 ตัวหลังรหัสพนักงาน)" />
+          <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+        </div>
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" />
+          <label for="rememberMe">Remember me</label>
+        </div>
+        <button onclick="handleLogin()">เข้าสู่ระบบ</button>
+        <div id="loginError" class="error">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
+      </div>
     </div>
-    <div class="loading" id="loading">
-      <span>กำลังโหลดข้อมูล...</span>
-    </div>
-    <div class="container">
-      <!-- Added disclaimer to clarify this is an internal tool -->
-      <div class="disclaimer">
-        ⚠️ ระบบนี้สำหรับคลังสินค้าเท่านั้น | ข้อมูลถูกส่งไปยัง Google Forms อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62 
+    <!-- App Content -->
+    <div id="appContent" class="app-content">
+      <div class="header">
+        <h1>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</h1>
+        <div class="header-right">
+          <button class="logout-btn" onclick="handleLogout()" id="logoutBtn" style="display: none;">
+            <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+          </button>
+          <span id="userNameSmall" class="user-name-small"></span>
+        </div>
       </div>
-      <div class="tabs">
-        <button class="tab-button active" id="tab-parts" onclick="showTab('parts')">
-          ค้นหาอะไหล่เพื่อเบิก
-        </button>
-        <button class="tab-button" id="tab-today" onclick="showTab('today')">
-          รายการเบิกประจำวันนี้
-        </button>
-        <button class="tab-button" id="tab-all" onclick="showTab('all')">
-          ประวัติการเบิกอะไหล่
-        </button>
-        <button class="tab-button" id="tab-pending-calls" onclick="showTab('pending-calls')">
-          อะไหล่จ่ายตาม Call
-        </button>
+      <div class="loading" id="loading">
+        <span>กำลังโหลดข้อมูล...</span>
       </div>
-      <div id="parts" class="tab-content active">
-        <div id="searchContainer">
-          <input type="text" id="searchInput" placeholder="ค้นหา Code, Description...." />
-          <button id="searchButton" class="refresh-button">
-            <i class="fas fa-search"></i>
+      <div class="container">
+        <!-- Added disclaimer to clarify this is an internal tool -->
+        <div class="disclaimer">
+          ⚠️ ระบบนี้สำหรับพนักงานคลังสินค้า วิภาวดี 62 เท่านั้น | ข้อมูลถูกส่งไปยัง Google Forms อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลัวสินค้าวิภาวดี 62 
+        </div>
+        <div class="tabs">
+          <button class="tab-button active" id="tab-parts" onclick="showTab('parts')">
+            ค้นหาอะไหล่เพื่อเบิก
+          </button>
+          <button class="tab-button" id="tab-today" onclick="showTab('today')">
+            รายการเบิกประจำวันนี้
+          </button>
+          <button class="tab-button" id="tab-all" onclick="showTab('all')">
+            ประวัติการเบิกอะไหล่
+          </button>
+          <button class="tab-button" id="tab-pending-calls" onclick="showTab('pending-calls')">
+            อะไหล่จ่ายตาม Call
           </button>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <div id="error-container">
-          <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
-          <button id="retry-button">ลองใหม่</button>
-        </div>
-        <div class="table-container">
-          <table id="data-table">
-            <thead>
-              <tr>
-                <th>เบิก</th>
-                <th>Image</th>
-                <th>Material</th>
-                <th>Description</th>
-                <th>วิภาวดี</th>
-                <th>นวนคร</th>
-                <th>Rebuilt</th>
-                <th>หมายเหตุ</th>
-                <th>Product</th>
-                <th>Spec</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="pagination" class="pagination">
-          <button id="firstPage">
-            <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
-          </button>
-          <button id="prevPage"><i class="fas fa-chevron-left"></i></button>
-          <div id="pageNumbers"></div>
-          <button id="nextPage"><i class="fas fa-chevron-right"></i></button>
-          <button id="lastPage">
-            <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
-          </button>
-          <div class="items-per-page">
-            <label for="itemsPerPage">Show</label>
-            <select id="itemsPerPage">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-            </select>
+        <div id="parts" class="tab-content active">
+          <div id="searchContainer">
+            <input type="text" id="searchInput" placeholder="ค้นหา Code, Description...." />
+            <button id="searchButton" class="refresh-button">
+              <i class="fas fa-search"></i>
+            </button>
           </div>
-        </div>
-      </div>
-      <div id="today" class="tab-content">
-        <div id="searchContainer">
-          <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
-        </div>
-        <div id="error-container-today" class="error-container" style="display: none;">
-          <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
-          <button id="retry-button-today">ลองใหม่</button>
-        </div>
-        <div id="loadingToday" class="spinner-container">
-          <div class="spinner"></div>
-          <p>กำลังโหลดข้อมูล...</p>
-        </div>
-        <div class="table-container">
-          <table id="data-table-today">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>วันเวลาบันทึก</th>
-                <th>Material</th>
-                <th>Description</th>
-                <th>จำนวน</th>
-                <th>วิภาวดี</th>
-                <th>ชื่อช่าง</th>
-                <th>หน่วยงาน</th>
-                <th>Call</th>
-                <th>CallType</th>
-                <th>หมายเหตุ</th>
-                <th>ดูรายละเอียด</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="detailModal" class="modal">
-          <div class="modal-content">
-            <span class="close" id="closeModal">×</span>
-            <h2>รายละเอียด</h2>
-            <div id="modalContent"></div>
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+          <div id="error-container">
+            <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
+            <button id="retry-button">ลองใหม่</button>
           </div>
-        </div>
-      </div>
-      <div id="all" class="tab-content">
-        <div id="searchContainerAll">
-          <input type="text" id="searchInputAll" placeholder="ค้นหา Code,Description, ชื่อช่าง หรือ ทีม..." />
-        </div>
-        <div class="all-table-container">
-          <table id="data-table-all">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th class="sortable" data-column="Timestamp">วันเวลา <span class="arrow"></span></th>
-                <th class="sortable" data-column="Code">Material <span class="arrow"></span></th>
-                <th class="sortable" data-column="Material Description">Description <span class="arrow"></span></th>
-                <th>จำนวน</th>
-                <th class="sortable" data-column="ชื่อช่าง">ชื่อช่าง <span class="arrow"></span></th>
-                <th>หน่วยงาน</th>
-                <th>เลขที่Call</th>
-                <th>CallType</th>
-                <th class="sortable" data-column="หมายเหตุ">หมายเหตุ <span class="arrow"></span></th>
-                <th>ดูรายละเอียด</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="detailModalAll" class="all-modal">
-          <div class="all-modal-content">
-            <span class="all-close" id="closeModalAll">&times;</span>
-            <h2>รายละเอียด</h2>
-            <div id="modalContentAll"></div>
+          <div class="table-container">
+            <table id="data-table">
+              <thead>
+                <tr>
+                  <th>เบิก</th>
+                  <th>Image</th>
+                  <th>Material</th>
+                  <th>Description</th>
+                  <th>วิภาวดี</th>
+                  <th>นวนคร</th>
+                  <th>Rebuilt</th>
+                  <th>หมายเหตุ</th>
+                  <th>Product</th>
+                  <th>Spec</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
-        </div>
-        <div class="all-pagination">
-          <button id="firstPageAll"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
-          <button id="prevPageAll"><i class="fas fa-chevron-left"></i></button>
-          <div id="pageNumbersAll"></div>
-          <button id="nextPageAll"><i class="fas fa-chevron-right"></i></button>
-          <button id="lastPageAll">
-            <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
-          </button>
-          <div class="all-items-per-page">
-            <label for="itemsPerPageAll">:</label>
-            <select id="itemsPerPageAll">
-              <option value="10">10 รายการ</option>
-              <option value="20">20 รายการ</option>
-              <option value="30">30 รายการ</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div id="pending-calls" class="tab-content">
-        <div id="searchContainerPending">
-          <div class="pending-filter-row">
-            <label id="teamFilterLabelPending" for="teamFilterPending" class="pending-modern-label">เลือกทีม</label>
-            <select id="teamFilterPending">
-              <option value="">ทั้งหมด</option>
-            </select>
-            <div id="callCountInfoPending" class="pending-call-count-box">
-              จำนวน Ticket ค้าง <span id="callCountValuePending">0</span> Call
+          <div id="pagination" class="pagination">
+            <button id="firstPage">
+              <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="prevPage"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbers"></div>
+            <button id="nextPage"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPage">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="items-per-page">
+              <label for="itemsPerPage">Show</label>
+              <select id="itemsPerPage">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+              </select>
             </div>
           </div>
-          <div class="pending-search-row">
-            <input type="text" id="searchInputPending" placeholder="ค้นหา Ticket, Team, สาขา, ค้างหน่วยงาน, Material, Description..." />
-            <button id="searchButtonPending"><i class="fas fa-search"></i></button>
+        </div>
+        <div id="today" class="tab-content">
+          <div id="searchContainer">
+            <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
+          </div>
+          <div id="error-container-today" class="error-container" style="display: none;">
+            <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
+            <button id="retry-button-today">ลองใหม่</button>
+          </div>
+          <div id="loadingToday" class="spinner-container">
+            <div class="spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+          </div>
+          <div class="table-container">
+            <table id="data-table-today">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>วันเวลาบันทึก</th>
+                  <th>Material</th>
+                  <th>Description</th>
+                  <th>จำนวน</th>
+                  <th>วิภาวดี</th>
+                  <th>ชื่อช่าง</th>
+                  <th>หน่วยงาน</th>
+                  <th>Call</th>
+                  <th>CallType</th>
+                  <th>หมายเหตุ</th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModal" class="modal">
+            <div class="modal-content">
+              <span class="close" id="closeModal">×</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContent"></div>
+            </div>
           </div>
         </div>
-        <div class="pending-table-container">
-          <table id="data-table-pending">
-            <thead>
-              <tr>
-                <th class="sortable" data-column="DateTime">วันที่แจ้ง <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Ticket Number">Ticket <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Team">Team <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Brand">สาขา <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="ค้างหน่วยงาน">ค้างหน่วยงาน <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Material">Material <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Description">Description <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="Vipa">คงเหลือ <span class="pending-arrow"></span></th>
-                <th class="sortable" data-column="DayRepair">ค้าง(วัน) <span class="pending-arrow"></span></th>
-                <th>ดูรายละเอียด</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="detailModalPending" class="pending-modal">
-          <div class="pending-modal-content">
-            <span class="pending-close" id="closeModalPending">×</span>
-            <h2>รายละเอียด</h2>
-            <div id="modalContentPending"></div>
+        <div id="all" class="tab-content">
+          <div id="searchContainerAll">
+            <input type="text" id="searchInputAll" placeholder="ค้นหา Code,Description, ชื่อช่าง หรือ ทีม..." />
+          </div>
+          <div class="all-table-container">
+            <table id="data-table-all">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th class="sortable" data-column="Timestamp">วันเวลา <span class="arrow"></span></th>
+                  <th class="sortable" data-column="Code">Material <span class="arrow"></span></th>
+                  <th class="sortable" data-column="Material Description">Description <span class="arrow"></span></th>
+                  <th>จำนวน</th>
+                  <th class="sortable" data-column="ชื่อช่าง">ชื่อช่าง <span class="arrow"></span></th>
+                  <th>หน่วยงาน</th>
+                  <th>เลขที่Call</th>
+                  <th>CallType</th>
+                  <th class="sortable" data-column="หมายเหตุ">หมายเหตุ <span class="arrow"></span></th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModalAll" class="all-modal">
+            <div class="all-modal-content">
+              <span class="all-close" id="closeModalAll">&times;</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContentAll"></div>
+            </div>
+          </div>
+          <div class="all-pagination">
+            <button id="firstPageAll"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
+            <button id="prevPageAll"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbersAll"></div>
+            <button id="nextPageAll"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPageAll">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="all-items-per-page">
+              <label for="itemsPerPageAll">:</label>
+              <select id="itemsPerPageAll">
+                <option value="10">10 รายการ</option>
+                <option value="20">20 รายการ</option>
+                <option value="30">30 รายการ</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div class="pending-pagination">
-          <button id="firstPagePending"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
-          <button id="prevPagePending"><i class="fas fa-chevron-left"></i></button>
-          <div id="pageNumbersPending"></div>
-          <button id="nextPagePending"><i class="fas fa-chevron-right"></i></button>
-          <button id="lastPagePending">
-            <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
-          </button>
-          <div class="pending-items-per-page">
-            <label for="itemsPerPagePending">รายการต่อหน้า:</label>
-            <select id="itemsPerPagePending">
-              <option value="10">10 รายการ</option>
-              <option value="20" selected>20 รายการ</option>
-              <option value="30">30 รายการ</option>
-            </select>
+        <div id="pending-calls" class="tab-content">
+          <div id="searchContainerPending">
+            <div class="pending-filter-row">
+              <label id="teamFilterLabelPending" for="teamFilterPending" class="pending-modern-label">เลือกทีม</label>
+              <select id="teamFilterPending">
+                <option value="">ทั้งหมด</option>
+              </select>
+              <div id="callCountInfoPending" class="pending-call-count-box">
+                จำนวน Ticket ค้าง <span id="callCountValuePending">0</span> Call
+              </div>
+            </div>
+            <div class="pending-search-row">
+              <input type="text" id="searchInputPending" placeholder="ค้นหา Ticket, Team, สาขา, ค้างหน่วยงาน, Material, Description..." />
+              <button id="searchButtonPending"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div class="pending-table-container">
+            <table id="data-table-pending">
+              <thead>
+                <tr>
+                  <th class="sortable" data-column="DateTime">วันที่แจ้ง <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Ticket Number">Ticket <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Team">Team <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Brand">สาขา <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="ค้างหน่วยงาน">ค้างหน่วยงาน <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Material">Material <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Description">Description <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Vipa">คงเหลือ <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="DayRepair">ค้าง(วัน) <span class="pending-arrow"></span></th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModalPending" class="pending-modal">
+            <div class="pending-modal-content">
+              <span class="pending-close" id="closeModalPending">×</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContentPending"></div>
+            </div>
+          </div>
+          <div class="pending-pagination">
+            <button id="firstPagePending"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
+            <button id="prevPagePending"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbersPending"></div>
+            <button id="nextPagePending"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPagePending">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="pending-items-per-page">
+              <label for="itemsPerPagePending">รายการต่อหน้า:</label>
+              <select id="itemsPerPagePending">
+                <option value="10">10 รายการ</option>
+                <option value="20" selected>20 รายการ</option>
+                <option value="30">30 รายการ</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
+      <div class="footer">
+        <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
+      </div>
+     <div class="social-buttons">
+    <button class="social-button qrcode" onclick="showQRCode()">
+      <i class="fas fa-qrcode"></i>
+    </button>
+  </div>
     </div>
-    <div class="footer">
-      <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
-    </div>
-   <div class="social-buttons">
-  <button class="social-button qrcode" onclick="showQRCode()">
-    <i class="fas fa-qrcode"></i>
-  </button>
-</div>
     <script>
+      // Global employee data
+      let employeeData = [];
+      // Login System
+      const loginModal = document.getElementById('loginModal');
+      const appContent = document.getElementById('appContent');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const loginError = document.getElementById('loginError');
+      const rememberMeCheckbox = document.getElementById('rememberMe');
+      const togglePasswordIcon = document.getElementById('togglePassword');
+      const userNameSmall = document.getElementById('userNameSmall');
+      function togglePasswordVisibility() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePasswordIcon.classList.toggle('fa-eye-slash');
+        togglePasswordIcon.classList.toggle('fa-eye');
+      }
+      async function loadEmployeeData() {
+        const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
+        const employeeSheetName = "Employee";
+        const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
+        try {
+          const response = await fetch(employeeUrl);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error loading employee data:", error);
+          throw error;
+        }
+      }
+      async function handleLogin() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        loginError.style.display = 'none';
+        if (!username || !password) {
+          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+          loginError.style.display = 'block';
+          return;
+        }
+        try {
+          employeeData = await loadEmployeeData();
+          const expectedPassword = username.slice(-4);
+          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
+          if (employee && employee.Name) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            localStorage.setItem('userName', employee.Name);
+            if (rememberMeCheckbox.checked) {
+              localStorage.setItem('savedUsername', username);
+              localStorage.setItem('rememberMe', 'true');
+            } else {
+              localStorage.removeItem('savedUsername');
+              localStorage.removeItem('rememberMe');
+            }
+            checkLoginStatus();
+            // Focus on search input after login
+            setTimeout(() => {
+              const searchInput = document.getElementById('searchInput');
+              if (searchInput) searchInput.focus();
+            }, 500);
+          } else {
+            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+            loginError.style.display = 'block';
+            passwordInput.value = ''; // Clear password on error
+          }
+        } catch (error) {
+          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
+          loginError.style.display = 'block';
+          console.error('Login error:', error);
+        }
+      }
+      function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const savedUsername = localStorage.getItem('username');
+        if (isLoggedIn && savedUsername) {
+          loginModal.classList.remove('active');
+          appContent.classList.add('logged-in');
+          logoutBtn.style.display = 'block';
+          userNameSmall.textContent = localStorage.getItem('userName') || '';
+          // Auto-load default tab if needed
+          if (document.querySelector('.tab-button.active')) {
+            showTab('parts');
+          }
+        } else {
+          loginModal.classList.add('active');
+          appContent.classList.remove('logged-in');
+          logoutBtn.style.display = 'none';
+          userNameSmall.textContent = '';
+          // Clear invalid session
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('username');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
+        }
+        // Load saved credentials if remember me was checked
+        if (localStorage.getItem('rememberMe') === 'true') {
+          const savedUsername = localStorage.getItem('savedUsername');
+          if (savedUsername) usernameInput.value = savedUsername;
+          rememberMeCheckbox.checked = true;
+        }
+      }
+      function handleLogout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('savedPassword');
+        localStorage.removeItem('rememberMe');
+        checkLoginStatus();
+      }
+      // Allow Enter key for login
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleLogin();
+        }
+      });
+      // Initial check on load
+      checkLoginStatus();
       function showTab(tabId) {
         const buttons = document.querySelectorAll(".tab-button");
         const contents = document.querySelectorAll(".tab-content");
@@ -1583,22 +1874,6 @@
           tableBody.appendChild(tr);
         });
       }
-      async function loadEmployeeData() {
-        const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-        const employeeSheetName = "Employee";
-        const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
-        try {
-          const response = await fetch(employeeUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          return data;
-        } catch (error) {
-          console.error("Error loading employee data:", error);
-          return [];
-        }
-      }
       async function showRequisitionDialog(row) {
         document.body.style.overflow = 'hidden';
         const history = {
@@ -1608,7 +1883,9 @@
           callNumber: getFromLocalStorage('callNumber'),
           callType: getFromLocalStorage('callType'),
         };
-        const employeeData = await loadEmployeeData();
+        if (employeeData.length === 0) {
+          employeeData = await loadEmployeeData();
+        }
         Swal.fire({
           title: '📋 เบิกอะไหล่นวนคร',
           html: `
@@ -2786,7 +3063,10 @@
             tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
           });
       }
-      loadData();
+      // Auto-load default data if logged in
+      if (appContent.classList.contains('logged-in')) {
+        loadData();
+      }
     </script>
   </body>
 </html>
