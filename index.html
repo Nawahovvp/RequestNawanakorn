@@ -720,7 +720,7 @@
       }
       .swal2-container {
         position: fixed !important;
-        z-index: 10001 !important; /* เพิ่ม z-index สูงกว่าตัวอื่นๆ */
+        z-index: 99999 !important;
         overflow-y: auto;
         max-height: 80vh;
       }
@@ -729,11 +729,11 @@
         padding: 15px !important;
         font-size: 14px !important;
         border-radius: 10px !important;
-        z-index: 10002 !important; /* เพิ่ม z-index สำหรับ popup เอง */
+        z-index: 100000 !important;
         position: relative !important;
       }
       .swal2-backdrop {
-        z-index: 10000 !important; /* หลังพื้นหลังของ swal */
+        z-index: 99998 !important;
       }
       .swal2-content {
         padding-bottom: 150px !important;
@@ -1431,7 +1431,7 @@
         }
         /* เพิ่มการปรับสำหรับ Swal บนมือถือ */
         .swal2-container {
-          z-index: 10001 !important;
+          z-index: 99999 !important;
         }
         .swal2-popup {
           max-width: 95% !important;
@@ -1462,7 +1462,7 @@
         <h2>เข้าสู่ระบบ</h2>
         <input type="text" id="username" placeholder="รหัสพนักงาน" />
         <div class="password-container">
-          <input type="password" id="password" placeholder="รหัสผ่าน (นึกก่อนได้)" />
+          <input type="password" id="password" placeholder="รหัสผ่าน (ให้นึกก่อน)" />
           <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
         </div>
         <div class="remember-me">
@@ -1870,7 +1870,7 @@
         Swal.fire({
           title: '📷 สแกน QR Code',
           html: `
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request888.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
             <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
           `,
           confirmButtonText: 'ปิด',
@@ -2119,21 +2119,23 @@
             // บังคับ z-index สูงสำหรับ Swal บนมือถือ
             const swalContainer = document.querySelector('.swal2-container');
             if (swalContainer) {
-              swalContainer.style.zIndex = '10001';
+              swalContainer.style.zIndex = '99999';
             }
             const swalPopup = document.querySelector('.swal2-popup');
             if (swalPopup) {
-              swalPopup.style.zIndex = '10002';
+              swalPopup.style.zIndex = '100000';
               // บนมือถือ: ปรับ positioning เพื่อให้อยู่กึ่งกลางและไม่โดนบัง
               if (window.innerWidth <= 768) {
                 swalPopup.style.position = 'fixed';
-                swalPopup.style.top = '50%';
+                swalPopup.style.top = '20vh'; // ปรับจาก 50% เป็น 20vh เพื่อเลี่ยง status bar
                 swalPopup.style.left = '50%';
-                swalPopup.style.transform = 'translate(-50%, -50%)';
-                swalPopup.style.maxHeight = '90vh';
+                swalPopup.style.transform = 'translateX(-50%) translateY(0%)'; // ลบ translateY(-50%) เพื่อไม่ให้เลื่อนขึ้น
+                swalPopup.style.maxHeight = 'calc(80vh - env(safe-area-inset-top))'; // ใช้ safe-area ถ้า browser รองรับ
                 swalPopup.style.overflowY = 'auto';
                 swalPopup.style.width = '95%';
                 swalPopup.style.margin = '0 auto';
+                swalPopup.style.paddingTop = 'env(safe-area-inset-top, 20px)'; // เพิ่ม padding-top สำหรับ safe area
+                swalPopup.style.paddingBottom = 'env(safe-area-inset-bottom, 20px)';
               }
             }
             const quantityInput = document.getElementById('swal-quantity');
