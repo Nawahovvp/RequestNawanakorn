@@ -229,6 +229,24 @@
         text-align: right;
         white-space: nowrap;
       }
+      .qrcode-header-btn {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .qrcode-header-btn:hover {
+        background: linear-gradient(135deg, #388e3c, #4caf50);
+        transform: translateY(-1px);
+      }
       .container {
         max-width: 1500px;
         margin: 0 auto;
@@ -329,50 +347,7 @@
         font-size: 14px;
       }
       .social-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 10px;
-        padding: 10px;
-      }
-      .social-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        color: white;
-        font-size: 18px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
-      .social-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      }
-      .social-button.facebook {
-        background: linear-gradient(135deg, #3b5998, #2a4373);
-      }
-      .social-button.tiktok {
-        background: linear-gradient(135deg, #000000, #333333);
-      }
-      .social-button.telegram {
-        background: linear-gradient(135deg, #26A5E4, #1b87b9);
-      }
-      .social-button.qrcode {
-        background: linear-gradient(135deg, #4caf50, #388e3c);
-      }
-      @media screen and (max-width: 360px) {
-        .social-button {
-          width: 36px;
-          height: 36px;
-          font-size: 16px;
-        }
-        .social-buttons {
-          gap: 8px;
-        }
+        display: none; /* ซ่อน social-buttons เนื่องจากย้าย QR ไป header แล้ว */
       }
       #parts, #today {
         font-family: "Poppins", sans-serif;
@@ -782,6 +757,15 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin: 0 auto 10px auto;
+      }
+      .summary-image {
+        width: 100px !important;
+        height: auto !important;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      .dark-blue-title {
+        color: #00008b !important;
       }
       @media screen and (max-width: 360px) {
         .swal2-popup {
@@ -1476,7 +1460,12 @@
     <!-- App Content -->
     <div id="appContent" class="app-content">
       <div class="header">
-        <h1>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</h1>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <button class="qrcode-header-btn" onclick="showQRCode()">
+            <i class="fas fa-qrcode"></i> QR
+          </button>
+          <h1>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</h1>
+        </div>
         <div class="header-right">
           <button class="logout-btn" onclick="handleLogout()" id="logoutBtn" style="display: none;">
             <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
@@ -1711,11 +1700,6 @@
       <div class="footer">
         <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
       </div>
-     <div class="social-buttons">
-    <button class="social-button qrcode" onclick="showQRCode()">
-      <i class="fas fa-qrcode"></i>
-    </button>
-  </div>
     </div>
     <script>
       // Global employee data
@@ -2369,9 +2353,14 @@
               });
             }
             // เพิ่ม popup สรุปข้อมูลที่นี่
+            let imageHtml = '';
+            if (row.UrlWeb && row.UrlWeb.trim()) {
+              imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image">`;
+            }
             const summaryResult = await Swal.fire({
               title: 'สรุปข้อมูลการเบิก',
               html: `
+                ${imageHtml}
                 <div style="text-align: left; font-size: 14px;">
                   <p><strong>Material:</strong> ${row.Material || ''}</p>
                   <p><strong>Description:</strong> ${row.Description || ''}</p>
@@ -2391,7 +2380,10 @@
               confirmButtonText: 'ยืนยันการเบิก',
               cancelButtonText: 'แก้ไข',
               allowOutsideClick: false,
-              allowEscapeKey: false
+              allowEscapeKey: false,
+              customClass: {
+                title: 'dark-blue-title'
+              }
             });
             if (summaryResult.isConfirmed) {
               // ดำเนินการส่งข้อมูล
