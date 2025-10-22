@@ -1460,9 +1460,9 @@
     <div id="loginModal" class="login-modal active">
       <div class="login-content">
         <h2>เข้าสู่ระบบ</h2>
-        <input type="text" id="username" placeholder="รหัสพนักงาน (เช่น 7512411)" />
+        <input type="text" id="username" placeholder="รหัสพนักงาน" />
         <div class="password-container">
-          <input type="password" id="password" placeholder="รหัสผ่าน (คิดสิ)" />
+          <input type="password" id="password" placeholder="รหัสผ่าน (ให้นึกก่อน)" />
           <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
         </div>
         <div class="remember-me">
@@ -1870,7 +1870,7 @@
         Swal.fire({
           title: '📷 สแกน QR Code',
           html: `
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request888.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
             <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
           `,
           confirmButtonText: 'ปิด',
