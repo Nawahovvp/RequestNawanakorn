@@ -2124,7 +2124,16 @@
             const swalPopup = document.querySelector('.swal2-popup');
             if (swalPopup) {
               swalPopup.style.zIndex = '10002';
-              // บนมือถือ: ปรับ positioning เพื่อให้อยู่กึ่งกลางและไม่โดนบัง
+              // ตั้งค่าการวางตำแหน่งให้อยู่กึ่งกลางเสมอ ไม่เปลี่ยนแปลงเมื่อ focus input
+              swalPopup.style.position = 'fixed';
+              swalPopup.style.top = '50%';
+              swalPopup.style.left = '50%';
+              swalPopup.style.transform = 'translate(-50%, -50%)';
+              swalPopup.style.maxHeight = '90vh';
+              swalPopup.style.overflowY = 'auto';
+              swalPopup.style.width = '95%';
+              swalPopup.style.margin = '0 auto';
+              // บนมือถือ: ยืนยันให้อยู่กึ่งกลางและไม่เปลี่ยน transform
               if (window.innerWidth <= 768) {
                 swalPopup.style.position = 'fixed';
                 swalPopup.style.top = '50%';
@@ -2176,17 +2185,8 @@
             const lastContact = getFromLocalStorage('contact')[0];
             if (lastContact) contactInput.value = lastContact;
             const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, callTypeInput, remarkInput];
-            inputs.forEach(input => {
-              input.addEventListener('focus', () => {
-                const popup = document.querySelector('.swal2-popup');
-                popup.style.transform = 'translateY(-20%)';
-                popup.style.transition = 'transform 0.3s ease';
-              });
-              input.addEventListener('blur', () => {
-                const popup = document.querySelector('.swal2-popup');
-                popup.style.transform = 'translateY(0)';
-              });
-            });
+            // ลบ event listeners สำหรับ focus และ blur ที่ทำให้ popup เปลี่ยนตำแหน่ง
+            // เพื่อให้ popup คงที่อยู่กึ่งกลางเสมอ
             function validateInputs() {
               const errors = {
                 quantityError: document.getElementById('swal-quantity-error'),
