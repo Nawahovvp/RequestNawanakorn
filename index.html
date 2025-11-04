@@ -1974,7 +1974,7 @@
       }
     </style>
   </head>
-  <body class="dark-mode">
+  <body class="light-mode">
     <!-- Login Modal -->
     <div id="loginModal" class="login-modal active">
       <div class="login-content">
@@ -2249,11 +2249,11 @@
         document.body.classList.add(theme + '-mode');
       }
       function loadTheme() {
-        const theme = localStorage.getItem('theme') || 'dark';
+        const theme = localStorage.getItem('theme') || 'light';
         setTheme(theme);
       }
       function showSettings() {
-        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const currentTheme = localStorage.getItem('theme') || 'light';
         Swal.fire({
           title: '⚙️ การตั้งค่า',
           html: `
