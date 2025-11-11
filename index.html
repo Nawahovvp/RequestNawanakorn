@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</title>
     <!-- Enhanced Content Security Policy to reduce phishing risks -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
     <!-- Additional security headers via meta -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -747,6 +747,9 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #parts .image-button:hover {
     background: linear-gradient(135deg, #1565c0, #0d47a1);
@@ -760,6 +763,9 @@
   #parts .image-button:active {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  #parts .image-button i {
+    font-size: 12px;
   }
       #parts .swal2-input {
         margin: 4px 0;
@@ -1111,10 +1117,15 @@
         border-top-color: #1abc9c;
       }
       .summary-image {
-        width: 100px !important;
+        width: 60px !important;
         height: auto !important;
+        max-width: 100% !important;
+        object-fit: cover !important;
         border-radius: 8px;
         margin-bottom: 10px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
       }
       .dark-blue-title {
         color: #00008b !important;
@@ -1972,6 +1983,142 @@
           font-size: 11px;
         }
       }
+      /* Additional styles for #parts image modal (reuse existing modal styles) */
+      #parts .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+      }
+      body.dark-mode #parts .image-modal {
+        background: rgba(0, 0, 0, 0.8);
+      }
+      #parts .image-modal-content {
+        background: linear-gradient(to bottom right, #ffffff, #f5f7fa);
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        position: relative;
+        transition: background 0.3s ease;
+      }
+      body.dark-mode #parts .image-modal-content {
+        background: linear-gradient(to bottom right, #2c3e50, #34495e);
+        color: #ecf0f1;
+      }
+      #parts .image-close {
+        color: #78909c;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+      body.dark-mode #parts .image-close {
+        color: #bdc3c7;
+      }
+      #parts .image-close:hover {
+        color: #e53935;
+      }
+      #parts #imageModalContent {
+        margin-top: 15px;
+      }
+      #parts #imageModalContent div {
+        padding: 10px 0;
+        border-bottom: 1px solid #eceff1;
+        transition: border-bottom-color 0.3s ease;
+      }
+      body.dark-mode #parts #imageModalContent div {
+        border-bottom-color: #555;
+      }
+      #parts #imageModalContent div:last-child {
+        border-bottom: none;
+      }
+      #parts #imageModalContent span.label {
+        display: inline-block;
+        min-width: 120px;
+        font-weight: 500;
+        color: #2196f3;
+        font-size: 15px;
+        transition: color 0.3s ease;
+      }
+      body.dark-mode #parts #imageModalContent span.label {
+        color: #1abc9c;
+      }
+      #parts #imageModalContent span.value {
+        font-size: 15px;
+        color: #37474f;
+        transition: color 0.3s ease;
+      }
+      body.dark-mode #parts #imageModalContent span.value {
+        color: #bdc3c7;
+      }
+      #parts .image-modal-content h2 {
+        color: #e91e63;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        transition: color 0.3s ease;
+      }
+      body.dark-mode #parts .image-modal-content h2 {
+        color: #ff6b9d;
+      }
+      #parts .drive-iframe {
+        width: 100%;
+        height: 400px;
+        border: none;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      body.dark-mode #parts .drive-iframe {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+      /* Additional style for Material row in image modal to accommodate the requisition button */
+      #parts #imageModalContent .material-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #parts #imageModalContent .material-row .value {
+        flex-grow: 1;
+        margin-right: 10px;
+      }
+      #parts #imageModalContent .material-row .requisition-button {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: white;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      #parts #imageModalContent .material-row .requisition-button:hover {
+        background: linear-gradient(135deg, #388e3c, #4caf50);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      body.dark-mode #parts #imageModalContent .material-row .requisition-button {
+        background: linear-gradient(135deg, #1abc9c, #16a085);
+      }
+      body.dark-mode #parts #imageModalContent .material-row .requisition-button:hover {
+        background: linear-gradient(135deg, #16a085, #1abc9c);
+      }
     </style>
   </head>
   <body class="light-mode">
@@ -2050,7 +2197,7 @@
               <thead>
                 <tr>
                   <th>เบิก</th>
-                  <th>Image</th>
+                  <th>รูป</th>
                   <th>Material</th>
                   <th>Description</th>
                   <th>วิภาวดี</th>
@@ -2063,6 +2210,14 @@
               </thead>
               <tbody></tbody>
             </table>
+          </div>
+          <!-- Image Modal for #parts -->
+          <div id="imageModal" class="image-modal">
+            <div class="image-modal-content">
+              <span class="image-close" id="closeImageModal">&times;</span>
+              <h2>รายละเอียดอะไหล่</h2>
+              <div id="imageModalContent"></div>
+            </div>
           </div>
           <div id="pagination" class="pagination">
             <button id="firstPage">
@@ -2466,6 +2621,71 @@
         errorContainer.style.display = "none";
         loadData();
       });
+      // Image Modal Handling for #parts
+      const imageModal = document.getElementById('imageModal');
+      const imageModalContent = document.getElementById('imageModalContent');
+      const closeImageModal = document.getElementById('closeImageModal');
+      closeImageModal.onclick = () => {
+        imageModal.style.display = 'none';
+      };
+      window.onclick = (event) => {
+        if (event.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+      };
+      function showImageModal(row) {
+        const fields = [
+          { key: 'Material', label: 'Material' },
+          { key: 'Description', label: 'Description' },
+          { key: 'วิภาวดี', label: 'วิภาวดี' },
+          { key: 'Unrestricted', label: 'นวนคร' },
+          { key: 'Rebuilt', label: 'Rebuilt' },
+          { key: 'หมายเหตุ', label: 'หมายเหตุ' },
+          { key: 'Product', label: 'Product' },
+          { key: 'OCRTAXT', label: 'Spec' }
+        ];
+        let html = '';
+        fields.forEach(field => {
+          let value = row[field.key] || '';
+          if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
+            if (value && !isNaN(value)) {
+              value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
+            } else if (value === '0' || value === 0) {
+              value = '';
+            }
+          }
+          if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
+            value = `<span style="color: red; font-weight: bold;">${value}</span>`;
+          }
+          if (field.key === 'Material') {
+            // Special handling for Material row: add flex layout and requisition button
+            html += `
+              <div class="material-row">
+                <span class="label">${field.label}:</span>
+                <div style="display: flex; align-items: center; flex-grow: 1;">
+                  <span class="value">${value}</span>
+                  <button class="requisition-button" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">เบิก</button>
+                </div>
+              </div>
+            `;
+          } else {
+            html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
+          }
+        });
+        // Add iframe for Google Drive image using 'id' column
+        if (row.id) {
+          html += `
+            <div style="margin-top: 20px;">
+              <strong>รูปภาพอะไหล่:</strong>
+              <iframe class="drive-iframe" src="https://drive.google.com/file/d/${row.id}/preview" allowfullscreen></iframe>
+            </div>
+          `;
+        } else {
+          html += '<div><span class="label">รูปภาพ:</span> <span class="value">ไม่พบข้อมูลรูปภาพ</span></div>';
+        }
+        imageModalContent.innerHTML = html;
+        imageModal.style.display = 'block';
+      }
       function renderTable(data) {
         if (!tableBody) {
           console.error("Table body for #data-table not found");
@@ -2537,18 +2757,13 @@
               if (textColor) td.style.color = textColor;
               if (fontWeight) td.style.fontWeight = fontWeight;
             }
-            if (col === "UrlWeb" && value && value.startsWith("https://drive.google.com/uc?")) {
-              td.innerHTML = `
-                <a href="${value}" target="_blank" rel="noopener noreferrer">
-                 <button class="image-button">Image</button>
-                </a>
-              `;
-            } else if (col === "UrlWeb" && value) {
-              td.innerHTML = `
-                <a href="${value}" target="_blank" rel="noopener noreferrer">
-                  <button class="image-button">Image</button>
-                </a>
-              `;
+            if (col === "UrlWeb" && value) {
+              // Changed to button that opens modal instead of external link
+              const imageBtn = document.createElement("button");
+              imageBtn.innerHTML = '<i class="fas fa-image"></i>';
+              imageBtn.className = "image-button";
+              imageBtn.onclick = () => showImageModal(row); // Use row.id for iframe
+              td.appendChild(imageBtn);
             } else {
               td.textContent = value;
             }
@@ -2934,7 +3149,7 @@
             // เพิ่ม popup สรุปข้อมูลที่นี่
             let imageHtml = '';
             if (row.UrlWeb && row.UrlWeb.trim()) {
-              imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image">`;
+              imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
             }
             const summaryResult = await Swal.fire({
               title: 'สรุปข้อมูลการเบิก',
