@@ -627,6 +627,20 @@
         top: 0;
         z-index: 1;
       }
+      #today th.sortable {
+        cursor: pointer;
+        position: relative;
+      }
+      #today th.sortable:hover {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+      }
+      body.dark-mode #today th.sortable:hover {
+        background: linear-gradient(135deg, #16a085, #1abc9c);
+      }
+      #today .today-arrow {
+        font-size: 12px;
+        margin-left: 5px;
+      }
       #parts tr:hover, #images tr:hover, #today tr:hover {
         background-color: #f5f5f5;
       }
@@ -2430,7 +2444,7 @@
               <thead>
                 <tr>
                   <th>Status</th>
-                  <th>วันเวลาบันทึก</th>
+                  <th class="sortable" data-column="Timestamp">วันเวลาบันทึก <span class="today-arrow">↓</span></th>
                   <th>Material</th>
                   <th>Description</th>
                   <th>จำนวน</th>
@@ -2577,6 +2591,8 @@
       let globalSearch2 = '';
       // Global for today tab: toggle pending only
       let pendingOnly = true;
+      // Sort config for today tab
+      let sortConfigToday = { column: 'Timestamp', direction: 'desc' }; // Default to descending Timestamp
       // Opensheet URL for Request sheet
       const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
       // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
@@ -4069,29 +4085,79 @@
         toggleAllDataBtn.textContent = pendingOnly ? 'แสดงข้อมูลทั้งหมด' : 'แสดงเฉพาะรอเบิก';
         updateTableToday();
       });
-      // Function to sort data by Timestamp descending (latest first)
-      function sortByTimestampDescending(a, b) {
-        if (!a.Timestamp || !b.Timestamp) return 0;
-        const parseDate = (timestamp) => {
-          const [datePart, timePart] = timestamp.split(' ');
-          if (!datePart) return new Date(0);
-          const [day, month, yearBE] = datePart.split('/');
-          const yearCE = parseInt(yearBE) - 543;
-          if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day));
-          const [hour, minute, second] = timePart.split(':').map(Number);
-          return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0);
-        };
-        const dateA = parseDate(a.Timestamp);
-        const dateB = parseDate(b.Timestamp);
-        return dateB - dateA; // Descending order (latest first)
+      // Function to sort data by column (for sortable headers)
+      function sortByColumn(a, b, column, direction) {
+        let valueA = a[column] || "";
+        let valueB = b[column] || "";
+        if (column === 'Timestamp') {
+          // Custom sort for Timestamp (descending by default)
+          const parseDate = (timestamp) => {
+            if (!timestamp) return new Date(0);
+            const [datePart, timePart] = timestamp.split(' ');
+            const [day, month, yearBE] = datePart.split('/');
+            const yearCE = parseInt(yearBE) - 543;
+            if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day));
+            const [hour, minute, second] = timePart.split(':').map(Number);
+            return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0);
+          };
+          const dateA = parseDate(valueA);
+          const dateB = parseDate(valueB);
+          return direction === 'asc' ? dateA - dateB : dateB - dateA;
+        } else {
+          // Default string/numeric sort
+          if (!isNaN(valueA) && !isNaN(valueB)) {
+            valueA = parseFloat(valueA);
+            valueB = parseFloat(valueB);
+            return direction === 'asc' ? valueA - valueB : valueB - valueA;
+          }
+          valueA = valueA.toString().toLowerCase();
+          valueB = valueB.toString().toLowerCase();
+          return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+        }
       }
+      // Add sort listeners for today tab
+      function addSortListenersToday() {
+        const sortableHeaders = document.querySelectorAll("#today th.sortable");
+        sortableHeaders.forEach(header => {
+          header.addEventListener("click", () => {
+            const column = header.getAttribute("data-column");
+            if (sortConfigToday.column === column) {
+              sortConfigToday.direction = sortConfigToday.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+              sortConfigToday.column = column;
+              sortConfigToday.direction = 'desc'; // Default to descending for Timestamp
+            }
+            updateSortArrowsToday();
+            updateTableToday();
+          });
+        });
+      }
+      function updateSortArrowsToday() {
+        const sortableHeaders = document.querySelectorAll("#today th.sortable");
+        sortableHeaders.forEach(header => {
+          const arrow = header.querySelector(".today-arrow");
+          const column = header.getAttribute("data-column");
+          if (column === sortConfigToday.column) {
+            arrow.textContent = sortConfigToday.direction === 'asc' ? '↑' : '↓';
+          } else {
+            arrow.textContent = '';
+          }
+        });
+      }
+      // Initial call to add listeners after load
+      document.addEventListener('DOMContentLoaded', () => {
+        addSortListenersToday();
+      });
       function filterByStatus(data) {
         let filtered = data;
         if (pendingOnly) {
           filtered = data.filter(row => row["status"] === "รอเบิก");
         }
-        // Always sort by timestamp descending
-        return filtered.sort(sortByTimestampDescending);
+        // Apply sort based on config
+        if (sortConfigToday.column) {
+          filtered.sort((a, b) => sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction));
+        }
+        return filtered;
       }
       function updateTableToday() {
         let dataToFilter = allDataToday;
