@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</title>
     <!-- Enhanced Content Security Policy to reduce phishing risks -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
     <!-- Additional security headers via meta -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -746,37 +746,37 @@
       }
       /* New style for image button, copied from requisition-button but with blue gradient */
       #parts .image-button, #images .image-button-images {
-    background: linear-gradient(135deg, #2196f3, #1976d2);
-    color: white;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #parts .image-button:hover, #images .image-button-images:hover {
-    background: linear-gradient(135deg, #1565c0, #0d47a1);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-  #parts .image-button:focus, #images .image-button-images:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
-  }
-  #parts .image-button:active, #images .image-button-images:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  #parts .image-button i, #images .image-button-images i {
-    font-size: 12px;
-  }
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        color: white;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #parts .image-button:hover, #images .image-button-images:hover {
+        background: linear-gradient(135deg, #1565c0, #0d47a1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      #parts .image-button:focus, #images .image-button-images:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+      }
+      #parts .image-button:active, #images .image-button-images:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      #parts .image-button i, #images .image-button-images i {
+        font-size: 12px;
+      }
       #parts .swal2-input, #images .swal2-input-images {
         margin: 4px 0;
         width: 100%;
@@ -1441,7 +1441,7 @@
           font-size: 14px;
         }
       }
-       #all tr {
+        #all tr {
           opacity: 0;
           transform: translateY(10px);
           animation: fadeInUp 0.5s ease forwards;
@@ -2226,6 +2226,28 @@
           padding: 10px;
         }
       }
+      /* Button for toggling all data in #today tab */
+      #today #toggleAllDataBtn {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+      }
+      #today #toggleAllDataBtn:hover {
+        background: linear-gradient(135deg, #f57c00, #ff9800);
+        transform: translateY(-2px);
+      }
+      body.dark-mode #today #toggleAllDataBtn {
+        background: linear-gradient(135deg, #e67e22, #d68910);
+      }
+      body.dark-mode #today #toggleAllDataBtn:hover {
+        background: linear-gradient(135deg, #d68910, #e67e22);
+      }
     </style>
   </head>
   <body class="light-mode">
@@ -2283,9 +2305,6 @@
           <button class="tab-button" id="tab-today" onclick="showTab('today')">
             รายการเบิกประจำวันนี้
           </button>
-          <button class="tab-button" id="tab-all" onclick="showTab('all')">
-            ประวัติการเบิกอะไหล่
-          </button>
           <button class="tab-button" id="tab-pending-calls" onclick="showTab('pending-calls')">
             อะไหล่จ่ายตาม Call
           </button>
@@ -2298,7 +2317,6 @@
               <i class="fas fa-search"></i>
             </button>
           </div>
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
           <div id="error-container">
             <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
             <button id="retry-button">ลองใหม่</button>
@@ -2358,7 +2376,6 @@
               <i class="fas fa-search"></i>
             </button>
           </div>
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
           <div id="error-container-images">
             <p id="error-message-images">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
             <button id="retry-button-images">ลองใหม่</button>
@@ -2397,6 +2414,8 @@
         <div id="today" class="tab-content">
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
+            <!-- Toggle button for all data -->
+            <button id="toggleAllDataBtn">แสดงข้อมูลทั้งหมด</button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
             <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -2549,12 +2568,19 @@
         <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       // Global employee data
       let employeeData = [];
       // Global search values for syncing between parts and images tabs
       let globalSearch1 = '';
       let globalSearch2 = '';
+      // Global for today tab: toggle pending only
+      let pendingOnly = true;
+      // Opensheet URL for Request sheet
+      const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
+      // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
+      const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
       // Theme Management
       function setTheme(theme) {
         localStorage.setItem('theme', theme);
@@ -3042,7 +3068,7 @@
             </select>
             <span id="swal-call-type-error" class="error-message"></span>
             <label class="swal2-label">🗒️ หมายเหตุ</label>
-            <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ" readonly>
+            <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ">
             <span id="swal-remark-error" class="error-message"></span>
           `,
           focusConfirm: false,
@@ -3052,7 +3078,7 @@
           allowOutsideClick: false,
           allowEscapeKey: false,
           didOpen: () => {
-            // Force high z-index and ensure backdrop covers full screen
+            // Force high z-index and ensure backdrop covers full screen (logic เดิม)
             const swalContainer = document.querySelector('.swal2-container');
             if (swalContainer) {
               swalContainer.style.zIndex = '99998';
@@ -3096,7 +3122,7 @@
             const contactInput = document.getElementById('swal-contact');
             const callNumberInput = document.getElementById('swal-call-number');
             const callTypeInput = document.getElementById('swal-call-type');
-            const remarkInput = document.getElementById('swal-remark');
+            const remarkInput = document.getElementById('swal-remark'); // เปลี่ยนจาก readonly เป็น editable
             const confirmButton = document.querySelector('.swal2-confirm');
             confirmButton.disabled = true;
             function setupAutocomplete(input, key, containerId) {
@@ -3127,7 +3153,7 @@
             }
             setupAutocomplete(contactInput, 'contact', 'contact-history');
             setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
-            setupAutocomplete(callTypeInput, 'callType', 'call-type-history');
+            // setupAutocomplete(callTypeInput, 'callType', 'call-type-history'); // ถ้าต้องการ autocomplete สำหรับ callType
             const lastContact = getFromLocalStorage('contact')[0];
             if (lastContact) contactInput.value = lastContact;
             const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, callTypeInput, remarkInput];
@@ -3156,7 +3182,6 @@
                 document.getElementById('swal-team-display').textContent = '';
                 isValid = false;
               } else {
-                // Check against employee data
                 const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
                 if (!employee || !employee.Name) {
                   errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
@@ -3235,7 +3260,6 @@
               isValid = false;
             }
             const employeeCode = employeeCodeInput.value.trim();
-            console.log('Employee Code Input:', employeeCode);
             if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
               errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
               employeeCodeInput.classList.add('invalid-input');
@@ -3291,7 +3315,7 @@
                 contact: contactInput.value,
                 callNumber: callNumberInput.value,
                 callType: callTypeInput.value,
-                remark: remarkInput.value
+                remark: remarkInput.value // เพิ่ม remark
               };
             }
             return false;
@@ -3312,7 +3336,7 @@
                 allowEscapeKey: false
               });
             }
-            // เพิ่ม popup สรุปข้อมูลที่นี่
+            // Popup สรุปข้อมูล (logic เดิม)
             let imageHtml = '';
             if (row.UrlWeb && row.UrlWeb.trim()) {
               imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
@@ -3345,7 +3369,7 @@
                 title: 'dark-blue-title'
               },
               didOpen: () => {
-                // Ensure full blur backdrop for summary popup as well
+                // Ensure full blur backdrop for summary popup (logic เดิม)
                 const swalContainer = document.querySelector('.swal2-container');
                 if (swalContainer) {
                   swalContainer.style.zIndex = '99998';
@@ -3387,17 +3411,21 @@
               }
             });
             if (summaryResult.isConfirmed) {
-              // ดำเนินการส่งข้อมูล
-              const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScEkPW7y1aM-Zb4YmvL_ytjgSssPZMpiEjOSspQZd_vzo7bRA/formResponse";
-              const formData = new URLSearchParams();
-              formData.append("entry.1920472981", row.Material);
-              formData.append("entry.1467523821", row.Description);
-              formData.append("entry.795690319", formValues.quantity);
-              formData.append("entry.794964518", formValues.contact);
-              formData.append("entry.702998988", formValues.employeeCode);
-              formData.append("entry.1899594146", formValues.team);
-              formData.append("entry.1607225659", formValues.callNumber);
-              formData.append("entry.738519154", formValues.callType);
+              // สร้าง JSON payload
+              const jsonPayload = {
+                material: row.Material || '',
+                description: row.Description || '',
+                quantity: parseInt(formValues.quantity),
+                contact: formValues.contact,
+                employeeCode: formValues.employeeCode,
+                team: formValues.team,
+                employeeName: formValues.employeeName, // เพิ่ม employeeName (ปรับ Code.gs headers ให้รวม 'employeeName' หลัง 'team')
+                callNumber: formValues.callNumber || '',
+                callType: formValues.callType || '',
+                remark: formValues.remark || '',
+                vibhavadi: vibhavadiValue.toString() // เพิ่ม vibhavadi
+              };
+              // แสดง loading
               Swal.fire({
                 title: 'กำลังบันทึกข้อมูล...',
                 html: `
@@ -3410,7 +3438,7 @@
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 didOpen: () => {
-                  // Ensure full blur for loading popup
+                  // Ensure full blur for loading popup (logic เดิม)
                   const swalContainer = document.querySelector('.swal2-container');
                   if (swalContainer) {
                     swalContainer.style.zIndex = '99998';
@@ -3452,101 +3480,104 @@
                 }
               });
               try {
-                const response = await fetch(formUrl, {
-                  method: "POST",
-                  mode: "no-cors",
+                const response = await fetch(gasUrl, {
+                  method: 'POST',
                   headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    'Content-Type': 'application/x-www-form-urlencoded',
                   },
-                  body: formData.toString()
+                  body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}` // <- แก้ไขตรงนี้
                 });
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                Swal.fire({
-                  icon: 'success',
-                  title: 'ส่งข้อมูลสำเร็จ!',
-                  text: 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
-                  confirmButtonText: 'OK'
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    Swal.fire({
-                      title: 'กำลังเปลี่ยนหน้า...',
-                      html: `
-                        <div class="swal2-spinner-container">
-                          <div class="swal2-spinner"></div>
-                          <p>กรุณารอสักครู่...</p>
-                        </div>
-                      `,
-                      showConfirmButton: false,
-                      allowOutsideClick: false,
-                      allowEscapeKey: false,
-                      didOpen: () => {
-                        // Ensure full blur for redirect popup
-                        const swalContainer = document.querySelector('.swal2-container');
-                        if (swalContainer) {
-                          swalContainer.style.zIndex = '99998';
-                          swalContainer.style.position = 'fixed';
-                          swalContainer.style.top = '0';
-                          swalContainer.style.left = '0';
-                          swalContainer.style.width = '100vw';
-                          swalContainer.style.height = '100vh';
-                          swalContainer.style.display = 'flex';
-                          swalContainer.style.justifyContent = 'center';
-                          swalContainer.style.alignItems = 'center';
-                        }
-                        const swalBackdrop = document.querySelector('.swal2-backdrop');
-                        if (swalBackdrop) {
-                          swalBackdrop.style.zIndex = '99997';
-                          swalBackdrop.style.position = 'fixed';
-                          swalBackdrop.style.top = '0';
-                          swalBackdrop.style.left = '0';
-                          swalBackdrop.style.width = '100vw';
-                          swalBackdrop.style.height = '100vh';
-                          swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                          swalBackdrop.style.backdropFilter = 'blur(8px)';
-                        }
-                        const swalPopup = document.querySelector('.swal2-popup');
-                        if (swalPopup) {
-                          swalPopup.style.zIndex = '99999';
-                          swalPopup.style.position = 'relative';
-                          swalPopup.style.margin = '0';
-                          swalPopup.style.transform = 'none';
-                          swalPopup.style.maxHeight = '90vh';
-                          swalPopup.style.overflowY = 'auto';
-                          swalPopup.style.width = 'auto';
-                          swalPopup.style.maxWidth = '90vw';
-                          if (window.innerWidth <= 768) {
-                            swalPopup.style.width = '95vw';
-                            swalPopup.style.padding = '15px';
+                const gasResult = await response.json();
+                if (gasResult.status === 'success') {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'ส่งข้อมูลสำเร็จ!',
+                    text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
+                    confirmButtonText: 'OK'
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      Swal.fire({
+                        title: 'กำลังเปลี่ยนหน้า...',
+                        html: `
+                          <div class="swal2-spinner-container">
+                            <div class="swal2-spinner"></div>
+                            <p>กรุณารอสักครู่...</p>
+                          </div>
+                        `,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                          // Ensure full blur for redirect popup (logic เดิม)
+                          const swalContainer = document.querySelector('.swal2-container');
+                          if (swalContainer) {
+                            swalContainer.style.zIndex = '99998';
+                            swalContainer.style.position = 'fixed';
+                            swalContainer.style.top = '0';
+                            swalContainer.style.left = '0';
+                            swalContainer.style.width = '100vw';
+                            swalContainer.style.height = '100vh';
+                            swalContainer.style.display = 'flex';
+                            swalContainer.style.justifyContent = 'center';
+                            swalContainer.style.alignItems = 'center';
+                          }
+                          const swalBackdrop = document.querySelector('.swal2-backdrop');
+                          if (swalBackdrop) {
+                            swalBackdrop.style.zIndex = '99997';
+                            swalBackdrop.style.position = 'fixed';
+                            swalBackdrop.style.top = '0';
+                            swalBackdrop.style.left = '0';
+                            swalBackdrop.style.width = '100vw';
+                            swalBackdrop.style.height = '100vh';
+                            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                            swalBackdrop.style.backdropFilter = 'blur(8px)';
+                          }
+                          const swalPopup = document.querySelector('.swal2-popup');
+                          if (swalPopup) {
+                            swalPopup.style.zIndex = '99999';
+                            swalPopup.style.position = 'relative';
+                            swalPopup.style.margin = '0';
+                            swalPopup.style.transform = 'none';
+                            swalPopup.style.maxHeight = '90vh';
+                            swalPopup.style.overflowY = 'auto';
+                            swalPopup.style.width = 'auto';
+                            swalPopup.style.maxWidth = '90vw';
+                            if (window.innerWidth <= 768) {
+                              swalPopup.style.width = '95vw';
+                              swalPopup.style.padding = '15px';
+                            }
                           }
                         }
-                      }
-                    });
-                    setTimeout(() => {
-                      Swal.close();
-                      showTab('today');
-                      // Fix for mobile scroll lock after tab switch
+                      });
                       setTimeout(() => {
-                        document.body.style.overflow = 'auto';
-                        const searchInputToday = document.getElementById('searchInputToday');
-                        if (searchInputToday) {
-                          searchInputToday.focus();
-                          searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
-                        }
-                        // Simulate a touch event to unlock scroll
-                        if ('ontouchstart' in window) {
-                          const event = new Event('touchstart', { bubbles: true });
-                          document.body.dispatchEvent(event);
-                        }
-                      }, 100);
-                    }, 2000);
-                  }
-                });
+                        Swal.close();
+                        showTab('today');
+                        // Fix for mobile scroll lock after tab switch
+                        setTimeout(() => {
+                          document.body.style.overflow = 'auto';
+                          const searchInputToday = document.getElementById('searchInputToday');
+                          if (searchInputToday) {
+                            searchInputToday.focus();
+                            searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
+                          }
+                          // Simulate a touch event to unlock scroll
+                          if ('ontouchstart' in window) {
+                            const event = new Event('touchstart', { bubbles: true });
+                            document.body.dispatchEvent(event);
+                          }
+                        }, 100);
+                      }, 2000);
+                    }
+                  });
+                } else {
+                  throw new Error(gasResult.data || 'GAS return error');
+                }
               } catch (error) {
-                console.error('เกิดข้อผิดพลาดในการส่งฟอร์ม:', error);
+                console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
                 Swal.fire({
                   icon: 'error',
                   title: 'เกิดข้อผิดพลาด',
-                  text: 'ไม่สามารถส่งข้อมูลไปยัง Google Form ได้ กรุณาลองใหม่',
+                  text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
                   confirmButtonText: 'ตกลง'
                 });
               }
@@ -3841,9 +3872,9 @@
           const thumbnailSrc = row.id ? `https://drive.google.com/thumbnail?id=${row.id}&sz=w300-h300` : '';
           galleryItem.innerHTML = `
             <img src="${thumbnailSrc}" alt="${row.Description || 'Image'}" class="gallery-thumbnail"
-                 style="color: ${textColor}; font-weight: ${fontWeight};"
-                 onclick="showImageModalImages(${JSON.stringify(row).replace(/"/g, '&quot;')})"
-                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='; this.onclick=null;">
+              style="color: ${textColor}; font-weight: ${fontWeight};"
+              onclick="showImageModalImages(${JSON.stringify(row).replace(/"/g, '&quot;')})"
+              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='; this.onclick=null;">
             <div class="gallery-info">
               <div class="gallery-material" style="color: ${textColor}; font-weight: ${fontWeight};">${row.Material || ''}</div>
               <div class="gallery-description">${row.Description || ''}</div>
@@ -4010,10 +4041,7 @@
           });
         }
       }
-      // Today tab script (original)
-      const sheetIDToday = "1fPzWLyR0xqU30gyIMSuSCuglKEr76AT1ekCR3mY-nrU";
-      const sheetNameToday = "ReQuesttoday";
-      const urlToday = `https://opensheet.elk.sh/${sheetIDToday}/${sheetNameToday}`;
+      // Today tab script (adjusted for Opensheet endpoint)
       const modal = document.getElementById("detailModal");
       const modalContent = document.getElementById("modalContent");
       const closeModal = document.getElementById("closeModal");
@@ -4021,6 +4049,7 @@
       const tableBodyToday = document.querySelector("#data-table-today tbody");
       const errorContainerToday = document.getElementById("error-container-today");
       const retryButtonToday = document.getElementById("retry-button-today");
+      const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
       let allDataToday = [];
       retryButtonToday.addEventListener("click", () => {
         errorContainerToday.style.display = "none";
@@ -4034,57 +4063,103 @@
       window.onclick = (event) => {
         if (event.target == modal) closeModal.click();
       };
+      // Toggle pending only button event
+      toggleAllDataBtn.addEventListener('click', () => {
+        pendingOnly = !pendingOnly;
+        toggleAllDataBtn.textContent = pendingOnly ? 'แสดงข้อมูลทั้งหมด' : 'แสดงเฉพาะรอเบิก';
+        updateTableToday();
+      });
+      // Function to sort data by Timestamp descending (latest first)
+      function sortByTimestampDescending(a, b) {
+        if (!a.Timestamp || !b.Timestamp) return 0;
+        const parseDate = (timestamp) => {
+          const [datePart, timePart] = timestamp.split(' ');
+          if (!datePart) return new Date(0);
+          const [day, month, yearBE] = datePart.split('/');
+          const yearCE = parseInt(yearBE) - 543;
+          if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day));
+          const [hour, minute, second] = timePart.split(':').map(Number);
+          return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0);
+        };
+        const dateA = parseDate(a.Timestamp);
+        const dateB = parseDate(b.Timestamp);
+        return dateB - dateA; // Descending order (latest first)
+      }
+      function filterByStatus(data) {
+        let filtered = data;
+        if (pendingOnly) {
+          filtered = data.filter(row => row["status"] === "รอเบิก");
+        }
+        // Always sort by timestamp descending
+        return filtered.sort(sortByTimestampDescending);
+      }
+      function updateTableToday() {
+        let dataToFilter = allDataToday;
+        const keyword = searchInputToday.value.toLowerCase();
+        if (keyword) {
+          dataToFilter = allDataToday.filter((row) => {
+            return (
+              (row["material"] || "").toLowerCase().includes(keyword) ||
+              (row["description"] || "").toLowerCase().includes(keyword) ||
+              (row["employeeName"] || "").toLowerCase().includes(keyword) ||
+              (row["team"] || "").toLowerCase().includes(keyword)
+            );
+          });
+        }
+        const filteredData = filterByStatus(dataToFilter);
+        renderTableToday(filteredData);
+      }
       function renderTableToday(data) {
         tableBodyToday.innerHTML = "";
         data.forEach((row) => {
           const tr = document.createElement("tr");
           const statusTd = document.createElement("td");
-          const status = row["Status"] || "";
+          const status = row["status"] || "";
           statusTd.textContent = status;
           statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
           tr.appendChild(statusTd);
           const columns = [
             "Timestamp",
-            "Code",
-            "Material Description",
-            "จำนวน",
-            "วิภาวดี",
-            "ชื่อช่าง",
-            "หน่วยงาน",
+            "material",
+            "description",
+            "quantity",
+            "vibhavadi",
+            "employeeName",
+            "team",
             "CallNumber",
             "CallType",
-            "หมายเหตุ",
+            "remark",
           ];
           columns.forEach((col) => {
             const td = document.createElement("td");
             let value = row[col] || "";
-            if (col === "จำนวน" || col === "วิภาวดี") {
+            if (col === "quantity" || col === "vibhavadi") {
               if (value && !isNaN(value)) {
                 value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
               } else if (value === "0" || value === 0) {
                 value = "";
               }
             }
-            if (col === "หมายเหตุ" && value) {
+            if (col === "remark" && value) {
               td.style.color = "red";
               td.style.fontWeight = "bold";
             }
-            if (col === "Code" && (row["หมายเหตุ"] || "").trim() !== "") {
+            if (col === "material" && (row["remark"] || "").trim() !== "") {
               td.style.color = "red";
               td.style.fontWeight = "bold";
             }
-            if (col === "Material Description" && (row["หมายเหตุ"] || "").trim() !== "") {
+            if (col === "description" && (row["remark"] || "").trim() !== "") {
               td.style.color = "red";
               td.style.fontWeight = "bold";
             }
-            if (col === "Timestamp" && (row["หมายเหตุ"] || "").trim() !== "") {
+            if (col === "Timestamp" && (row["remark"] || "").trim() !== "") {
               td.style.color = "red";
               td.style.fontWeight = "bold";
             }
-            if (col === "วิภาวดี" && value) {
+            if (col === "vibhavadi" && value) {
               td.style.color = "#4caf50"; // Green color
               td.style.fontWeight = "bold";
-           }
+            }
             td.textContent = value;
             tr.appendChild(td);
           });
@@ -4098,19 +4173,19 @@
                 let label = "";
                 switch (col) {
                   case "Timestamp": label = "📅 วันเวลา"; break;
-                  case "Code": label = "🔢 Material"; break;
-                  case "Material Description": label = "🛠️ Description"; break;
-                  case "จำนวน": label = "🔢 จำนวน"; break;
-                  case "ชื่อช่าง": label = "👷‍♂️ ชื่อช่าง"; break;
-                  case "หน่วยงาน": label = "🏢 หน่วยงาน"; break;
+                  case "material": label = "🔢 Material"; break;
+                  case "description": label = "🛠️ Description"; break;
+                  case "quantity": label = "🔢 จำนวน"; break;
+                  case "employeeName": label = "👷‍♂️ ชื่อช่าง"; break;
+                  case "team": label = "🏢 หน่วยงาน"; break;
                   case "CallNumber": label = "📄 Call"; break;
                   case "CallType": label = "🗳️ CallType"; break;
-                  case "วิภาวดี": label = "📦 คลังวิภาวดี"; break;
-                  case "หมายเหตุ": label = "📝 หมายเหตุ"; break;
+                  case "vibhavadi": label = "📦 คลังวิภาวดี"; break;
+                  case "remark": label = "📝 หมายเหตุ"; break;
                   default: label = col;
                 }
                 const value = row[col] || "";
-                const valueHtml = col === "หมายเหตุ" && value
+                const valueHtml = col === "remark" && value
                   ? `<span class='value' style='color:red'>${value}</span>`
                   : `<span class='value'>${value}</span>`;
                 return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
@@ -4127,27 +4202,18 @@
           tableBodyToday.appendChild(tr);
         });
       }
-      searchInputToday.addEventListener("input", (e) => {
-        const keyword = e.target.value.toLowerCase();
-        const filtered = allDataToday.filter((row) => {
-          return (
-            (row["Code"] || "").toLowerCase().includes(keyword) ||
-            (row["Material Description"] || "").toLowerCase().includes(keyword) ||
-            (row["ชื่อช่าง"] || "").toLowerCase().includes(keyword) ||
-            (row["หน่วยงาน"] || "").toLowerCase().includes(keyword)
-          );
-        });
-        renderTableToday(filtered);
+      searchInputToday.addEventListener("input", () => {
+        updateTableToday();
       });
       async function loadTodayData() {
         document.getElementById("loading").style.display = "flex";
         document.getElementById("loadingToday").style.display = "block";
         errorContainerToday.style.display = "none";
-        console.log("Starting data load from:", urlToday);
+        console.log("Starting data load from Opensheet:", requestSheetUrl);
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 15000);
-          const response = await fetch(urlToday, { signal: controller.signal });
+          const response = await fetch(requestSheetUrl, { signal: controller.signal });
           clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -4158,7 +4224,7 @@
             throw new Error("No data received or data is empty");
           }
           allDataToday = data;
-          renderTableToday(data);
+          updateTableToday();
           document.getElementById("loading").style.display = "none";
           document.getElementById("loadingToday").style.display = "none";
           document.getElementById("data-table-today").style.display = "table";
@@ -4188,10 +4254,7 @@
           });
         }
       }
-      // All tab script
-      const sheetIDAll = '1fPzWLyR0xqU30gyIMSuSCuglKEr76AT1ekCR3mY-nrU';
-      const sheetNameAll = 'ReQuestHistory';
-      const urlAll = `https://opensheet.elk.sh/${sheetIDAll}/${sheetNameAll}`;
+      // All tab script (adjusted for new GAS endpoint)
       const modalAll = document.getElementById("detailModalAll");
       const modalContentAll = document.getElementById("modalContentAll");
       const closeModalAll = document.getElementById("closeModalAll");
@@ -4215,7 +4278,7 @@
         currentPageAll = 1;
         renderTableAll(allDataAll);
       });
-     function renderTableAll(data) {
+      function renderTableAll(data) {
         tableBodyAll.innerHTML = '';
         const startIdx = (currentPageAll - 1) * itemsPerPageAll;
         const endIdx = startIdx + itemsPerPageAll;
@@ -4223,31 +4286,31 @@
         paginatedData.forEach((row, i) => {
           const tr = document.createElement("tr");
           tr.style.animationDelay = `${i * 0.05}s`; // Fade-in ทีละแถว
-           const status = row["Status"] || "";
-          const statusTd = document.createElement("td");
-          statusTd.textContent = status;
-          statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
-          tr.appendChild(statusTd);
-          const columns = ["Timestamp", "Code", "Material Description", "จำนวน", "ชื่อช่าง", "หน่วยงาน","CallNumber","CallType", "Note"];
-          columns.forEach(col => {
-            const td = document.createElement("td");
-            td.textContent = row[col] || "";
-            tr.appendChild(td);
-          });
-          const detailTd = document.createElement("td");
-          const btn = document.createElement("button");
-          btn.textContent = "ดูรายละเอียด";
-          btn.className = "detail-button";
-          btn.onclick = () => {
-            modalContentAll.innerHTML = columns.map(col => {
-              const label = col === "Timestamp" ? "วันเวลา" : col;
-              return `<div><span class='label'>${label}:</span> <span class='value'>${row[col] || ''}</span></div>`;
-            }).join('');
-            modalAll.style.display = "block";
-          };
-          detailTd.appendChild(btn);
-          tr.appendChild(detailTd);
-          tableBodyAll.appendChild(tr);
+            const status = row["status"] || "";
+            const statusTd = document.createElement("td");
+            statusTd.textContent = status;
+            statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+            tr.appendChild(statusTd);
+            const columns = ["timestamp", "material", "description", "quantity", "employeeName", "team","callNumber","callType", "remark"];
+            columns.forEach(col => {
+              const td = document.createElement("td");
+              td.textContent = row[col] || "";
+              tr.appendChild(td);
+            });
+            const detailTd = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.textContent = "ดูรายละเอียด";
+            btn.className = "detail-button";
+            btn.onclick = () => {
+              modalContentAll.innerHTML = columns.map(col => {
+                const label = col === "timestamp" ? "วันเวลา" : col;
+                return `<div><span class='label'>${label}:</span> <span class='value'>${row[col] || ''}</span></div>`;
+              }).join('');
+              modalAll.style.display = "block";
+            };
+            detailTd.appendChild(btn);
+            tr.appendChild(detailTd);
+            tableBodyAll.appendChild(tr);
         });
         updatePaginationAll(data);
       }
@@ -4296,25 +4359,29 @@
         const keyword = e.target.value.toLowerCase();
         const filtered = allDataAll.filter(row => {
           return (
-            (row["Code"] || "").toLowerCase().includes(keyword) ||
-            (row["Material Description"] || "").toLowerCase().includes(keyword) ||
-            (row["ชื่อช่าง"] || "").toLowerCase().includes(keyword) ||
-            (row["หน่วยงาน"] || "").toLowerCase().includes(keyword) ||
-            (row["หมายเหตุ"] || "").toLowerCase().includes(keyword)
+            (row["material"] || "").toLowerCase().includes(keyword) ||
+            (row["description"] || "").toLowerCase().includes(keyword) ||
+            (row["employeeName"] || "").toLowerCase().includes(keyword) ||
+            (row["team"] || "").toLowerCase().includes(keyword) ||
+            (row["remark"] || "").toLowerCase().includes(keyword)
           );
         });
         renderTableAll(filtered);
       });
-      function loadAllData() {
-        fetch(urlAll)
-          .then(response => response.json())
-          .then(data => {
-            allDataAll = data;
-            renderTableAll(data);
-          })
-          .catch(error => {
-            console.error("ไม่สามารถโหลดข้อมูลได้:", error);
-          });
+      async function loadAllData() {
+        try {
+          const response = await fetch(`${gasUrl}?action=getRequests`);
+          const res = await response.json();
+          if (res.status === 'success') {
+            allDataAll = res.data;
+            renderTableAll(allDataAll);
+          } else {
+            throw new Error(res.data || 'GAS error');
+          }
+        } catch (error) {
+          console.error("ไม่สามารถโหลดข้อมูลได้:", error);
+          tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        }
       }
       // Pending-calls tab script
       const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
@@ -4419,15 +4486,15 @@
                  !pendingDept.includes("nec_ยกเลิกผลิต") &&
                  (!selectedTeam || row["Team"] === selectedTeam) &&
                  (!keyword ||
-                   (row["DateTime"] || "").toLowerCase().includes(keyword) ||
-                   (row["Ticket Number"] || "").toLowerCase().includes(keyword) ||
-                   (row["Team"] || "").toLowerCase().includes(keyword) ||
-                   (row["Brand"] || "").toLowerCase().includes(keyword) ||
-                   (row["ค้างหน่วยงาน"] || "").toLowerCase().includes(keyword) ||
-                   (row["Material"] || "").toLowerCase().includes(keyword) ||
-                   (row["Description"] || "").toLowerCase().includes(keyword) ||
-                   (row["Vipa"] || "").toLowerCase().includes(keyword) ||
-                   (row["DayRepair"] || "").toLowerCase().includes(keyword)
+                  (row["DateTime"] || "").toLowerCase().includes(keyword) ||
+                  (row["Ticket Number"] || "").toLowerCase().includes(keyword) ||
+                  (row["Team"] || "").toLowerCase().includes(keyword) ||
+                  (row["Brand"] || "").toLowerCase().includes(keyword) ||
+                  (row["ค้างหน่วยงาน"] || "").toLowerCase().includes(keyword) ||
+                  (row["Material"] || "").toLowerCase().includes(keyword) ||
+                  (row["Description"] || "").toLowerCase().includes(keyword) ||
+                  (row["Vipa"] || "").toLowerCase().includes(keyword) ||
+                  (row["DayRepair"] || "").toLowerCase().includes(keyword)
                  );
         });
         if (sortConfigPending.column) {
