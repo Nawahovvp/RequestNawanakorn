@@ -662,14 +662,14 @@
       body.dark-mode #today .table-container {
         background: #2c3e50;
       }
-      #parts .pagination, #images .pagination-images {
+      #parts .pagination, #images .pagination-images, #today .pagination-today {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
         margin-top: 12px;
       }
-      #parts .pagination button, #images .pagination-images button {
+      #parts .pagination button, #images .pagination-images button, #today .pagination-today button {
         background: linear-gradient(135deg, #42a5f5, #2196f3);
         color: white;
         padding: 8px;
@@ -682,18 +682,18 @@
         font-size: 13px;
         transition: all 0.3s ease;
       }
-      #parts .pagination button:hover, #images .pagination-images button:hover {
+      #parts .pagination button:hover, #images .pagination-images button:hover, #today .pagination-today button:hover {
         background: linear-gradient(135deg, #1976d2, #1565c0);
         transform: translateY(-2px);
       }
-      #parts .pagination .active, #images .pagination-images .active {
+      #parts .pagination .active, #images .pagination-images .active, #today .pagination-today .active {
         background: linear-gradient(135deg, #ff9800, #f57c00);
       }
-      #parts .pagination button:disabled, #images .pagination-images button:disabled {
+      #parts .pagination button:disabled, #images .pagination-images button:disabled, #today .pagination-today button:disabled {
         background: #b0bec5;
         cursor: not-allowed;
       }
-      #parts .pagination select, #images .pagination-images select {
+      #parts .pagination select, #images .pagination-images select, #today .pagination-today select {
         padding: 8px;
         border-radius: 6px;
         margin: 0 10px;
@@ -2460,6 +2460,26 @@
               <tbody></tbody>
             </table>
           </div>
+          <!-- Pagination for Today Tab -->
+          <div id="paginationToday" class="pagination-today">
+            <button id="firstPageToday">
+              <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="prevPageToday"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbersToday"></div>
+            <button id="nextPageToday"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPageToday">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="items-per-page-today">
+              <label for="itemsPerPageToday">Show</label>
+              <select id="itemsPerPageToday">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+              </select>
+            </div>
+          </div>
           <div id="detailModal" class="modal">
             <div class="modal-content">
               <span class="close" id="closeModal">×</span>
@@ -2593,6 +2613,9 @@
       let pendingOnly = true;
       // Sort config for today tab
       let sortConfigToday = { column: 'Timestamp', direction: 'desc' }; // Default to descending Timestamp
+      // Pagination config for today tab
+      let currentPageToday = 1;
+      let itemsPerPageToday = 20; // Default to 20 items per page
       // Opensheet URL for Request sheet
       const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
       // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
@@ -4066,7 +4089,16 @@
       const errorContainerToday = document.getElementById("error-container-today");
       const retryButtonToday = document.getElementById("retry-button-today");
       const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
+      // Pagination elements for today tab
+      const paginationToday = document.getElementById("paginationToday");
+      const pageNumbersToday = document.getElementById("pageNumbersToday");
+      const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
+      const firstPageButtonToday = document.getElementById("firstPageToday");
+      const prevPageButtonToday = document.getElementById("prevPageToday");
+      const nextPageButtonToday = document.getElementById("nextPageToday");
+      const lastPageButtonToday = document.getElementById("lastPageToday");
       let allDataToday = [];
+      let currentFilteredDataToday = [];
       retryButtonToday.addEventListener("click", () => {
         errorContainerToday.style.display = "none";
         loadTodayData();
@@ -4083,6 +4115,36 @@
       toggleAllDataBtn.addEventListener('click', () => {
         pendingOnly = !pendingOnly;
         toggleAllDataBtn.textContent = pendingOnly ? 'แสดงข้อมูลทั้งหมด' : 'แสดงเฉพาะรอเบิก';
+        currentPageToday = 1; // Reset page on toggle
+        updateTableToday();
+      });
+      // Items per page change event for today tab
+      itemsPerPageSelectToday.addEventListener("change", () => {
+        itemsPerPageToday = parseInt(itemsPerPageSelectToday.value, 10);
+        currentPageToday = 1;
+        updateTableToday();
+      });
+      // Pagination button events for today tab
+      firstPageButtonToday.addEventListener("click", () => {
+        currentPageToday = 1;
+        updateTableToday();
+      });
+      prevPageButtonToday.addEventListener("click", () => {
+        if (currentPageToday > 1) {
+          currentPageToday--;
+          updateTableToday();
+        }
+      });
+      nextPageButtonToday.addEventListener("click", () => {
+        const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday);
+        if (currentPageToday < totalPages) {
+          currentPageToday++;
+          updateTableToday();
+        }
+      });
+      lastPageButtonToday.addEventListener("click", () => {
+        const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday);
+        currentPageToday = totalPages;
         updateTableToday();
       });
       // Function to sort data by column (for sortable headers)
@@ -4173,7 +4235,13 @@
           });
         }
         const filteredData = filterByStatus(dataToFilter);
-        renderTableToday(filteredData);
+        currentFilteredDataToday = filteredData;
+        // Paginate
+        const startIndex = (currentPageToday - 1) * itemsPerPageToday;
+        const endIndex = startIndex + itemsPerPageToday;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        renderTableToday(paginatedData);
+        renderPaginationToday(filteredData.length);
       }
       function renderTableToday(data) {
         tableBodyToday.innerHTML = "";
@@ -4268,7 +4336,45 @@
           tableBodyToday.appendChild(tr);
         });
       }
+      function renderPaginationToday(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPageToday);
+        pageNumbersToday.innerHTML = "";
+        if (totalPages === 0) {
+          firstPageButtonToday.disabled = true;
+          prevPageButtonToday.disabled = true;
+          nextPageButtonToday.disabled = true;
+          lastPageButtonToday.disabled = true;
+          return;
+        }
+        let startPage = Math.max(1, currentPageToday - 2);
+        let endPage = Math.min(totalPages, currentPageToday + 2);
+        if (totalPages <= 5) {
+          startPage = 1;
+          endPage = totalPages;
+        } else {
+          if (currentPageToday <= 3) {
+            endPage = 5;
+          } else if (currentPageToday >= totalPages - 2) {
+            startPage = totalPages - 4;
+          }
+        }
+        for (let page = startPage; page <= endPage; page++) {
+          const button = document.createElement("button");
+          button.textContent = page;
+          button.className = page === currentPageToday ? "active" : "";
+          button.onclick = () => {
+            currentPageToday = page;
+            updateTableToday();
+          };
+          pageNumbersToday.appendChild(button);
+        }
+        firstPageButtonToday.disabled = currentPageToday === 1;
+        prevPageButtonToday.disabled = currentPageToday === 1;
+        nextPageButtonToday.disabled = currentPageToday === totalPages;
+        lastPageButtonToday.disabled = currentPageToday === totalPages;
+      }
       searchInputToday.addEventListener("input", () => {
+        currentPageToday = 1; // Reset page on search
         updateTableToday();
       });
       async function loadTodayData() {
@@ -4290,6 +4396,7 @@
             throw new Error("No data received or data is empty");
           }
           allDataToday = data;
+          currentPageToday = 1; // Reset page on load
           updateTableToday();
           document.getElementById("loading").style.display = "none";
           document.getElementById("loadingToday").style.display = "none";
