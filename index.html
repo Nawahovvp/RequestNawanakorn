@@ -2444,6 +2444,7 @@
               <thead>
                 <tr>
                   <th>Status</th>
+                  <th class="sortable" data-column="IDRow">IDRow <span class="today-arrow">↓</span></th>
                   <th class="sortable" data-column="Timestamp">วันเวลาบันทึก <span class="today-arrow">↓</span></th>
                   <th>Material</th>
                   <th>Description</th>
@@ -2612,7 +2613,7 @@
       // Global for today tab: toggle pending only
       let pendingOnly = true;
       // Sort config for today tab
-      let sortConfigToday = { column: 'Timestamp', direction: 'desc' }; // Default to descending Timestamp
+      let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
       // Pagination config for today tab
       let currentPageToday = 1;
       let itemsPerPageToday = 20; // Default to 20 items per page
@@ -4151,20 +4152,24 @@
       function sortByColumn(a, b, column, direction) {
         let valueA = a[column] || "";
         let valueB = b[column] || "";
-        if (column === 'Timestamp') {
-          // Custom sort for Timestamp (descending by default)
-          const parseDate = (timestamp) => {
-            if (!timestamp) return new Date(0);
-            const [datePart, timePart] = timestamp.split(' ');
+        if (column === 'IDRow' || column === 'Timestamp') {
+          // Custom sort for IDRow (descending by default) and Timestamp
+          const parseDateOrId = (value) => {
+            if (!value) return 0;
+            if (column === 'IDRow') {
+              return parseInt(value, 10) || 0;
+            }
+            // For Timestamp
+            const [datePart, timePart] = value.split(' ');
             const [day, month, yearBE] = datePart.split('/');
             const yearCE = parseInt(yearBE) - 543;
-            if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day));
+            if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day)).getTime();
             const [hour, minute, second] = timePart.split(':').map(Number);
-            return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0);
+            return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0).getTime();
           };
-          const dateA = parseDate(valueA);
-          const dateB = parseDate(valueB);
-          return direction === 'asc' ? dateA - dateB : dateB - dateA;
+          const numA = parseDateOrId(valueA);
+          const numB = parseDateOrId(valueB);
+          return direction === 'asc' ? numA - numB : numB - numA;
         } else {
           // Default string/numeric sort
           if (!isNaN(valueA) && !isNaN(valueB)) {
@@ -4187,7 +4192,7 @@
               sortConfigToday.direction = sortConfigToday.direction === 'asc' ? 'desc' : 'asc';
             } else {
               sortConfigToday.column = column;
-              sortConfigToday.direction = 'desc'; // Default to descending for Timestamp
+              sortConfigToday.direction = column === 'IDRow' ? 'desc' : 'asc'; // Default descending for IDRow
             }
             updateSortArrowsToday();
             updateTableToday();
@@ -4227,6 +4232,7 @@
         if (keyword) {
           dataToFilter = allDataToday.filter((row) => {
             return (
+              (row["IDRow"] || "").toLowerCase().includes(keyword) ||
               (row["material"] || "").toLowerCase().includes(keyword) ||
               (row["description"] || "").toLowerCase().includes(keyword) ||
               (row["employeeName"] || "").toLowerCase().includes(keyword) ||
@@ -4252,6 +4258,10 @@
           statusTd.textContent = status;
           statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
           tr.appendChild(statusTd);
+          // Add IDRow column
+          const idRowTd = document.createElement("td");
+          idRowTd.textContent = row["IDRow"] || "";
+          tr.appendChild(idRowTd);
           const columns = [
             "Timestamp",
             "material",
@@ -4302,10 +4312,11 @@
           btn.textContent = "ดูรายละเอียด";
           btn.className = "detail-button";
           btn.onclick = () => {
-            modalContent.innerHTML = columns
+            modalContent.innerHTML = ["IDRow", ...columns]
               .map((col) => {
                 let label = "";
                 switch (col) {
+                  case "IDRow": label = "🆔 IDRow"; break;
                   case "Timestamp": label = "📅 วันเวลา"; break;
                   case "material": label = "🔢 Material"; break;
                   case "description": label = "🛠️ Description"; break;
