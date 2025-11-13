@@ -607,6 +607,11 @@
         font-size: 15px;
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
       }
+      /* เพิ่มสไตล์นี้ในส่วน <style> เพื่อปรับคอลัมน์ Description ในตาราง tab รายการเบิกประจำวันนี้ ให้ชิดขวา */
+#today th:nth-child(5),
+#today td:nth-child(5) {
+  text-align: right !important;
+}
       body.dark-mode #parts th,
       body.dark-mode #images th,
       body.dark-mode #today th {
