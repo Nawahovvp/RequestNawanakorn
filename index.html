@@ -2078,14 +2078,14 @@
         min-width: 120px;
         font-weight: 500;
         color: #2196f3;
-        font-size: 15px;
+        font-size: 13px;
         transition: color 0.3s ease;
       }
       body.dark-mode #parts #imageModalContent span.label, body.dark-mode #images #imageModalContentImages span.label {
         color: #1abc9c;
       }
       #parts #imageModalContent span.value, #images #imageModalContentImages span.value {
-        font-size: 15px;
+        font-size: 13px;
         color: #37474f;
         transition: color 0.3s ease;
       }
@@ -2193,20 +2193,21 @@
         transform: scale(1.05);
       }
       #images .gallery-info {
-        font-size: 14px;
-        line-height: 1.4;
+        font-size: 12px;
+        line-height: 1.3;
       }
       #images .gallery-material {
         font-weight: bold;
         color: #2196f3;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
+        font-size: 12px;
       }
       body.dark-mode #images .gallery-material {
         color: #1abc9c;
       }
       #images .gallery-description {
         color: #666;
-        font-size: 12px;
+        font-size: 11px;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
@@ -2217,15 +2218,15 @@
         color: #bdc3c7;
       }
       #images .gallery-actions {
-        margin-top: 10px;
+        margin-top: 8px;
         display: flex;
-        gap: 10px;
+        gap: 5px;
         justify-content: center;
       }
       #images .gallery-item .requisition-button-images,
       #images .gallery-item .image-button-images {
-        padding: 6px 12px;
-        font-size: 12px;
+        padding: 4px 8px;
+        font-size: 10px;
       }
       /* Responsive for gallery on mobile */
       @media (max-width: 768px) {
@@ -3922,9 +3923,6 @@
             <div class="gallery-actions">
               <button class="requisition-button-images" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
                 เบิก
-              </button>
-              <button class="image-button-images" onclick="showImageModalImages(${JSON.stringify(row).replace(/"/g, '&quot;')})">
-                <i class="fas fa-image"></i> ดูรูป
               </button>
             </div>
           `;
