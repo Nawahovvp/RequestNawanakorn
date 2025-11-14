@@ -493,6 +493,7 @@
         height: 100%;
         background: rgba(255, 255, 255, 0.8);
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         font-size: 22px;
@@ -503,6 +504,20 @@
       body.dark-mode .loading {
         background: rgba(0, 0, 0, 0.8);
         color: #1abc9c;
+      }
+      .loading .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #eceff1;
+        border-top: 4px solid #2196f3;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 10px;
+        transition: border-color 0.3s ease;
+      }
+      body.dark-mode .loading .spinner {
+        border-color: #555;
+        border-top-color: #1abc9c;
       }
       iframe {
         width: 100%;
@@ -2306,6 +2321,7 @@
         </div>
       </div>
       <div class="loading" id="loading">
+        <div class="spinner"></div>
         <span>กำลังโหลดข้อมูล...</span>
       </div>
       <div class="container">
@@ -2625,7 +2641,6 @@
       const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
       // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
       const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
-
       // Parts tab variables (moved up to avoid initialization error)
       const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
       const sheetName = "MainSap";
@@ -2648,7 +2663,6 @@
       let currentPage = 1;
       let itemsPerPage = 10;
       let currentFilteredData = [];
-
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
       const searchInputImages2 = document.getElementById("searchInputImages2");
@@ -2668,7 +2682,6 @@
       let currentPageImages = 1;
       let itemsPerPageImages = 10;
       let currentFilteredDataImages = [];
-
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
       const modalContent = document.getElementById("modalContent");
@@ -2688,7 +2701,6 @@
       const lastPageButtonToday = document.getElementById("lastPageToday");
       let allDataToday = [];
       let currentFilteredDataToday = [];
-
       // All tab variables (moved up)
       const modalAll = document.getElementById("detailModalAll");
       const modalContentAll = document.getElementById("modalContentAll");
@@ -2704,7 +2716,6 @@
       let allDataAll = [];
       let currentPageAll = 1;
       let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
-
       // Pending calls tab variables (moved up)
       const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
       const sheetNamePending = 'Call_Report';
@@ -2726,7 +2737,6 @@
       let currentPagePending = 1;
       let itemsPerPagePending = 20;
       let sortConfigPending = { column: null, direction: 'asc' };
-
       // Image Modal Handling for #parts (moved up)
       const imageModal = document.getElementById('imageModal');
       const imageModalContent = document.getElementById('imageModalContent');
@@ -2739,7 +2749,6 @@
           imageModal.style.display = 'none';
         }
       };
-
       // Image Modal Handling for #images (moved up)
       const imageModalImages = document.getElementById('imageModalImages');
       const imageModalContentImages = document.getElementById('imageModalContentImages');
@@ -2752,7 +2761,6 @@
           imageModalImages.style.display = 'none';
         }
       };
-
       // Theme Management
       function setTheme(theme) {
         localStorage.setItem('theme', theme);
@@ -2785,7 +2793,6 @@
           }
         });
       }
-
       // Login System
       const loginModal = document.getElementById('loginModal');
       const appContent = document.getElementById('appContent');
@@ -2904,7 +2911,6 @@
           handleLogin();
         }
       });
-
       function showTab(tabId) {
         const buttons = document.querySelectorAll(".tab-button");
         const contents = document.querySelectorAll(".tab-content");
@@ -2952,7 +2958,6 @@
           }
         });
       }
-
       // Parts tab functions (now after variables)
       itemsPerPageSelect.addEventListener("change", () => {
         itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
@@ -3897,7 +3902,6 @@
           });
         }
       }
-
       // Images tab functions (now after variables)
       itemsPerPageSelectImages.addEventListener("change", () => {
         itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
@@ -4172,7 +4176,6 @@
           });
         }
       }
-
       // Today tab functions (now after variables)
       retryButtonToday.addEventListener("click", () => {
         errorContainerToday.style.display = "none";
@@ -4524,7 +4527,6 @@
           });
         }
       }
-
       // All tab functions (now after variables)
       closeModalAll.onclick = () => modalAll.style.display = "none";
       window.onclick = event => {
@@ -4640,7 +4642,6 @@
           tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
         }
       }
-
       // Pending-calls tab functions (now after variables)
       closeModalPending.onclick = () => modalPending.style.display = "none";
       window.onclick = event => {
@@ -4956,7 +4957,6 @@
           });
         }
       }
-
       // Initial calls (now safe after all variables defined)
       loadTheme();
       checkLoginStatus();
