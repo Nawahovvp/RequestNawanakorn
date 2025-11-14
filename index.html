@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
     <!-- Additional security headers via meta -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
+    <!-- Removed invalid X-Frame-Options meta; set via server if needed -->
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Verification meta to help with Safe Browsing (add your site verification if available) -->
@@ -2625,6 +2625,134 @@
       const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
       // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
       const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
+
+      // Parts tab variables (moved up to avoid initialization error)
+      const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
+      const sheetName = "MainSap";
+      const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+      const searchInput1 = document.getElementById("searchInput1");
+      const searchInput2 = document.getElementById("searchInput2");
+      const searchButton = document.getElementById("searchButton");
+      const tableBody = document.querySelector("#data-table tbody");
+      const pagination = document.getElementById("pagination");
+      const pageNumbers = document.getElementById("pageNumbers");
+      const itemsPerPageSelect = document.getElementById("itemsPerPage");
+      const firstPageButton = document.getElementById("firstPage");
+      const prevPageButton = document.getElementById("prevPage");
+      const nextPageButton = document.getElementById("nextPage");
+      const lastPageButton = document.getElementById("lastPage");
+      const errorContainer = document.getElementById("error-container");
+      const retryButton = document.getElementById("retry-button");
+      let allData = [];
+      let tempFilteredData = [];
+      let currentPage = 1;
+      let itemsPerPage = 10;
+      let currentFilteredData = [];
+
+      // Images tab variables (moved up)
+      const searchInputImages1 = document.getElementById("searchInputImages1");
+      const searchInputImages2 = document.getElementById("searchInputImages2");
+      const searchButtonImages = document.getElementById("searchButtonImages");
+      const galleryContainer = document.getElementById("gallery-container-images");
+      const paginationImages = document.getElementById("paginationImages");
+      const pageNumbersImages = document.getElementById("pageNumbersImages");
+      const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
+      const firstPageButtonImages = document.getElementById("firstPageImages");
+      const prevPageButtonImages = document.getElementById("prevPageImages");
+      const nextPageButtonImages = document.getElementById("nextPageImages");
+      const lastPageButtonImages = document.getElementById("lastPageImages");
+      const errorContainerImages = document.getElementById("error-container-images");
+      const retryButtonImages = document.getElementById("retry-button-images");
+      let allDataImages = [];
+      let tempFilteredDataImages = [];
+      let currentPageImages = 1;
+      let itemsPerPageImages = 10;
+      let currentFilteredDataImages = [];
+
+      // Today tab variables (moved up)
+      const modal = document.getElementById("detailModal");
+      const modalContent = document.getElementById("modalContent");
+      const closeModal = document.getElementById("closeModal");
+      const searchInputToday = document.getElementById("searchInputToday");
+      const tableBodyToday = document.querySelector("#data-table-today tbody");
+      const errorContainerToday = document.getElementById("error-container-today");
+      const retryButtonToday = document.getElementById("retry-button-today");
+      const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
+      // Pagination elements for today tab
+      const paginationToday = document.getElementById("paginationToday");
+      const pageNumbersToday = document.getElementById("pageNumbersToday");
+      const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
+      const firstPageButtonToday = document.getElementById("firstPageToday");
+      const prevPageButtonToday = document.getElementById("prevPageToday");
+      const nextPageButtonToday = document.getElementById("nextPageToday");
+      const lastPageButtonToday = document.getElementById("lastPageToday");
+      let allDataToday = [];
+      let currentFilteredDataToday = [];
+
+      // All tab variables (moved up)
+      const modalAll = document.getElementById("detailModalAll");
+      const modalContentAll = document.getElementById("modalContentAll");
+      const closeModalAll = document.getElementById("closeModalAll");
+      const searchInputAll = document.getElementById("searchInputAll");
+      const tableBodyAll = document.querySelector("#data-table-all tbody");
+      const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
+      const firstPageButtonAll = document.getElementById("firstPageAll");
+      const prevPageButtonAll = document.getElementById("prevPageAll");
+      const nextPageButtonAll = document.getElementById("nextPageAll");
+      const lastPageButtonAll = document.getElementById("lastPageAll");
+      const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
+      let allDataAll = [];
+      let currentPageAll = 1;
+      let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
+
+      // Pending calls tab variables (moved up)
+      const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
+      const sheetNamePending = 'Call_Report';
+      const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
+      const modalPending = document.getElementById("detailModalPending");
+      const modalContentPending = document.getElementById("modalContentPending");
+      const closeModalPending = document.getElementById("closeModalPending");
+      const teamFilterPending = document.getElementById("teamFilterPending");
+      const searchInputPending = document.getElementById("searchInputPending");
+      const searchButtonPending = document.getElementById("searchButtonPending");
+      const tableBodyPending = document.querySelector("#data-table-pending tbody");
+      const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
+      const firstPageButtonPending = document.getElementById("firstPagePending");
+      const prevPageButtonPending = document.getElementById("prevPagePending");
+      const nextPageButtonPending = document.getElementById("nextPagePending");
+      const lastPageButtonPending = document.getElementById("lastPagePending");
+      const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
+      let allDataPending = [];
+      let currentPagePending = 1;
+      let itemsPerPagePending = 20;
+      let sortConfigPending = { column: null, direction: 'asc' };
+
+      // Image Modal Handling for #parts (moved up)
+      const imageModal = document.getElementById('imageModal');
+      const imageModalContent = document.getElementById('imageModalContent');
+      const closeImageModal = document.getElementById('closeImageModal');
+      closeImageModal.onclick = () => {
+        imageModal.style.display = 'none';
+      };
+      window.onclick = (event) => {
+        if (event.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+      };
+
+      // Image Modal Handling for #images (moved up)
+      const imageModalImages = document.getElementById('imageModalImages');
+      const imageModalContentImages = document.getElementById('imageModalContentImages');
+      const closeImageModalImages = document.getElementById('closeImageModalImages');
+      closeImageModalImages.onclick = () => {
+        imageModalImages.style.display = 'none';
+      };
+      window.onclick = (event) => {
+        if (event.target === imageModalImages) {
+          imageModalImages.style.display = 'none';
+        }
+      };
+
       // Theme Management
       function setTheme(theme) {
         localStorage.setItem('theme', theme);
@@ -2657,6 +2785,7 @@
           }
         });
       }
+
       // Login System
       const loginModal = document.getElementById('loginModal');
       const appContent = document.getElementById('appContent');
@@ -2775,9 +2904,7 @@
           handleLogin();
         }
       });
-      // Initial check on load
-      loadTheme();
-      checkLoginStatus();
+
       function showTab(tabId) {
         const buttons = document.querySelectorAll(".tab-button");
         const contents = document.querySelectorAll(".tab-content");
@@ -2825,28 +2952,8 @@
           }
         });
       }
-      // Parts tab script (original)
-      const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
-      const sheetName = "MainSap";
-      const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
-      const searchInput1 = document.getElementById("searchInput1");
-      const searchInput2 = document.getElementById("searchInput2");
-      const searchButton = document.getElementById("searchButton");
-      const tableBody = document.querySelector("#data-table tbody");
-      const pagination = document.getElementById("pagination");
-      const pageNumbers = document.getElementById("pageNumbers");
-      const itemsPerPageSelect = document.getElementById("itemsPerPage");
-      const firstPageButton = document.getElementById("firstPage");
-      const prevPageButton = document.getElementById("prevPage");
-      const nextPageButton = document.getElementById("nextPage");
-      const lastPageButton = document.getElementById("lastPage");
-      const errorContainer = document.getElementById("error-container");
-      const retryButton = document.getElementById("retry-button");
-      let allData = [];
-      let tempFilteredData = [];
-      let currentPage = 1;
-      let itemsPerPage = 10;
-      let currentFilteredData = [];
+
+      // Parts tab functions (now after variables)
       itemsPerPageSelect.addEventListener("change", () => {
         itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
         currentPage = 1;
@@ -2857,18 +2964,6 @@
         errorContainer.style.display = "none";
         loadData();
       });
-      // Image Modal Handling for #parts
-      const imageModal = document.getElementById('imageModal');
-      const imageModalContent = document.getElementById('imageModalContent');
-      const closeImageModal = document.getElementById('closeImageModal');
-      closeImageModal.onclick = () => {
-        imageModal.style.display = 'none';
-      };
-      window.onclick = (event) => {
-        if (event.target === imageModal) {
-          imageModal.style.display = 'none';
-        }
-      };
       function showImageModal(row) {
         const fields = [
           { key: 'Material', label: 'Material' },
@@ -3757,8 +3852,12 @@
         console.log("Starting data load from:", url);
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000);
-          const response = await fetch(url, { signal: controller.signal });
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
+          const response = await fetch(url, {
+            signal: controller.signal,
+            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
+            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
+          });
           clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -3777,38 +3876,29 @@
           console.error("Error loading data:", error);
           document.getElementById("loading").style.display = "none";
           errorContainer.style.display = "block";
-          document.getElementById("error-message").textContent = error.message.includes("aborted")
-            ? "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่อ"
-            : `ไม่สามารถโหลดข้อมูลได้: ${error.message}`;
+          if (error.name === 'AbortError') {
+            document.getElementById("error-message").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
+          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
+            document.getElementById("error-message").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
+          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            document.getElementById("error-message").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
+          } else {
+            document.getElementById("error-message").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
+          }
           Swal.fire({
             icon: "error",
             title: "ไม่สามารถโหลดข้อมูล",
-            text: error.message.includes("aborted")
+            text: error.name === 'AbortError'
               ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
+              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
+              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
               : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
             confirmButtonText: "ตกลง",
           });
         }
       }
-      // Images tab script (updated for gallery)
-      const searchInputImages1 = document.getElementById("searchInputImages1");
-      const searchInputImages2 = document.getElementById("searchInputImages2");
-      const searchButtonImages = document.getElementById("searchButtonImages");
-      const galleryContainer = document.getElementById("gallery-container-images");
-      const paginationImages = document.getElementById("paginationImages");
-      const pageNumbersImages = document.getElementById("pageNumbersImages");
-      const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
-      const firstPageButtonImages = document.getElementById("firstPageImages");
-      const prevPageButtonImages = document.getElementById("prevPageImages");
-      const nextPageButtonImages = document.getElementById("nextPageImages");
-      const lastPageButtonImages = document.getElementById("lastPageImages");
-      const errorContainerImages = document.getElementById("error-container-images");
-      const retryButtonImages = document.getElementById("retry-button-images");
-      let allDataImages = [];
-      let tempFilteredDataImages = [];
-      let currentPageImages = 1;
-      let itemsPerPageImages = 10;
-      let currentFilteredDataImages = [];
+
+      // Images tab functions (now after variables)
       itemsPerPageSelectImages.addEventListener("change", () => {
         itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
         currentPageImages = 1;
@@ -3819,18 +3909,6 @@
         errorContainerImages.style.display = "none";
         loadImagesData();
       });
-      // Image Modal Handling for #images (unchanged)
-      const imageModalImages = document.getElementById('imageModalImages');
-      const imageModalContentImages = document.getElementById('imageModalContentImages');
-      const closeImageModalImages = document.getElementById('closeImageModalImages');
-      closeImageModalImages.onclick = () => {
-        imageModalImages.style.display = 'none';
-      };
-      window.onclick = (event) => {
-        if (event.target === imageModalImages) {
-          imageModalImages.style.display = 'none';
-        }
-      };
       function showImageModalImages(row) {
         const fields = [
           { key: 'Material', label: 'Material' },
@@ -4049,8 +4127,12 @@
         console.log("Starting data load for images from:", url);
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000);
-          const response = await fetch(url, { signal: controller.signal });
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
+          const response = await fetch(url, {
+            signal: controller.signal,
+            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
+            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
+          });
           clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -4069,38 +4151,29 @@
           console.error("Error loading images data:", error);
           document.getElementById("loading").style.display = "none";
           errorContainerImages.style.display = "block";
-          document.getElementById("error-message-images").textContent = error.message.includes("aborted")
-            ? "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่อ"
-            : `ไม่สามารถโหลดข้อมูลได้: ${error.message}`;
+          if (error.name === 'AbortError') {
+            document.getElementById("error-message-images").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
+          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
+            document.getElementById("error-message-images").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
+          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            document.getElementById("error-message-images").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
+          } else {
+            document.getElementById("error-message-images").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
+          }
           Swal.fire({
             icon: "error",
             title: "ไม่สามารถโหลดข้อมูล",
-            text: error.message.includes("aborted")
+            text: error.name === 'AbortError'
               ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
+              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
+              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
               : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
             confirmButtonText: "ตกลง",
           });
         }
       }
-      // Today tab script (adjusted for Opensheet endpoint)
-      const modal = document.getElementById("detailModal");
-      const modalContent = document.getElementById("modalContent");
-      const closeModal = document.getElementById("closeModal");
-      const searchInputToday = document.getElementById("searchInputToday");
-      const tableBodyToday = document.querySelector("#data-table-today tbody");
-      const errorContainerToday = document.getElementById("error-container-today");
-      const retryButtonToday = document.getElementById("retry-button-today");
-      const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
-      // Pagination elements for today tab
-      const paginationToday = document.getElementById("paginationToday");
-      const pageNumbersToday = document.getElementById("pageNumbersToday");
-      const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
-      const firstPageButtonToday = document.getElementById("firstPageToday");
-      const prevPageButtonToday = document.getElementById("prevPageToday");
-      const nextPageButtonToday = document.getElementById("nextPageToday");
-      const lastPageButtonToday = document.getElementById("lastPageToday");
-      let allDataToday = [];
-      let currentFilteredDataToday = [];
+
+      // Today tab functions (now after variables)
       retryButtonToday.addEventListener("click", () => {
         errorContainerToday.style.display = "none";
         loadTodayData();
@@ -4396,8 +4469,12 @@
         console.log("Starting data load from Opensheet:", requestSheetUrl);
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000);
-          const response = await fetch(requestSheetUrl, { signal: controller.signal });
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
+          const response = await fetch(requestSheetUrl, {
+            signal: controller.signal,
+            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
+            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
+          });
           clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -4426,34 +4503,29 @@
           document.getElementById("loading").style.display = "none";
           document.getElementById("loadingToday").style.display = "none";
           errorContainerToday.style.display = "block";
-          document.getElementById("error-message-today").textContent = error.message.includes("aborted")
-            ? "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่อ"
-            : `ไม่สามารถโหลดข้อมูลได้: ${error.message}`;
+          if (error.name === 'AbortError') {
+            document.getElementById("error-message-today").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
+          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
+            document.getElementById("error-message-today").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
+          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            document.getElementById("error-message-today").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
+          } else {
+            document.getElementById("error-message-today").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
+          }
           Swal.fire({
             icon: "error",
             title: "ไม่สามารถโหลดข้อมูล",
-            text: error.message.includes("aborted")
+            text: error.name === 'AbortError'
               ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
+              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
+              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
               : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
             confirmButtonText: "ตกลง",
           });
         }
       }
-      // All tab script (adjusted for new GAS endpoint)
-      const modalAll = document.getElementById("detailModalAll");
-      const modalContentAll = document.getElementById("modalContentAll");
-      const closeModalAll = document.getElementById("closeModalAll");
-      const searchInputAll = document.getElementById("searchInputAll");
-      const tableBodyAll = document.querySelector("#data-table-all tbody");
-      const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
-      const firstPageButtonAll = document.getElementById("firstPageAll");
-      const prevPageButtonAll = document.getElementById("prevPageAll");
-      const nextPageButtonAll = document.getElementById("nextPageAll");
-      const lastPageButtonAll = document.getElementById("lastPageAll");
-      const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
-      let allDataAll = [];
-      let currentPageAll = 1;
-      let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
+
+      // All tab functions (now after variables)
       closeModalAll.onclick = () => modalAll.style.display = "none";
       window.onclick = event => {
         if (event.target == modalAll) modalAll.style.display = "none";
@@ -4568,27 +4640,8 @@
           tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
         }
       }
-      // Pending-calls tab script
-      const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
-      const sheetNamePending = 'Call_Report';
-      const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
-      const modalPending = document.getElementById("detailModalPending");
-      const modalContentPending = document.getElementById("modalContentPending");
-      const closeModalPending = document.getElementById("closeModalPending");
-      const teamFilterPending = document.getElementById("teamFilterPending");
-      const searchInputPending = document.getElementById("searchInputPending");
-      const searchButtonPending = document.getElementById("searchButtonPending");
-      const tableBodyPending = document.querySelector("#data-table-pending tbody");
-      const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
-      const firstPageButtonPending = document.getElementById("firstPagePending");
-      const prevPageButtonPending = document.getElementById("prevPagePending");
-      const nextPageButtonPending = document.getElementById("nextPagePending");
-      const lastPageButtonPending = document.getElementById("lastPagePending");
-      const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
-      let allDataPending = [];
-      let currentPagePending = 1;
-      let itemsPerPagePending = 20;
-      let sortConfigPending = { column: null, direction: 'asc' };
+
+      // Pending-calls tab functions (now after variables)
       closeModalPending.onclick = () => modalPending.style.display = "none";
       window.onclick = event => {
         if (event.target == modalPending) modalPending.style.display = "none";
@@ -4857,24 +4910,64 @@
         }).length / itemsPerPagePending);
         filterAndRenderTablePending();
       };
-      function loadPendingCallsData() {
-        fetch(urlPending)
-          .then(response => response.json())
-          .then(data => {
-            allDataPending = data;
-            populateTeamFilterPending(allDataPending);
-            addSortListenersPending();
-            filterAndRenderTablePending();
-          })
-          .catch(error => {
-            console.error("ไม่สามารถโหลดข้อมูลได้:", error);
-            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+      async function loadPendingCallsData() {
+        console.log("Starting data load for pending calls from:", urlPending);
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
+          const response = await fetch(urlPending, {
+            signal: controller.signal,
+            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
+            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
           });
+          clearTimeout(timeoutId);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Pending calls data loaded successfully:", data);
+          if (!Array.isArray(data) || data.length === 0) {
+            throw new Error("No data received or data is empty");
+          }
+          allDataPending = data;
+          populateTeamFilterPending(allDataPending);
+          addSortListenersPending();
+          filterAndRenderTablePending();
+        } catch (error) {
+          console.error("Error loading pending calls data:", error);
+          if (error.name === 'AbortError') {
+            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่</td></tr>';
+          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
+            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)</td></tr>';
+          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่</td></tr>';
+          } else {
+            tableBodyPending.innerHTML = `<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</td></tr>`;
+          }
+          Swal.fire({
+            icon: "error",
+            title: "ไม่สามารถโหลดข้อมูล",
+            text: error.name === 'AbortError'
+              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
+              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
+              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
+              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
+            confirmButtonText: "ตกลง",
+          });
+        }
       }
+
+      // Initial calls (now safe after all variables defined)
+      loadTheme();
+      checkLoginStatus();
       // Auto-load default data if logged in
       if (appContent.classList.contains('logged-in')) {
         loadData();
       }
+      // Add sort listeners for pending calls
+      document.addEventListener('DOMContentLoaded', () => {
+        addSortListenersPending();
+      });
     </script>
   </body>
 </html>
