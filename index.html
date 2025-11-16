@@ -67,9 +67,6 @@
       body.dark-mode .header h1 {
         color: #ecf0f1;
       }
-      body.dark-mode .user-name-small {
-        color: #ff6b9d;
-      }
       body.dark-mode .qrcode-header-btn {
         background: linear-gradient(135deg, #1abc9c, #16a085);
       }
@@ -360,7 +357,7 @@
       /* Adjusted Header for Top Navigation Bar - More Compact */
     .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     color: #ffffff; /* สีตัวอักษรขาว */
     padding: 5px 10px;
@@ -394,17 +391,6 @@
       }
       body.dark-mode .header-title {
         color: #ecf0f1;
-      }
-      .user-name-small {
-        font-size: 14px; /* ลด font-size */
-        color: #0b2752;
-        font-weight: bold;
-        text-align: right;
-        white-space: nowrap;
-        transition: color 0.3s ease;
-      }
-      body.dark-mode .user-name-small {
-        color: #ff6b9d;
       }
       /* Bottom Navigation Styles (Facebook Mobile-like) - More Compact */
       .bottom-nav {
@@ -564,7 +550,7 @@
         padding: 10px; /* ลด padding */
         padding-bottom: 70px; /* Space for bottom nav */
         background-color: #ffffff;
-        border-radius: 12px;
+        border-radius: 12px 12px 0 0;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         font-family: "Kanit", sans-serif;
         transition: background-color 0.3s ease, color 0.3s ease;
@@ -635,8 +621,8 @@
         color: white;
         text-align: center;
         padding: 8px 0; /* ลด padding */
-        margin-top: 15px; /* ลด margin */
-        border-radius: 10px;
+        margin-top: 0;
+        border-radius: 0 0 10px 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         transition: background 0.3s ease;
       }
@@ -1938,7 +1924,7 @@
         }
       }
       #pending-calls .pending-highlight-red {
-        color: red;
+        color: #d32f2f;
         font-weight: bold;
       }
       #pending-calls .pending-yellow-light {
@@ -2041,7 +2027,7 @@
     padding: 6px 10px; /* เพิ่ม padding เล็กน้อยจาก 4px 8px เพื่อให้มีพื้นที่หายใจมากขึ้น แต่ยัง compact */
     flex-wrap: wrap;
     overflow: visible; /* Allow overflow on small screens to prevent clipping */
-    justify-content: space-between;
+    justify-content: center;
   }
   .header-logo {
     height: 28px; /* ลดจาก 32px เล็กน้อยเพื่อสมดุลกับ font 16px */
@@ -2049,18 +2035,10 @@
   .header-title {
     font-size: 16px; /* เพิ่มจาก 14px เพื่อให้ชัดเจนและสมดุลกับโลโก้ */
     white-space: normal; /* Allow wrapping to prevent overflow */
-    text-align: left; /* Align left for better space usage */
+    text-align: center; /* Align left for better space usage */
     flex-grow: 1;
     flex-basis: 100%; /* Take full width on very small screens if needed */
     margin-bottom: 2px; /* ลดจาก 3px เพื่อ compact มากขึ้น */
-  }
-  .user-name-small {
-    font-size: 13px; /* เพิ่มจาก 12px เพื่อสมดุลกับ header-title แต่ยังเล็กพอสำหรับชื่อ */
-    white-space: nowrap;
-    margin-top: 4px;
-    max-width: 100%; /* เพิ่มจาก 100px เพื่อให้ชื่อแสดงได้ชัดกว่า */
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
         .bottom-nav {
@@ -2151,17 +2129,17 @@
      #parts .image-modal-content, #images .image-modal-content-images {
   background: linear-gradient(to bottom right, #ffffff, #f5f7fa);
   margin: 5% auto;
-  padding: 15px 15px 0px !important;  /* padding-bottom: 0 !important; เพื่อชิดล่างสุด */
+  padding: 15px 15px 0px !important; /* padding-bottom: 0 !important; เพื่อชิดล่างสุด */
   border-radius: 12px;
   width: 90%;
-  max-width: 800px;  /* เพิ่มจาก 800px ถ้าต้องการให้กว้างขึ้น */
+  max-width: 800px; /* เพิ่มจาก 800px ถ้าต้องการให้กว้างขึ้น */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   position: relative;
   transition: background 0.3s ease;
-  display: flex;  /* เพิ่ม: ใช้ flex เพื่อ layout ชิดล่าง */
-  flex-direction: column;  /* เพิ่ม: column layout */
+  display: flex; /* เพิ่ม: ใช้ flex เพื่อ layout ชิดล่าง */
+  flex-direction: column; /* เพิ่ม: column layout */
 }
      body.dark-mode #parts .image-modal-content, body.dark-mode #images .image-modal-content-images {
   background: linear-gradient(to bottom right, #2c3e50, #34495e);
@@ -2183,8 +2161,8 @@
       }
      #parts #imageModalContent, #images #imageModalContentImages {
   margin-top: 10px; /* ลด margin */
-  flex-grow: 1;  /* เพิ่ม: ให้ content ด้านบน grow แต่ไม่เกิน */
-  overflow-y: auto;  /* เพิ่ม: scroll เฉพาะ content ด้านบน ถ้าจำเป็น */
+  flex-grow: 1; /* เพิ่ม: ให้ content ด้านบน grow แต่ไม่เกิน */
+  overflow-y: auto; /* เพิ่ม: scroll เฉพาะ content ด้านบน ถ้าจำเป็น */
 }
       #parts #imageModalContent div, #images #imageModalContentImages div {
         padding: 8px 0; /* ลด padding */
@@ -2228,16 +2206,16 @@
       }
       #parts .drive-iframe, #images .drive-iframe-images {
   width: 100%;
-  height: 300px;  /* ถ้าต้องการเต็มล่าง ให้เปลี่ยนเป็น flex-grow: 1; หรือ calc(100% - height ด้านบน) */
+  height: 300px; /* ถ้าต้องการเต็มล่าง ให้เปลี่ยนเป็น flex-grow: 1; หรือ calc(100% - height ด้านบน) */
   border: none;
   border-radius: 8px;
-  margin: 0 !important;  /* !important เพื่อชิดติด */
-  margin-bottom: -8px !important;  /* เพิ่ม: ชดเชย border-radius + shadow ด้านล่าง */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  /* ลด shadow กระจายจาก 10px เป็น 5px เพื่อลดช่องว่าง illusion */
-  flex-shrink: 0;  /* เพิ่ม: ไม่ให้ iframe หดตัว */
+  margin: 0 !important; /* !important เพื่อชิดติด */
+  margin-bottom: -8px !important; /* เพิ่ม: ชดเชย border-radius + shadow ด้านล่าง */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ลด shadow กระจายจาก 10px เป็น 5px เพื่อลดช่องว่าง illusion */
+  flex-shrink: 0; /* เพิ่ม: ไม่ให้ iframe หดตัว */
 }
      body.dark-mode #parts .drive-iframe, body.dark-mode #images .drive-iframe-images {
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);  /* ลดใน dark mode ด้วย */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* ลดใน dark mode ด้วย */
 }
       /* Additional style for Material row in image modal to accommodate the requisition button */
       #parts #imageModalContent .material-row, #images #imageModalContentImages .material-row {
@@ -2354,6 +2332,84 @@
         padding: 3px 6px; /* ลด padding */
         font-size: 9px; /* ลด font-size */
       }
+      /* Gallery in Image Modal */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+body.dark-mode .image-gallery {
+  background: #2c3e50;
+}
+.gallery-thumbnail-modal {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+.gallery-thumbnail-modal:hover {
+  transform: scale(1.05);
+}
+body.dark-mode .gallery-thumbnail-modal {
+  border-color: #555;
+}
+/* Responsive for Mobile */
+@media (max-width: 768px) {
+  .image-gallery {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 5px;
+  }
+  .gallery-thumbnail-modal {
+    height: 150px;
+  }
+}
+.image-gallery-parts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+  body.dark-mode .image-gallery-parts {
+    background: #2c3e50;
+  }
+  .gallery-thumbnail-modal-parts {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 1px solid #e0e0e0;
+  }
+  .gallery-thumbnail-modal-parts:hover {
+    transform: scale(1.05);
+  }
+  body.dark-mode .gallery-thumbnail-modal-parts {
+    border-color: #555;
+  }
+  /* Responsive for Mobile */
+  @media (max-width: 768px) {
+    .image-gallery-parts {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 5px;
+    }
+    .gallery-thumbnail-modal-parts {
+      height: 150px;
+    }
+  }
+</style>
    </style>
   </head>
   <body class="light-mode">
@@ -2510,7 +2566,7 @@
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
             <!-- Toggle button for all data -->
-            <button id="toggleAllDataBtn" title="ประวัติเบิก"><i class="fas fa-list-ul"></i></button>
+            <button id="toggleAllDataBtn" title="รอเบิก"><i class="fas fa-clock"></i></button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
             <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -2714,6 +2770,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+      'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
       // Global employee data
       let employeeData = [];
       // Global search values for syncing between parts and images tabs
@@ -2834,22 +2891,12 @@
       closeImageModal.onclick = () => {
         imageModal.style.display = 'none';
       };
-      window.onclick = (event) => {
-        if (event.target === imageModal) {
-          imageModal.style.display = 'none';
-        }
-      };
       // Image Modal Handling for #images (moved up)
       const imageModalImages = document.getElementById('imageModalImages');
       const imageModalContentImages = document.getElementById('imageModalContentImages');
       const closeImageModalImages = document.getElementById('closeImageModalImages');
       closeImageModalImages.onclick = () => {
         imageModalImages.style.display = 'none';
-      };
-      window.onclick = (event) => {
-        if (event.target === imageModalImages) {
-          imageModalImages.style.display = 'none';
-        }
       };
       // Theme Management
       function setTheme(theme) {
@@ -2887,6 +2934,13 @@
         if (event.target == modal) closeModal.click();
         if (event.target == modalAll) closeModalAll.click();
         if (event.target == modalPending) closeModalPending.click();
+        // Image modals
+        if (event.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+        if (event.target === imageModalImages) {
+          imageModalImages.style.display = 'none';
+        }
       };
       // Login System
       const loginModal = document.getElementById('loginModal');
@@ -2962,33 +3016,33 @@
         }
       }
       function checkLoginStatus() {
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const savedUsername = localStorage.getItem('username');
-        if (isLoggedIn && savedUsername) {
-          loginModal.classList.remove('active');
-          appContent.classList.add('logged-in');
-          userNameSmall.textContent = localStorage.getItem('userName') || '';
-          // Auto-load default tab if needed
-          if (document.querySelector('.nav-btn.active')) {
-            showTab('parts');
-          }
-        } else {
-          loginModal.classList.add('active');
-          appContent.classList.remove('logged-in');
-          userNameSmall.textContent = '';
-          // Clear invalid session
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('username');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
-        }
-        // Load saved credentials if remember me was checked
-        if (localStorage.getItem('rememberMe') === 'true') {
-          const savedUsername = localStorage.getItem('savedUsername');
-          if (savedUsername) usernameInput.value = savedUsername;
-          rememberMeCheckbox.checked = true;
-        }
-      }
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const savedUsername = localStorage.getItem('username');
+  if (isLoggedIn && savedUsername) {
+    loginModal.classList.remove('active');
+    appContent.classList.add('logged-in');
+    // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
+    // Auto-load default tab if needed
+    if (document.querySelector('.nav-btn.active')) {
+      showTab('parts');
+    }
+  } else {
+    loginModal.classList.add('active');
+    appContent.classList.remove('logged-in');
+    // userNameSmall.textContent = ''; // Comment out or delete
+    // Clear invalid session
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
+  }
+  // Load saved credentials if remember me was checked
+  if (localStorage.getItem('rememberMe') === 'true') {
+    const savedUsername = localStorage.getItem('savedUsername');
+    if (savedUsername) usernameInput.value = savedUsername;
+    rememberMeCheckbox.checked = true;
+  }
+}
       function handleLogout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
@@ -3052,18 +3106,8 @@
           }
         });
       }
-      // Parts tab functions (now after variables)
-      itemsPerPageSelect.addEventListener("change", () => {
-        itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
-        currentPage = 1;
-        renderTableData();
-        renderPagination(allData.length);
-      });
-      retryButton.addEventListener("click", () => {
-        errorContainer.style.display = "none";
-        loadData();
-      });
-      function showImageModal(row) {
+      // Unified function for showing detail modal (shared event for both tabs)
+      function showDetailModal(row, modalId, contentId) {
         const fields = [
           { key: 'Material', label: 'Material' },
           { key: 'Description', label: 'Description' },
@@ -3085,7 +3129,7 @@
             }
           }
           if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
-            value = `<span style="color: red; font-weight: bold;">${value}</span>`;
+            value = `<span style="color: #d32f2f; font-weight: bold;">${value}</span>`;
           }
           if (field.key === 'Material') {
             // Special handling for Material row: add flex layout and requisition button
@@ -3102,21 +3146,62 @@
             html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
           }
         });
-        // Add iframe for Google Drive image using 'id' column
+        // Gallery for images (shared logic)
+        let imageGalleryHtml = '<div class="image-gallery-parts">';
+        let imageIds = [];
         if (row.id) {
-          html += `
-            <div style="margin-top: 20px;">
-              <strong>รูปภาพอะไหล่:</strong>
-              <iframe class="drive-iframe" src="https://drive.google.com/file/d/${row.id}/preview" allowfullscreen></iframe>
-            </div>
-          `;
-        } else {
-          html += '<div><span class="label">รูปภาพ:</span> <span class="value">ไม่พบข้อมูลรูปภาพ</span></div>';
+          if (typeof row.id === 'string' && row.id.includes(',')) {
+            imageIds = row.id.split(',').map(id => id.trim()).filter(id => id);
+          } else {
+            imageIds = [row.id];
+          }
+        } else if (row.UrlWeb) {
+          // Extract ID from Google Drive URL in parts tab
+          const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/);
+          if (match) {
+            imageIds = [match[1]];
+          }
         }
-        imageModalContent.innerHTML = html;
-        imageModal.style.display = 'block';
+        if (imageIds.length > 0) {
+          imageIds.forEach(id => {
+            const thumbnailSrc = `https://drive.google.com/thumbnail?id=${id}&sz=w400-h400`;
+            imageGalleryHtml += `
+              <img src="${thumbnailSrc}"
+                   alt="Thumbnail"
+                   class="gallery-thumbnail-modal-parts"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                   style="display: block;">
+              <div style="text-align: center; font-size: 12px; color: #666; margin-top: 4px; display: none;">ไม่พบรูปภาพ</div>
+            `;
+          });
+        } else {
+          imageGalleryHtml += '<p style="text-align: center; color: #999; grid-column: 1 / -1;">ไม่พบข้อมูลรูปภาพ</p>';
+        }
+        imageGalleryHtml += '</div>';
+        html = imageGalleryHtml + html; // Gallery first, then fields
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(contentId);
+        content.innerHTML = html;
+        modal.style.display = 'block';
       }
-      function renderTable(data) {
+      // Event listener for lightbox close on ESC key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
+          closeLightbox();
+        }
+      });
+      // Parts tab functions (now after variables)
+      itemsPerPageSelect.addEventListener("change", () => {
+        itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
+        currentPage = 1;
+        renderTableData();
+        renderPagination(allData.length);
+      });
+      retryButton.addEventListener("click", () => {
+        errorContainer.style.display = "none";
+        loadData();
+      });
+     function renderTable(data) {
         if (!tableBody) {
           console.error("Table body for #data-table not found");
           Swal.fire({
@@ -3174,7 +3259,7 @@
               }
             }
             if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
-              td.style.color = "red";
+              td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
             }
             // Apply conditional styling to Material, Description, วิภาวดี, and Unrestricted
@@ -3192,7 +3277,7 @@
               const imageBtn = document.createElement("button");
               imageBtn.innerHTML = '<i class="fas fa-image"></i>';
               imageBtn.className = "image-button";
-              imageBtn.onclick = () => showImageModal(row); // Use row.id for iframe
+              imageBtn.onclick = () => showDetailModal(row, 'imageModal', 'imageModalContent'); // Use unified function
               td.appendChild(imageBtn);
             } else {
               td.textContent = value;
@@ -3905,16 +3990,12 @@
         // เคลียร์ช่องค้นหาแท็บอะไหล่
         searchInput1.value = "";
         searchInput2.value = "";
-
         // เคลียร์ตัวแปร global ของฝั่งอะไหล่
         globalSearch1 = "";
         globalSearch2 = "";
-
         // คำนวณใหม่ (จะแสดงข้อมูลทั้งหมดเพราะช่องว่าง)
         triggerFadeAndFilter(tableContainerParts, applyFilters);
       });
-
-
       searchInput1.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           applyFilters();
@@ -4015,59 +4096,6 @@
         errorContainerImages.style.display = "none";
         loadImagesData();
       });
-      function showImageModalImages(row) {
-        const fields = [
-          { key: 'Material', label: 'Material' },
-          { key: 'Description', label: 'Description' },
-          { key: 'วิภาวดี', label: 'วิภาวดี' },
-          { key: 'Unrestricted', label: 'นวนคร' },
-          { key: 'Rebuilt', label: 'Rebuilt' },
-          { key: 'หมายเหตุ', label: 'หมายเหตุ' },
-          { key: 'Product', label: 'Product' },
-          { key: 'OCRTAXT', label: 'Spec' }
-        ];
-        let html = '';
-        fields.forEach(field => {
-          let value = row[field.key] || '';
-          if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
-            if (value && !isNaN(value)) {
-              value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
-            } else if (value === '0' || value === 0) {
-              value = '';
-            }
-          }
-          if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
-            value = `<span style="color: red; font-weight: bold;">${value}</span>`;
-          }
-          if (field.key === 'Material') {
-            // Special handling for Material row: add flex layout and requisition button
-            html += `
-              <div class="material-row">
-                <span class="label">${field.label}:</span>
-                <div style="display: flex; align-items: center; flex-grow: 1;">
-                  <span class="value">${value}</span>
-                  <button class="requisition-button-images" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">เบิก</button>
-                </div>
-              </div>
-            `;
-          } else {
-            html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
-          }
-        });
-        // Add iframe for Google Drive image using 'id' column
-        if (row.id) {
-          html += `
-            <div style="margin-top: 20px;">
-              <strong>รูปภาพอะไหล่:</strong>
-              <iframe class="drive-iframe-images" src="https://drive.google.com/file/d/${row.id}/preview" allowfullscreen></iframe>
-            </div>
-          `;
-        } else {
-          html += '<div><span class="label">รูปภาพ:</span> <span class="value">ไม่พบข้อมูลรูปภาพ</span></div>';
-        }
-        imageModalContentImages.innerHTML = html;
-        imageModalImages.style.display = 'block';
-      }
       // Updated render function for gallery
       function renderGalleryDataImages(data) {
         if (!galleryContainer) {
@@ -4101,7 +4129,7 @@
           galleryItem.innerHTML = `
             <img src="${thumbnailSrc}" alt="${row.Description || 'Image'}" class="gallery-thumbnail"
               style="color: ${textColor}; font-weight: ${fontWeight};"
-              onclick="showImageModalImages(${JSON.stringify(row).replace(/"/g, '&quot;')})"
+              onclick="showDetailModal(${JSON.stringify(row).replace(/"/g, '&quot;')}, 'imageModalImages', 'imageModalContentImages')" // Use unified function
               onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='; this.onclick=null;">
             <div class="gallery-info">
               <div class="gallery-material" style="color: ${textColor}; font-weight: ${fontWeight};">${row.Material || ''}</div>
@@ -4187,19 +4215,15 @@ searchButtonImages.addEventListener("click", () => {
   // เคลียร์ช่องค้นหาแท็บรูปภาพ
   searchInputImages1.value = "";
   searchInputImages2.value = "";
-
   // เคลียร์ค่าที่ sync ไปแท็บอะไหล่ด้วย (ให้สองแท็บตรงกัน)
   searchInput1.value = "";
   searchInput2.value = "";
-
   // เคลียร์ตัวแปร global
   globalSearch1 = "";
   globalSearch2 = "";
-
   // เรียก filter อีกรอบ (จะกลายเป็นแสดงข้อมูลทั้งหมด เพราะช่องค้นหาว่าง)
   triggerFadeAndFilter(galleryContainer, applyFiltersImages);
 });
-
       searchInputImages1.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           applyFiltersImages();
@@ -4306,11 +4330,11 @@ searchButtonImages.addEventListener("click", () => {
       toggleAllDataBtn.addEventListener('click', () => {
         pendingOnly = !pendingOnly;
         if (pendingOnly) {
-          toggleAllDataBtn.innerHTML = '<i class="fas fa-list-ul"></i>';
-          toggleAllDataBtn.title = 'ประวัติเบิก';
-        } else {
           toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
           toggleAllDataBtn.title = 'รอเบิก';
+        } else {
+          toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
+          toggleAllDataBtn.title = 'ประวัติเบิก';
         }
         currentPageToday = 1; // Reset page on toggle
         updateTableToday();
@@ -4423,7 +4447,6 @@ searchButtonImages.addEventListener("click", () => {
           container.classList.remove("fade-out");
         }, 200);
       }
-
       function filterByStatus(data) {
         let filtered = data;
         if (pendingOnly) {
@@ -4494,19 +4517,19 @@ searchButtonImages.addEventListener("click", () => {
               }
             }
             if (col === "remark" && value) {
-              td.style.color = "red";
+              td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
             }
             if (col === "material" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "red";
+              td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
             }
             if (col === "description" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "red";
+              td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
             }
             if (col === "Timestamp" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "red";
+              td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
             }
             if (col === "vibhavadi" && value) {
@@ -4540,7 +4563,7 @@ searchButtonImages.addEventListener("click", () => {
                 }
                 const value = row[col] || "";
                 const valueHtml = col === "remark" && value
-                  ? `<span class='value' style='color:red'>${value}</span>`
+                  ? `<span class='value' style='color:#d32f2f'>${value}</span>`
                   : `<span class='value'>${value}</span>`;
                 return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
               })
@@ -5072,6 +5095,10 @@ searchButtonImages.addEventListener("click", () => {
           });
         }
       }
+      // Add sort listeners for pending calls
+      document.addEventListener('DOMContentLoaded', () => {
+        addSortListenersPending();
+      });
       // Initial calls (now safe after all variables defined)
       loadTheme();
       checkLoginStatus();
@@ -5079,10 +5106,6 @@ searchButtonImages.addEventListener("click", () => {
       if (appContent.classList.contains('logged-in')) {
         loadData();
       }
-      // Add sort listeners for pending calls
-      document.addEventListener('DOMContentLoaded', () => {
-        addSortListenersPending();
-      });
     </script>
   </body>
 </html>
