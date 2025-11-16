@@ -2485,6 +2485,26 @@ body.dark-mode #toggleAllDataBtn {
 body.dark-mode #toggleAllDataBtn:hover {
   background: linear-gradient(135deg, #16a085, #1abc9c);
 }
+      .new-footer {
+  position: fixed;
+  bottom: 50px; /* ขึ้นเหนือ bottom-nav */
+  left: 0;
+  width: 100%;
+  background: #0d47a1;
+  color: #fff;
+  text-align: center;
+  padding: 5px 6px;
+  font-size: 8px;
+  z-index: 998;
+  line-height: 1.2;
+  border-top: 1px solid #08306b;
+}
+
+body.dark-mode .new-footer {
+  background: #2c3e50;
+  border-top-color: #1abc9c;
+  color: #ecf0f1;
+}
    </style>
   </head>
   <body class="light-mode">
@@ -2828,6 +2848,12 @@ body.dark-mode #toggleAllDataBtn:hover {
           </div>
           <button class="modal-qr-btn" onclick="showQRCode()" title="QR Code"><i class="fas fa-qrcode"></i></button>
           <button class="modal-logout-btn" onclick="handleLogout()" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
+          <div style="margin-top: 12px; padding: 8px; background: #e8f4fc; border-radius: 6px; font-size: 11px; color: #0d4a75; text-align: center;">
+    <p>⚠️ ระบบนี้สำหรับคลังสินค้าวิภาวดี 62 เท่านั้น</p>
+    <p>ข้อมูลถูกส่งไปยัง Google Sheet อย่างปลอดภัย</p>
+    <p>หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62</p>
+    <p style="margin-top: 8px; font-weight: bold; color: #1a3c87;">© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
+  </div>
         </div>
       </div>
       <!-- Bottom Navigation (Removed Setting Button) -->
@@ -2836,10 +2862,6 @@ body.dark-mode #toggleAllDataBtn:hover {
         <button class="nav-btn" id="nav-images" data-tab="images" onclick="showTab('images')" data-label="รูปภาพ"><i class="fas fa-images"></i></button>
         <button class="nav-btn" id="nav-today" data-tab="today" onclick="showTab('today')" data-label="เบิกวันนี้"><i class="fas fa-calendar-day"></i></button>
         <button class="nav-btn" id="nav-pending" data-tab="pending-calls" onclick="showTab('pending-calls')" data-label="Call"><i class="fas fa-phone"></i></button>
-      </div>
-      <div class="footer">
-        <p>⚠️ ระบบนี้สำหรับคลังสินค้าวิภาวดี 62 เท่านั้น | ข้อมูลถูกส่งไปยัง Google Sheet อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62</p>
-        <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
