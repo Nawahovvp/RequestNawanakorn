@@ -2849,9 +2849,6 @@ body.dark-mode .new-footer {
           <button class="modal-qr-btn" onclick="showQRCode()" title="QR Code"><i class="fas fa-qrcode"></i></button>
           <button class="modal-logout-btn" onclick="handleLogout()" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
           <div style="margin-top: 12px; padding: 8px; background: #e8f4fc; border-radius: 6px; font-size: 11px; color: #0d4a75; text-align: center;">
-    <p>⚠️ ระบบนี้สำหรับคลังสินค้าวิภาวดี 62 เท่านั้น</p>
-    <p>ข้อมูลถูกส่งไปยัง Google Sheet อย่างปลอดภัย</p>
-    <p>หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62</p>
     <p style="margin-top: 8px; font-weight: bold; color: #1a3c87;">© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
   </div>
         </div>
@@ -3384,120 +3381,539 @@ body.dark-mode .new-footer {
         });
       }
       async function showRequisitionDialog(row) {
-        document.body.style.overflow = 'hidden';
-        const history = {
-          employeeCode: getFromLocalStorage('employeeCode'),
-          team: getFromLocalStorage('team'),
-          contact: getFromLocalStorage('contact'),
-          callNumber: getFromLocalStorage('callNumber'),
-          callType: getFromLocalStorage('callType'),
-        };
-        if (employeeData.length === 0) {
-          employeeData = await loadEmployeeData();
+  document.body.style.overflow = 'hidden';
+  const history = {
+    employeeCode: getFromLocalStorage('employeeCode'),
+    team: getFromLocalStorage('team'),
+    contact: getFromLocalStorage('contact'),
+    callNumber: getFromLocalStorage('callNumber'),
+    callType: getFromLocalStorage('callType'),
+  };
+  if (employeeData.length === 0) {
+    employeeData = await loadEmployeeData();
+  }
+
+  // ตัวแปร selectedCallType ย้ายมาอยู่นอก didOpen เพื่อให้ preConfirm เข้าถึงได้
+  let selectedCallType = '';
+
+  Swal.fire({
+    title: '📋 เบิกอะไหล่นวนคร',
+    html: `
+      <style>
+        .autocomplete-items {
+          position: absolute;
+          border: 1px solid #ccc;
+          border-top: none;
+          z-index: 9999;
+          background-color: white;
+          width: 100%;
+          max-height: 120px;
+          overflow-y: auto;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          margin-top: 2px;
+          border-radius: 6px;
         }
+        .autocomplete-item {
+          padding: 6px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        .autocomplete-item:hover {
+          background-color: #f1f1f1;
+        }
+        .swal2-label {
+          text-align: left !important;
+          display: block !important;
+          margin: 8px 0 4px !important;
+          font-weight: bold !important;
+          width: 100% !important;
+        }
+        .swal2-input, .swal2-select {
+          width: 100% !important;
+          margin: 4px 0 !important;
+          padding: 6px !important;
+          box-sizing: border-box !important;
+          font-size: 14px !important;
+          height: 36px !important;
+        }
+        .error-message {
+          color: red !important;
+          font-size: 12px !important;
+          margin-top: 2px !important;
+          display: block !important;
+          text-align: left !important;
+        }
+        .invalid-input {
+          border: 2px solid red !important;
+          box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
+        }
+        #swal-employee-name-display, #swal-team-display {
+          color: #4caf50 !important;
+          font-weight: bold !important;
+          margin: 4px 0 !important;
+          padding: 4px !important;
+          background: #e8f5e8 !important;
+          border-radius: 4px !important;
+          text-align: left !important;
+        }
+        /* Canva-like Call Type buttons */
+        .call-type-container {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin: 4px 0;
+          justify-content: center;
+        }
+        .call-type-btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 25px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          color: white;
+          min-width: 60px;
+          text-align: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .call-type-btn:not(.selected) {
+          background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+          color: #666;
+        }
+        .call-type-btn.selected {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+          transform: translateY(-1px);
+        }
+        .call-type-btn:hover:not(.selected) {
+          background: linear-gradient(135deg, #d0d0d0, #e5e5e5);
+          transform: translateY(-1px);
+        }
+        body.dark-mode .call-type-btn:not(.selected) {
+          background: linear-gradient(135deg, #555, #666);
+          color: #ccc;
+        }
+        body.dark-mode .call-type-btn.selected {
+          background: linear-gradient(135deg, #1abc9c, #16a085);
+          box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+        }
+        body.dark-mode .call-type-btn:hover:not(.selected) {
+          background: linear-gradient(135deg, #444, #555);
+          transform: translateY(-1px);
+        }
+      </style>
+      <div class="swal2-label">📦 Material: ${row.Material || ''}</div>
+      <div class="swal2-label">📝 Description: ${row.Description || ''}</div>
+      <label class="swal2-label">🔢 จำนวน</label>
+      <input id="swal-quantity" class="swal2-input" type="number" value="1" min="1">
+      <span id="swal-quantity-error" class="error-message"></span>
+      <label class="swal2-label">🆔 รหัสพนักงาน</label>
+      <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
+      <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
+      <span id="swal-employee-code-error" class="error-message"></span>
+      <label class="swal2-label">👤 ชื่อพนักงาน</label>
+      <div id="swal-employee-name-display"></div>
+      <label class="swal2-label">👥 ทีม</label>
+      <div id="swal-team-display"></div>
+      <label class="swal2-label">📞 เบอร์ติดต่อ</label>
+      <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
+      <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
+      <span id="swal-contact-error" class="error-message"></span>
+      <label class="swal2-label">📄 เลขที่ Call</label>
+      <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
+      <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
+      <span id="swal-call-number-error" class="error-message"></span>
+      <label class="swal2-label">🗳️ Call Type</label>
+      <div id="call-type-container" class="call-type-container">
+        <button class="call-type-btn" data-value="I">I</button>
+        <button class="call-type-btn" data-value="P">P</button>
+        <button class="call-type-btn" data-value="Q">Q</button>
+        <button class="call-type-btn" data-value="R">R</button>
+      </div>
+      <span id="swal-call-type-error" class="error-message"></span>
+      <label class="swal2-label">🗒️ หมายเหตุ</label>
+      <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ">
+      <span id="swal-remark-error" class="error-message"></span>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      // Force high z-index and ensure backdrop covers full screen
+      const swalContainer = document.querySelector('.swal2-container');
+      if (swalContainer) {
+        swalContainer.style.zIndex = '99998';
+        swalContainer.style.position = 'fixed';
+        swalContainer.style.top = '0';
+        swalContainer.style.left = '0';
+        swalContainer.style.width = '100vw';
+        swalContainer.style.height = '100vh';
+        swalContainer.style.display = 'flex';
+        swalContainer.style.justifyContent = 'center';
+        swalContainer.style.alignItems = 'center';
+      }
+      const swalBackdrop = document.querySelector('.swal2-backdrop');
+      if (swalBackdrop) {
+        swalBackdrop.style.zIndex = '99997';
+        swalBackdrop.style.position = 'fixed';
+        swalBackdrop.style.top = '0';
+        swalBackdrop.style.left = '0';
+        swalBackdrop.style.width = '100vw';
+        swalBackdrop.style.height = '100vh';
+        swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        swalBackdrop.style.backdropFilter = 'blur(8px)';
+      }
+      const swalPopup = document.querySelector('.swal2-popup');
+      if (swalPopup) {
+        swalPopup.style.zIndex = '99999';
+        swalPopup.style.position = 'relative';
+        swalPopup.style.margin = '0';
+        swalPopup.style.transform = 'none';
+        swalPopup.style.maxHeight = '90vh';
+        swalPopup.style.overflowY = 'auto';
+        swalPopup.style.width = 'auto';
+        swalPopup.style.maxWidth = '90vw';
+        if (window.innerWidth <= 768) {
+          swalPopup.style.width = '95vw';
+          swalPopup.style.padding = '15px';
+        }
+      }
+      const quantityInput = document.getElementById('swal-quantity');
+      const employeeCodeInput = document.getElementById('swal-employee-code');
+      const contactInput = document.getElementById('swal-contact');
+      const callNumberInput = document.getElementById('swal-call-number');
+      const remarkInput = document.getElementById('swal-remark');
+      const confirmButton = document.querySelector('.swal2-confirm');
+      confirmButton.disabled = true;
+
+      // Handle Call Type button selection (Canva-like) - ใช้ selectedCallType จาก outer scope
+      const callTypeButtons = document.querySelectorAll('.call-type-btn');
+      callTypeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          callTypeButtons.forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedCallType = btn.dataset.value;  // อัพเดทตัวแปรจาก outer scope
+          console.log('Selected Call Type:', selectedCallType);  // Debug: ดูใน console
+          validateInputs();
+        });
+      });
+
+      function setupAutocomplete(input, key, containerId) {
+        input.addEventListener('input', () => {
+          const container = document.getElementById(containerId);
+          const val = input.value.toLowerCase();
+          const items = getFromLocalStorage(key).filter(item => item.toLowerCase().includes(val));
+          container.innerHTML = '';
+          items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.textContent = item;
+            div.onclick = () => {
+              input.value = item;
+              container.style.display = 'none';
+              validateInputs();
+            };
+            container.appendChild(div);
+          });
+          container.style.display = items.length ? 'block' : 'none';
+        });
+        input.addEventListener('blur', () => {
+          setTimeout(() => {
+            const container = document.getElementById(containerId);
+            container.style.display = 'none';
+          }, 200);
+        });
+      }
+      setupAutocomplete(contactInput, 'contact', 'contact-history');
+      setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
+
+      const lastContact = getFromLocalStorage('contact')[0];
+      if (lastContact) contactInput.value = lastContact;
+
+      const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput];
+      function validateInputs() {
+        const errors = {
+          quantityError: document.getElementById('swal-quantity-error'),
+          employeeCodeError: document.getElementById('swal-employee-code-error'),
+          contactError: document.getElementById('swal-contact-error'),
+          callNumberError: document.getElementById('swal-call-number-error'),
+          callTypeError: document.getElementById('swal-call-type-error'),
+          remarkError: document.getElementById('swal-remark-error')
+        };
+        inputs.forEach(input => input.classList.remove('invalid-input'));
+        Object.values(errors).forEach(el => el.textContent = '');
+        let isValid = true;
+        if (!quantityInput.value || quantityInput.value < 1) {
+          errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
+          quantityInput.classList.add('invalid-input');
+          isValid = false;
+        }
+        const employeeCode = employeeCodeInput.value.trim();
+        if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
+          errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
+          employeeCodeInput.classList.add('invalid-input');
+          document.getElementById('swal-employee-name-display').textContent = '';
+          document.getElementById('swal-team-display').textContent = '';
+          isValid = false;
+        } else {
+          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+          if (!employee || !employee.Name) {
+            errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
+            employeeCodeInput.classList.add('invalid-input');
+            document.getElementById('swal-employee-name-display').textContent = '';
+            document.getElementById('swal-team-display').textContent = '';
+            isValid = false;
+          } else {
+            document.getElementById('swal-employee-name-display').textContent = `${employee.Name}`;
+            document.getElementById('swal-team-display').textContent = `${employee.หน่วยงาน || ''}`;
+            errors.employeeCodeError.textContent = '';
+          }
+        }
+        if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
+          errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
+          contactInput.classList.add('invalid-input');
+          isValid = false;
+        }
+        const hasRemark = remarkInput.value.trim().length > 0;
+        if (!hasRemark) {
+          if (!callNumberInput.value) {
+            errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
+            callNumberInput.classList.add('invalid-input');
+            isValid = false;
+          } else if (
+            (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
+            (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
+          ) {
+            errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
+            callNumberInput.classList.add('invalid-input');
+            isValid = false;
+          }
+          if (!selectedCallType) {
+            errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
+            isValid = false;
+          }
+        }
+        confirmButton.disabled = !isValid;
+      }
+      quantityInput.addEventListener('input', validateInputs);
+      employeeCodeInput.addEventListener('input', validateInputs);
+      contactInput.addEventListener('input', validateInputs);
+      callNumberInput.addEventListener('input', validateInputs);
+      remarkInput.addEventListener('input', validateInputs);
+      validateInputs();
+      quantityInput.focus();
+    },
+    didClose: () => {
+      document.body.style.overflow = 'auto';
+    },
+    preConfirm: () => {
+      const quantityInput = document.getElementById('swal-quantity');
+      const employeeCodeInput = document.getElementById('swal-employee-code');
+      const contactInput = document.getElementById('swal-contact');
+      const callNumberInput = document.getElementById('swal-call-number');
+      const remarkInput = document.getElementById('swal-remark');
+      const errors = {
+        quantityError: document.getElementById('swal-quantity-error'),
+        employeeCodeError: document.getElementById('swal-employee-code-error'),
+        contactError: document.getElementById('swal-contact-error'),
+        callNumberError: document.getElementById('swal-call-number-error'),
+        callTypeError: document.getElementById('swal-call-type-error'),
+        remarkError: document.getElementById('swal-remark-error')
+      };
+      [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput].forEach(input => {
+        input.classList.remove('invalid-input');
+      });
+      Object.values(errors).forEach(el => el.textContent = '');
+      let isValid = true;
+      if (!quantityInput.value || quantityInput.value < 1) {
+        errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
+        quantityInput.classList.add('invalid-input');
+        isValid = false;
+      }
+      const employeeCode = employeeCodeInput.value.trim();
+      if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
+        errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
+        employeeCodeInput.classList.add('invalid-input');
+        isValid = false;
+      } else {
+        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+        if (!employee || !employee.Name) {
+          errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
+          employeeCodeInput.classList.add('invalid-input');
+          isValid = false;
+        }
+      }
+      if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
+        errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
+        contactInput.classList.add('invalid-input');
+        isValid = false;
+      }
+      const hasRemark = remarkInput.value.trim().length > 0;
+      if (!hasRemark) {
+        if (!callNumberInput.value) {
+          errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
+          callNumberInput.classList.add('invalid-input');
+          isValid = false;
+        } else if (
+          (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
+          (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
+        ) {
+          errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
+          callNumberInput.classList.add('invalid-input');
+          isValid = false;
+        }
+        if (!selectedCallType) {  // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
+          errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
+          isValid = false;
+        }
+      }
+      if (isValid) {
+        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+        saveToLocalStorage('employeeCode', employeeCode);
+        saveToLocalStorage('contact', contactInput.value);
+        if (callNumberInput.value) {
+          saveToLocalStorage('callNumber', callNumberInput.value);
+        }
+        if (selectedCallType) {
+          saveToLocalStorage('callType', selectedCallType);
+        }
+        console.log('Final Call Type:', selectedCallType);  // Debug: ดูว่าส่งไปถูกไหม
+        return {
+          quantity: quantityInput.value,
+          employeeCode: employeeCode,
+          employeeName: employee ? employee.Name : '',
+          team: employee ? (employee.หน่วยงาน || '') : '',
+          contact: contactInput.value,
+          callNumber: callNumberInput.value,
+          callType: selectedCallType,
+          remark: remarkInput.value
+        };
+      }
+      return false;
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const formValues = result.value;
+      const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+      const quantity = parseFloat(formValues.quantity) || 0;
+      // เช็คเงื่อนไขเตือน
+      if (quantity <= vibhavadiValue) {
+        await Swal.fire({
+          icon: 'warning',
+          title: '⚠️ คำเตือน',
+          text: `ที่คลังวิภาวดีมีอะไหล่ ${vibhavadiValue.toLocaleString()} ชิ้น (จำนวนที่เบิก ${quantity} ชิ้น)`,
+          confirmButtonText: 'ยืนยันดำเนินการต่อ',
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        });
+      }
+      // Popup สรุปข้อมูล
+      let imageHtml = '';
+      if (row.UrlWeb && row.UrlWeb.trim()) {
+        imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
+      }
+      const summaryResult = await Swal.fire({
+        title: 'สรุปข้อมูลการเบิก',
+        html: `
+          ${imageHtml}
+          <div style="text-align: left; font-size: 14px;">
+            <p><strong>Material:</strong> ${row.Material || ''}</p>
+            <p><strong>Description:</strong> ${row.Description || ''}</p>
+            <p><strong>จำนวน:</strong> ${formValues.quantity}</p>
+            <p><strong>รหัสพนักงาน:</strong> ${formValues.employeeCode}</p>
+            <p><strong>ชื่อพนักงาน:</strong> ${formValues.employeeName}</p>
+            <p><strong>ทีม:</strong> ${formValues.team}</p>
+            <p><strong>เบอร์ติดต่อ:</strong> ${formValues.contact}</p>
+            <p><strong>เลขที่ Call:</strong> ${formValues.callNumber || 'ไม่มี'}</p>
+            <p><strong>Call Type:</strong> ${formValues.callType || 'ไม่มี'}</p>
+            <p><strong>หมายเหตุ:</strong> ${formValues.remark || 'ไม่มี'}</p>
+            <hr style="margin: 10px 0;">
+          </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันการเบิก',
+        cancelButtonText: 'แก้ไข',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          title: 'dark-blue-title'
+        },
+        didOpen: () => {
+          // Ensure full blur backdrop for summary popup
+          const swalContainer = document.querySelector('.swal2-container');
+          if (swalContainer) {
+            swalContainer.style.zIndex = '99998';
+            swalContainer.style.position = 'fixed';
+            swalContainer.style.top = '0';
+            swalContainer.style.left = '0';
+            swalContainer.style.width = '100vw';
+            swalContainer.style.height = '100vh';
+            swalContainer.style.display = 'flex';
+            swalContainer.style.justifyContent = 'center';
+            swalContainer.style.alignItems = 'center';
+          }
+          const swalBackdrop = document.querySelector('.swal2-backdrop');
+          if (swalBackdrop) {
+            swalBackdrop.style.zIndex = '99997';
+            swalBackdrop.style.position = 'fixed';
+            swalBackdrop.style.top = '0';
+            swalBackdrop.style.left = '0';
+            swalBackdrop.style.width = '100vw';
+            swalBackdrop.style.height = '100vh';
+            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            swalBackdrop.style.backdropFilter = 'blur(8px)';
+          }
+          const swalPopup = document.querySelector('.swal2-popup');
+          if (swalPopup) {
+            swalPopup.style.zIndex = '99999';
+            swalPopup.style.position = 'relative';
+            swalPopup.style.margin = '0';
+            swalPopup.style.transform = 'none';
+            swalPopup.style.maxHeight = '90vh';
+            swalPopup.style.overflowY = 'auto';
+            swalPopup.style.width = 'auto';
+            swalPopup.style.maxWidth = '90vw';
+            if (window.innerWidth <= 768) {
+              swalPopup.style.width = '95vw';
+              swalPopup.style.padding = '15px';
+            }
+          }
+        }
+      });
+      if (summaryResult.isConfirmed) {
+        // สร้าง JSON payload
+        const jsonPayload = {
+          material: row.Material || '',
+          description: row.Description || '',
+          quantity: parseInt(formValues.quantity),
+          contact: formValues.contact,
+          employeeCode: formValues.employeeCode,
+          team: formValues.team,
+          employeeName: formValues.employeeName,
+          callNumber: formValues.callNumber || '',
+          callType: formValues.callType || '',
+          remark: formValues.remark || '',
+          vibhavadi: vibhavadiValue.toString()
+        };
+        // แสดง loading
         Swal.fire({
-          title: '📋 เบิกอะไหล่นวนคร',
+          title: 'กำลังบันทึกข้อมูล...',
           html: `
-            <style>
-              .autocomplete-items {
-                position: absolute;
-                border: 1px solid #ccc;
-                border-top: none;
-                z-index: 9999;
-                background-color: white;
-                width: 100%;
-                max-height: 120px;
-                overflow-y: auto;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                margin-top: 2px;
-                border-radius: 6px;
-              }
-              .autocomplete-item {
-                padding: 6px;
-                cursor: pointer;
-                font-size: 14px;
-              }
-              .autocomplete-item:hover {
-                background-color: #f1f1f1;
-              }
-              .swal2-label {
-                text-align: left !important;
-                display: block !important;
-                margin: 8px 0 4px !important;
-                font-weight: bold !important;
-                width: 100% !important;
-              }
-              .swal2-input, .swal2-select {
-                width: 100% !important;
-                margin: 4px 0 !important;
-                padding: 6px !important;
-                box-sizing: border-box !important;
-                font-size: 14px !important;
-                height: 36px !important;
-              }
-              .error-message {
-                color: red !important;
-                font-size: 12px !important;
-                margin-top: 2px !important;
-                display: block !important;
-                text-align: left !important;
-              }
-              .invalid-input {
-                border: 2px solid red !important;
-                box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
-              }
-              #swal-employee-name-display, #swal-team-display {
-                color: #4caf50 !important;
-                font-weight: bold !important;
-                margin: 4px 0 !important;
-                padding: 4px !important;
-                background: #e8f5e8 !important;
-                border-radius: 4px !important;
-                text-align: left !important;
-              }
-            </style>
-            <div class="swal2-label">📦 Material: ${row.Material || ''}</div>
-            <div class="swal2-label">📝 Description: ${row.Description || ''}</div>
-            <label class="swal2-label">🔢 จำนวน</label>
-            <input id="swal-quantity" class="swal2-input" type="number" value="1" min="1">
-            <span id="swal-quantity-error" class="error-message"></span>
-            <label class="swal2-label">🆔 รหัสพนักงาน</label>
-            <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
-            <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
-            <span id="swal-employee-code-error" class="error-message"></span>
-            <label class="swal2-label">👤 ชื่อพนักงาน</label>
-            <div id="swal-employee-name-display"></div>
-            <label class="swal2-label">👥 ทีม</label>
-            <div id="swal-team-display"></div>
-            <label class="swal2-label">📞 เบอร์ติดต่อ</label>
-            <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
-            <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
-            <span id="swal-contact-error" class="error-message"></span>
-            <label class="swal2-label">📄 เลขที่ Call</label>
-            <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
-            <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
-            <span id="swal-call-number-error" class="error-message"></span>
-            <label class="swal2-label">🗳️ Call Type</label>
-            <select id="swal-call-type" class="swal2-select">
-              <option value="" disabled selected>เลือก Call Type</option>
-              <option value="I">I</option>
-              <option value="P">P</option>
-              <option value="Q">Q</option>
-              <option value="R">R</option>
-            </select>
-            <span id="swal-call-type-error" class="error-message"></span>
-            <label class="swal2-label">🗒️ หมายเหตุ</label>
-            <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ">
-            <span id="swal-remark-error" class="error-message"></span>
+            <div class="swal2-spinner-container">
+              <div class="swal2-spinner"></div>
+              <p>กรุณารอสักครู่...</p>
+            </div>
           `,
-          focusConfirm: false,
-          showCancelButton: true,
-          confirmButtonText: 'ยืนยัน',
-          cancelButtonText: 'ยกเลิก',
+          showConfirmButton: false,
           allowOutsideClick: false,
           allowEscapeKey: false,
           didOpen: () => {
-            // Force high z-index and ensure backdrop covers full screen (logic เดิม)
+            // Ensure full blur for loading popup
             const swalContainer = document.querySelector('.swal2-container');
             if (swalContainer) {
               swalContainer.style.zIndex = '99998';
@@ -3536,474 +3952,114 @@ body.dark-mode .new-footer {
                 swalPopup.style.padding = '15px';
               }
             }
-            const quantityInput = document.getElementById('swal-quantity');
-            const employeeCodeInput = document.getElementById('swal-employee-code');
-            const contactInput = document.getElementById('swal-contact');
-            const callNumberInput = document.getElementById('swal-call-number');
-            const callTypeInput = document.getElementById('swal-call-type');
-            const remarkInput = document.getElementById('swal-remark'); // เปลี่ยนจาก readonly เป็น editable
-            const confirmButton = document.querySelector('.swal2-confirm');
-            confirmButton.disabled = true;
-            function setupAutocomplete(input, key, containerId) {
-              input.addEventListener('input', () => {
-                const container = document.getElementById(containerId);
-                const val = input.value.toLowerCase();
-                const items = getFromLocalStorage(key).filter(item => item.toLowerCase().includes(val));
-                container.innerHTML = '';
-                items.forEach(item => {
-                  const div = document.createElement('div');
-                  div.className = 'autocomplete-item';
-                  div.textContent = item;
-                  div.onclick = () => {
-                    input.value = item;
-                    container.style.display = 'none';
-                    validateInputs();
-                  };
-                  container.appendChild(div);
-                });
-                container.style.display = items.length ? 'block' : 'none';
-              });
-              input.addEventListener('blur', () => {
-                setTimeout(() => {
-                  const container = document.getElementById(containerId);
-                  container.style.display = 'none';
-                }, 200);
-              });
-            }
-            setupAutocomplete(contactInput, 'contact', 'contact-history');
-            setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
-            // setupAutocomplete(callTypeInput, 'callType', 'call-type-history'); // ถ้าต้องการ autocomplete สำหรับ callType
-            const lastContact = getFromLocalStorage('contact')[0];
-            if (lastContact) contactInput.value = lastContact;
-            const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, callTypeInput, remarkInput];
-            function validateInputs() {
-              const errors = {
-                quantityError: document.getElementById('swal-quantity-error'),
-                employeeCodeError: document.getElementById('swal-employee-code-error'),
-                contactError: document.getElementById('swal-contact-error'),
-                callNumberError: document.getElementById('swal-call-number-error'),
-                callTypeError: document.getElementById('swal-call-type-error'),
-                remarkError: document.getElementById('swal-remark-error')
-              };
-              inputs.forEach(input => input.classList.remove('invalid-input'));
-              Object.values(errors).forEach(el => el.textContent = '');
-              let isValid = true;
-              if (!quantityInput.value || quantityInput.value < 1) {
-                errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
-                quantityInput.classList.add('invalid-input');
-                isValid = false;
-              }
-              const employeeCode = employeeCodeInput.value.trim();
-              if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
-                errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
-                employeeCodeInput.classList.add('invalid-input');
-                document.getElementById('swal-employee-name-display').textContent = '';
-                document.getElementById('swal-team-display').textContent = '';
-                isValid = false;
-              } else {
-                const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-                if (!employee || !employee.Name) {
-                  errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
-                  employeeCodeInput.classList.add('invalid-input');
-                  document.getElementById('swal-employee-name-display').textContent = '';
-                  document.getElementById('swal-team-display').textContent = '';
-                  isValid = false;
-                } else {
-                  document.getElementById('swal-employee-name-display').textContent = `${employee.Name}`;
-                  document.getElementById('swal-team-display').textContent = `${employee.หน่วยงาน || ''}`;
-                  errors.employeeCodeError.textContent = '';
-                }
-              }
-              if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
-                errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
-                contactInput.classList.add('invalid-input');
-                isValid = false;
-              }
-              const hasRemark = remarkInput.value.trim().length > 0;
-              if (!hasRemark) {
-                if (!callNumberInput.value) {
-                  errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
-                  callNumberInput.classList.add('invalid-input');
-                  isValid = false;
-                } else if (
-                  (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
-                  (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
-                ) {
-                  errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
-                  callNumberInput.classList.add('invalid-input');
-                  isValid = false;
-                }
-                if (!callTypeInput.value) {
-                  errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
-                  callTypeInput.classList.add('invalid-input');
-                  isValid = false;
-                }
-              }
-              confirmButton.disabled = !isValid;
-            }
-            quantityInput.addEventListener('input', validateInputs);
-            employeeCodeInput.addEventListener('input', validateInputs);
-            contactInput.addEventListener('input', validateInputs);
-            callNumberInput.addEventListener('input', validateInputs);
-            callTypeInput.addEventListener('change', validateInputs);
-            remarkInput.addEventListener('input', validateInputs);
-            validateInputs();
-            quantityInput.focus();
-          },
-          didClose: () => {
-            document.body.style.overflow = 'auto';
-          },
-          preConfirm: () => {
-            const quantityInput = document.getElementById('swal-quantity');
-            const employeeCodeInput = document.getElementById('swal-employee-code');
-            const contactInput = document.getElementById('swal-contact');
-            const callNumberInput = document.getElementById('swal-call-number');
-            const callTypeInput = document.getElementById('swal-call-type');
-            const remarkInput = document.getElementById('swal-remark');
-            const errors = {
-              quantityError: document.getElementById('swal-quantity-error'),
-              employeeCodeError: document.getElementById('swal-employee-code-error'),
-              contactError: document.getElementById('swal-contact-error'),
-              callNumberError: document.getElementById('swal-call-number-error'),
-              callTypeError: document.getElementById('swal-call-type-error'),
-              remarkError: document.getElementById('swal-remark-error')
-            };
-            [quantityInput, employeeCodeInput, contactInput, callNumberInput, callTypeInput, remarkInput].forEach(input => {
-              input.classList.remove('invalid-input');
-            });
-            Object.values(errors).forEach(el => el.textContent = '');
-            let isValid = true;
-            if (!quantityInput.value || quantityInput.value < 1) {
-              errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
-              quantityInput.classList.add('invalid-input');
-              isValid = false;
-            }
-            const employeeCode = employeeCodeInput.value.trim();
-            if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
-              errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
-              employeeCodeInput.classList.add('invalid-input');
-              isValid = false;
-            } else {
-              const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-              if (!employee || !employee.Name) {
-                errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
-                employeeCodeInput.classList.add('invalid-input');
-                isValid = false;
-              }
-            }
-            if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
-              errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
-              contactInput.classList.add('invalid-input');
-              isValid = false;
-            }
-            const hasRemark = remarkInput.value.trim().length > 0;
-            if (!hasRemark) {
-              if (!callNumberInput.value) {
-                errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
-                callNumberInput.classList.add('invalid-input');
-                isValid = false;
-              } else if (
-                (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
-                (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
-              ) {
-                errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
-                callNumberInput.classList.add('invalid-input');
-                isValid = false;
-              }
-              if (!callTypeInput.value) {
-                errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
-                callTypeInput.classList.add('invalid-input');
-                isValid = false;
-              }
-            }
-            if (isValid) {
-              const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-              saveToLocalStorage('employeeCode', employeeCode);
-              saveToLocalStorage('contact', contactInput.value);
-              if (callNumberInput.value) {
-                saveToLocalStorage('callNumber', callNumberInput.value);
-              }
-              if (callTypeInput.value) {
-                saveToLocalStorage('callType', callTypeInput.value);
-              }
-              return {
-                quantity: quantityInput.value,
-                employeeCode: employeeCode,
-                employeeName: employee ? employee.Name : '',
-                team: employee ? (employee.หน่วยงาน || '') : '',
-                contact: contactInput.value,
-                callNumber: callNumberInput.value,
-                callType: callTypeInput.value,
-                remark: remarkInput.value // เพิ่ม remark
-              };
-            }
-            return false;
-          }
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            const formValues = result.value;
-            const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-            const quantity = parseFloat(formValues.quantity) || 0;
-            // เช็คเงื่อนไขเตือน
-            if (quantity <= vibhavadiValue) {
-              await Swal.fire({
-                icon: 'warning',
-                title: '⚠️ คำเตือน',
-                text: `ที่คลังวิภาวดีมีอะไหล่ ${vibhavadiValue.toLocaleString()} ชิ้น (จำนวนที่เบิก ${quantity} ชิ้น)`,
-                confirmButtonText: 'ยืนยันดำเนินการต่อ',
-                allowOutsideClick: false,
-                allowEscapeKey: false
-              });
-            }
-            // Popup สรุปข้อมูล (logic เดิม)
-            let imageHtml = '';
-            if (row.UrlWeb && row.UrlWeb.trim()) {
-              imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
-            }
-            const summaryResult = await Swal.fire({
-              title: 'สรุปข้อมูลการเบิก',
-              html: `
-                ${imageHtml}
-                <div style="text-align: left; font-size: 14px;">
-                  <p><strong>Material:</strong> ${row.Material || ''}</p>
-                  <p><strong>Description:</strong> ${row.Description || ''}</p>
-                  <p><strong>จำนวน:</strong> ${formValues.quantity}</p>
-                  <p><strong>รหัสพนักงาน:</strong> ${formValues.employeeCode}</p>
-                  <p><strong>ชื่อพนักงาน:</strong> ${formValues.employeeName}</p>
-                  <p><strong>ทีม:</strong> ${formValues.team}</p>
-                  <p><strong>เบอร์ติดต่อ:</strong> ${formValues.contact}</p>
-                  <p><strong>เลขที่ Call:</strong> ${formValues.callNumber || 'ไม่มี'}</p>
-                  <p><strong>Call Type:</strong> ${formValues.callType || 'ไม่มี'}</p>
-                  <p><strong>หมายเหตุ:</strong> ${formValues.remark || 'ไม่มี'}</p>
-                  <hr style="margin: 10px 0;">
-                </div>
-              `,
-              icon: 'info',
-              showCancelButton: true,
-              confirmButtonText: 'ยืนยันการเบิก',
-              cancelButtonText: 'แก้ไข',
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-              customClass: {
-                title: 'dark-blue-title'
-              },
-              didOpen: () => {
-                // Ensure full blur backdrop for summary popup (logic เดิม)
-                const swalContainer = document.querySelector('.swal2-container');
-                if (swalContainer) {
-                  swalContainer.style.zIndex = '99998';
-                  swalContainer.style.position = 'fixed';
-                  swalContainer.style.top = '0';
-                  swalContainer.style.left = '0';
-                  swalContainer.style.width = '100vw';
-                  swalContainer.style.height = '100vh';
-                  swalContainer.style.display = 'flex';
-                  swalContainer.style.justifyContent = 'center';
-                  swalContainer.style.alignItems = 'center';
-                }
-                const swalBackdrop = document.querySelector('.swal2-backdrop');
-                if (swalBackdrop) {
-                  swalBackdrop.style.zIndex = '99997';
-                  swalBackdrop.style.position = 'fixed';
-                  swalBackdrop.style.top = '0';
-                  swalBackdrop.style.left = '0';
-                  swalBackdrop.style.width = '100vw';
-                  swalBackdrop.style.height = '100vh';
-                  swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                  swalBackdrop.style.backdropFilter = 'blur(8px)';
-                }
-                const swalPopup = document.querySelector('.swal2-popup');
-                if (swalPopup) {
-                  swalPopup.style.zIndex = '99999';
-                  swalPopup.style.position = 'relative';
-                  swalPopup.style.margin = '0';
-                  swalPopup.style.transform = 'none';
-                  swalPopup.style.maxHeight = '90vh';
-                  swalPopup.style.overflowY = 'auto';
-                  swalPopup.style.width = 'auto';
-                  swalPopup.style.maxWidth = '90vw';
-                  if (window.innerWidth <= 768) {
-                    swalPopup.style.width = '95vw';
-                    swalPopup.style.padding = '15px';
-                  }
-                }
-              }
-            });
-            if (summaryResult.isConfirmed) {
-              // สร้าง JSON payload
-              const jsonPayload = {
-                material: row.Material || '',
-                description: row.Description || '',
-                quantity: parseInt(formValues.quantity),
-                contact: formValues.contact,
-                employeeCode: formValues.employeeCode,
-                team: formValues.team,
-                employeeName: formValues.employeeName, // เพิ่ม employeeName (ปรับ Code.gs headers ให้รวม 'employeeName' หลัง 'team')
-                callNumber: formValues.callNumber || '',
-                callType: formValues.callType || '',
-                remark: formValues.remark || '',
-                vibhavadi: vibhavadiValue.toString() // เพิ่ม vibhavadi
-              };
-              // แสดง loading
-              Swal.fire({
-                title: 'กำลังบันทึกข้อมูล...',
-                html: `
-                  <div class="swal2-spinner-container">
-                    <div class="swal2-spinner"></div>
-                    <p>กรุณารอสักครู่...</p>
-                  </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                  // Ensure full blur for loading popup (logic เดิม)
-                  const swalContainer = document.querySelector('.swal2-container');
-                  if (swalContainer) {
-                    swalContainer.style.zIndex = '99998';
-                    swalContainer.style.position = 'fixed';
-                    swalContainer.style.top = '0';
-                    swalContainer.style.left = '0';
-                    swalContainer.style.width = '100vw';
-                    swalContainer.style.height = '100vh';
-                    swalContainer.style.display = 'flex';
-                    swalContainer.style.justifyContent = 'center';
-                    swalContainer.style.alignItems = 'center';
-                  }
-                  const swalBackdrop = document.querySelector('.swal2-backdrop');
-                  if (swalBackdrop) {
-                    swalBackdrop.style.zIndex = '99997';
-                    swalBackdrop.style.position = 'fixed';
-                    swalBackdrop.style.top = '0';
-                    swalBackdrop.style.left = '0';
-                    swalBackdrop.style.width = '100vw';
-                    swalBackdrop.style.height = '100vh';
-                    swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                    swalBackdrop.style.backdropFilter = 'blur(8px)';
-                  }
-                  const swalPopup = document.querySelector('.swal2-popup');
-                  if (swalPopup) {
-                    swalPopup.style.zIndex = '99999';
-                    swalPopup.style.position = 'relative';
-                    swalPopup.style.margin = '0';
-                    swalPopup.style.transform = 'none';
-                    swalPopup.style.maxHeight = '90vh';
-                    swalPopup.style.overflowY = 'auto';
-                    swalPopup.style.width = 'auto';
-                    swalPopup.style.maxWidth = '90vw';
-                    if (window.innerWidth <= 768) {
-                      swalPopup.style.width = '95vw';
-                      swalPopup.style.padding = '15px';
-                    }
-                  }
-                }
-              });
-              try {
-                const response = await fetch(gasUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                  },
-                  body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}` // <- แก้ไขตรงนี้
-                });
-                const gasResult = await response.json();
-                if (gasResult.status === 'success') {
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'ส่งข้อมูลสำเร็จ!',
-                    text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
-                    confirmButtonText: 'OK'
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      Swal.fire({
-                        title: 'กำลังเปลี่ยนหน้า...',
-                        html: `
-                          <div class="swal2-spinner-container">
-                            <div class="swal2-spinner"></div>
-                            <p>กรุณารอสักครู่...</p>
-                          </div>
-                        `,
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        didOpen: () => {
-                          // Ensure full blur for redirect popup (logic เดิม)
-                          const swalContainer = document.querySelector('.swal2-container');
-                          if (swalContainer) {
-                            swalContainer.style.zIndex = '99998';
-                            swalContainer.style.position = 'fixed';
-                            swalContainer.style.top = '0';
-                            swalContainer.style.left = '0';
-                            swalContainer.style.width = '100vw';
-                            swalContainer.style.height = '100vh';
-                            swalContainer.style.display = 'flex';
-                            swalContainer.style.justifyContent = 'center';
-                            swalContainer.style.alignItems = 'center';
-                          }
-                          const swalBackdrop = document.querySelector('.swal2-backdrop');
-                          if (swalBackdrop) {
-                            swalBackdrop.style.zIndex = '99997';
-                            swalBackdrop.style.position = 'fixed';
-                            swalBackdrop.style.top = '0';
-                            swalBackdrop.style.left = '0';
-                            swalBackdrop.style.width = '100vw';
-                            swalBackdrop.style.height = '100vh';
-                            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                            swalBackdrop.style.backdropFilter = 'blur(8px)';
-                          }
-                          const swalPopup = document.querySelector('.swal2-popup');
-                          if (swalPopup) {
-                            swalPopup.style.zIndex = '99999';
-                            swalPopup.style.position = 'relative';
-                            swalPopup.style.margin = '0';
-                            swalPopup.style.transform = 'none';
-                            swalPopup.style.maxHeight = '90vh';
-                            swalPopup.style.overflowY = 'auto';
-                            swalPopup.style.width = 'auto';
-                            swalPopup.style.maxWidth = '90vw';
-                            if (window.innerWidth <= 768) {
-                              swalPopup.style.width = '95vw';
-                              swalPopup.style.padding = '15px';
-                            }
-                          }
-                        }
-                      });
-                      setTimeout(() => {
-                        Swal.close();
-                        showTab('today');
-                        // Fix for mobile scroll lock after tab switch
-                        setTimeout(() => {
-                          document.body.style.overflow = 'auto';
-                          const searchInputToday = document.getElementById('searchInputToday');
-                          if (searchInputToday) {
-                            searchInputToday.focus();
-                            searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
-                          }
-                          // Simulate a touch event to unlock scroll
-                          if ('ontouchstart' in window) {
-                            const event = new Event('touchstart', { bubbles: true });
-                            document.body.dispatchEvent(event);
-                          }
-                        }, 100);
-                      }, 2000);
-                    }
-                  });
-                } else {
-                  throw new Error(gasResult.data || 'GAS return error');
-                }
-              } catch (error) {
-                console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'เกิดข้อผิดพลาด',
-                  text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
-                  confirmButtonText: 'ตกลง'
-                });
-              }
-            }
           }
         });
+        try {
+          const response = await fetch(gasUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
+          });
+          const gasResult = await response.json();
+          if (gasResult.status === 'success') {
+            Swal.fire({
+              icon: 'success',
+              title: 'ส่งข้อมูลสำเร็จ!',
+              text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
+              confirmButtonText: 'OK'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                Swal.fire({
+                  title: 'กำลังเปลี่ยนหน้า...',
+                  html: `
+                    <div class="swal2-spinner-container">
+                      <div class="swal2-spinner"></div>
+                      <p>กรุณารอสักครู่...</p>
+                    </div>
+                  `,
+                  showConfirmButton: false,
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                  didOpen: () => {
+                    // Ensure full blur for redirect popup
+                    const swalContainer = document.querySelector('.swal2-container');
+                    if (swalContainer) {
+                      swalContainer.style.zIndex = '99998';
+                      swalContainer.style.position = 'fixed';
+                      swalContainer.style.top = '0';
+                      swalContainer.style.left = '0';
+                      swalContainer.style.width = '100vw';
+                      swalContainer.style.height = '100vh';
+                      swalContainer.style.display = 'flex';
+                      swalContainer.style.justifyContent = 'center';
+                      swalContainer.style.alignItems = 'center';
+                    }
+                    const swalBackdrop = document.querySelector('.swal2-backdrop');
+                    if (swalBackdrop) {
+                      swalBackdrop.style.zIndex = '99997';
+                      swalBackdrop.style.position = 'fixed';
+                      swalBackdrop.style.top = '0';
+                      swalBackdrop.style.left = '0';
+                      swalBackdrop.style.width = '100vw';
+                      swalBackdrop.style.height = '100vh';
+                      swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                      swalBackdrop.style.backdropFilter = 'blur(8px)';
+                    }
+                    const swalPopup = document.querySelector('.swal2-popup');
+                    if (swalPopup) {
+                      swalPopup.style.zIndex = '99999';
+                      swalPopup.style.position = 'relative';
+                      swalPopup.style.margin = '0';
+                      swalPopup.style.transform = 'none';
+                      swalPopup.style.maxHeight = '90vh';
+                      swalPopup.style.overflowY = 'auto';
+                      swalPopup.style.width = 'auto';
+                      swalPopup.style.maxWidth = '90vw';
+                      if (window.innerWidth <= 768) {
+                        swalPopup.style.width = '95vw';
+                        swalPopup.style.padding = '15px';
+                      }
+                    }
+                  }
+                });
+                setTimeout(() => {
+                  Swal.close();
+                  showTab('today');
+                  // Fix for mobile scroll lock after tab switch
+                  setTimeout(() => {
+                    document.body.style.overflow = 'auto';
+                    const searchInputToday = document.getElementById('searchInputToday');
+                    if (searchInputToday) {
+                      searchInputToday.focus();
+                      searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
+                    }
+                    // Simulate a touch event to unlock scroll
+                    if ('ontouchstart' in window) {
+                      const event = new Event('touchstart', { bubbles: true });
+                      document.body.dispatchEvent(event);
+                    }
+                  }, 100);
+                }, 2000);
+              }
+            });
+          } else {
+            throw new Error(gasResult.data || 'GAS return error');
+          }
+        } catch (error) {
+          console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
+            confirmButtonText: 'ตกลง'
+          });
+        }
       }
+    }
+  });
+}
       function saveToLocalStorage(key, value) {
         let items = JSON.parse(localStorage.getItem(key)) || [];
         if (!items.includes(value)) {
