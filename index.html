@@ -2456,8 +2456,35 @@ body.dark-mode .gallery-thumbnail-modal {
     height: 400px; /* ลดสูงลงเหลือครึ่งหนึ่งเพื่อไม่ใหญ่เกิน */
   }
     }
-  }
-</style>
+  #toggleAllDataBtn {
+  background: linear-gradient(135deg, #42a5f5, #2196f3);
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#toggleAllDataBtn:hover {
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode #toggleAllDataBtn {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+}
+body.dark-mode #toggleAllDataBtn:hover {
+  background: linear-gradient(135deg, #16a085, #1abc9c);
+}
    </style>
   </head>
   <body class="light-mode">
