@@ -822,7 +822,9 @@
         transform: translateY(-2px);
       }
       #parts .pagination .active, #images .pagination-images .active, #today .pagination-today .active {
-        background: linear-gradient(135deg, #ff9800, #f57c00);
+        background: linear-gradient(135deg, #ff9800, #f57c00) !important; /* สีส้ม gradient */
+        color: white !important; /* ตัวอักษรขาว */
+        border: none !important;
       }
       #parts .pagination button:disabled, #images .pagination-images button:disabled, #today .pagination-today button:disabled {
         background: #b0bec5;
@@ -1506,8 +1508,9 @@
         color: #1abc9c;
       }
       #all .all-pagination .all-page-number.active {
-        background-color: #3498db;
-        color: white;
+       background: linear-gradient(135deg, #ff9800, #f57c00) !important; /* เปลี่ยนเป็นส้ม */
+       color: white !important; /* ตัวอักษรขาว */
+       border: none !important;
       }
       body.dark-mode #all .all-pagination .all-page-number.active {
         background-color: #e67e22;
@@ -1892,8 +1895,9 @@
         transform: scale(1.1);
       }
       #pending-calls .pending-pagination .pending-page-number.active {
-        background-color: #e67e22;
-        color: white;
+        background: linear-gradient(135deg, #ff9800, #f57c00) !important; /* เปลี่ยนเป็นส้ม */
+        color: white !important; /* ตัวอักษรขาว */
+        border: none !important;
       }
       #pending-calls .pending-items-per-page {
         margin-left: 8px; /* ลด margin */
@@ -2505,6 +2509,14 @@ body.dark-mode .new-footer {
 .header-setting-btn i {
   font-size: 16px; /* ปรับขนาดไอคอนถ้าต้องการให้ใหญ่ขึ้น */
 }
+body.dark-mode #parts .pagination .active,
+body.dark-mode #images .pagination-images .active,
+body.dark-mode #today .pagination-today .active,
+body.dark-mode #all .all-pagination .all-page-number.active,
+body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
+  background: linear-gradient(135deg, #ff8c00, #e67e22) !important; /* ส้มเข้มสำหรับ dark mode */
+  color: white !important;
+}      
    </style>
   </head>
   <body class="light-mode">
