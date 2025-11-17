@@ -2049,7 +2049,6 @@
   body {
     font-size: 14px;
   }
-
   .header {
     padding: 6px 10px;
     flex-wrap: nowrap;
@@ -2057,13 +2056,11 @@
     justify-content: space-between;
     align-items: center; /* ศูนย์กลางแนวตั้ง */
   }
-
   .header-logo {
     height: 60px;
     width: auto; /* ให้ขยายสัดส่วนตามความสูง */
     align-items: center;
   }
-
   .header-title {
     display: flex;
     align-items: center; /* ⭐ จัดกึ่งกลางแนวตั้ง */
@@ -2077,7 +2074,6 @@
     flex-basis: auto;
     margin-bottom: 0;
   }
-
   .header-setting-btn {
     padding: 4px 6px;
     font-size: 14px;
@@ -2391,13 +2387,15 @@ body.dark-mode .image-gallery {
   background: #2c3e50;
 }
 .gallery-thumbnail-modal {
-  width: 800px; /* กว้าง 800px */
-  height: 800px; /* สูง 800px */
-  object-fit: cover; /* ครอบตัดให้พอดี ไม่บิดเบี้ยว */
+  width: 400px; /* Fixed width for default frame */
+  height: 300px; /* Fixed height for default frame */
+  object-fit: contain; /* Default: show full image without cropping, fit within frame */
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.3s ease;
   border: 1px solid #e0e0e0;
+  display: block;
+  margin: 0 auto; /* Center the image */
 }
 .gallery-thumbnail-modal:hover {
   transform: scale(1.05);
@@ -2413,8 +2411,8 @@ body.dark-mode .gallery-thumbnail-modal {
     padding: 5px;
   }
   .gallery-thumbnail-modal {
-    width: 100%; /* กว้างเต็ม container บนมือถือ */
-    height: 400px; /* ลดสูงลงเหลือครึ่งหนึ่งเพื่อไม่ใหญ่เกิน */
+    width: 100%; /* Full width on mobile but maintain aspect */
+    height: 250px; /* Adjusted fixed height for mobile */
   }
 }
 .image-gallery-parts {
@@ -2430,14 +2428,16 @@ body.dark-mode .gallery-thumbnail-modal {
     background: #2c3e50;
   }
   .gallery-thumbnail-modal-parts {
-    width: 800px; /* กว้าง 800px */
-  height: 800px; /* สูง 800px */
-  object-fit: cover; /* ครอบตัดให้พอดี ไม่บิดเบี้ยว */
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  border: 1px solid #e0e0e0;
-}
+    width: 400px; /* Fixed width for default frame */
+    height: 300px; /* Fixed height for default frame */
+    object-fit: contain; /* Default: show full image without cropping, fit within frame */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 1px solid #e0e0e0;
+    display: block;
+    margin: 0 auto; /* Center the image */
+  }
   .gallery-thumbnail-modal-parts:hover {
     transform: scale(1.05);
   }
@@ -2452,9 +2452,9 @@ body.dark-mode .gallery-thumbnail-modal {
       padding: 5px;
     }
     .gallery-thumbnail-modal-parts {
-      width: 100%; /* กว้างเต็ม container บนมือถือ */
-    height: 400px; /* ลดสูงลงเหลือครึ่งหนึ่งเพื่อไม่ใหญ่เกิน */
-  }
+      width: 100%; /* Full width on mobile but maintain aspect */
+      height: 250px; /* Adjusted fixed height for mobile */
+    }
     }
   #toggleAllDataBtn {
   background: linear-gradient(135deg, #42a5f5, #2196f3);
@@ -2472,13 +2472,11 @@ body.dark-mode .gallery-thumbnail-modal {
   align-items: center;
   gap: 4px;
 }
-
 #toggleAllDataBtn:hover {
   background: linear-gradient(135deg, #1976d2, #1565c0);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
-
 body.dark-mode #toggleAllDataBtn {
   background: linear-gradient(135deg, #1abc9c, #16a085);
 }
@@ -2499,7 +2497,6 @@ body.dark-mode #toggleAllDataBtn:hover {
   line-height: 1.2;
   border-top: 1px solid #08306b;
 }
-
 body.dark-mode .new-footer {
   background: #2c3e50;
   border-top-color: #1abc9c;
@@ -2507,7 +2504,7 @@ body.dark-mode .new-footer {
 }
 .header-setting-btn i {
   font-size: 16px; /* ปรับขนาดไอคอนถ้าต้องการให้ใหญ่ขึ้น */
-}      
+}
    </style>
   </head>
   <body class="light-mode">
@@ -3395,10 +3392,8 @@ body.dark-mode .new-footer {
   if (employeeData.length === 0) {
     employeeData = await loadEmployeeData();
   }
-
   // ตัวแปร selectedCallType ย้ายมาอยู่นอก didOpen เพื่อให้ preConfirm เข้าถึงได้
   let selectedCallType = '';
-
   Swal.fire({
     title: '📋 เบิกอะไหล่นวนคร',
     html: `
@@ -3592,19 +3587,17 @@ body.dark-mode .new-footer {
       const remarkInput = document.getElementById('swal-remark');
       const confirmButton = document.querySelector('.swal2-confirm');
       confirmButton.disabled = true;
-
       // Handle Call Type button selection (Canva-like) - ใช้ selectedCallType จาก outer scope
       const callTypeButtons = document.querySelectorAll('.call-type-btn');
       callTypeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
           callTypeButtons.forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
-          selectedCallType = btn.dataset.value;  // อัพเดทตัวแปรจาก outer scope
-          console.log('Selected Call Type:', selectedCallType);  // Debug: ดูใน console
+          selectedCallType = btn.dataset.value; // อัพเดทตัวแปรจาก outer scope
+          console.log('Selected Call Type:', selectedCallType); // Debug: ดูใน console
           validateInputs();
         });
       });
-
       function setupAutocomplete(input, key, containerId) {
         input.addEventListener('input', () => {
           const container = document.getElementById(containerId);
@@ -3633,10 +3626,8 @@ body.dark-mode .new-footer {
       }
       setupAutocomplete(contactInput, 'contact', 'contact-history');
       setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
-
       const lastContact = getFromLocalStorage('contact')[0];
       if (lastContact) contactInput.value = lastContact;
-
       const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput];
       function validateInputs() {
         const errors = {
@@ -3769,7 +3760,7 @@ body.dark-mode .new-footer {
           callNumberInput.classList.add('invalid-input');
           isValid = false;
         }
-        if (!selectedCallType) {  // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
+        if (!selectedCallType) { // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
           errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
           isValid = false;
         }
@@ -3784,7 +3775,7 @@ body.dark-mode .new-footer {
         if (selectedCallType) {
           saveToLocalStorage('callType', selectedCallType);
         }
-        console.log('Final Call Type:', selectedCallType);  // Debug: ดูว่าส่งไปถูกไหม
+        console.log('Final Call Type:', selectedCallType); // Debug: ดูว่าส่งไปถูกไหม
         return {
           quantity: quantityInput.value,
           employeeCode: employeeCode,
