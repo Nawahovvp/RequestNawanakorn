@@ -2870,7 +2870,7 @@ body.dark-mode .new-footer {
       let globalSearch1 = '';
       let globalSearch2 = '';
       // Global for today tab: toggle pending only
-      let pendingOnly = true;
+      let currentFilter = 'pending'; // 'pending' or 'history'
       // Sort config for today tab
       let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
       // Pagination config for today tab
@@ -4479,18 +4479,18 @@ searchButtonImages.addEventListener("click", () => {
         if (event.target == modal) closeModal.click();
       };
       // Toggle pending only button event
-      toggleAllDataBtn.addEventListener('click', () => {
-        pendingOnly = !pendingOnly;
-        if (pendingOnly) {
-          toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
-          toggleAllDataBtn.title = 'รอเบิก';
-        } else {
-          toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
-          toggleAllDataBtn.title = 'ประวัติเบิก';
-        }
-        currentPageToday = 1; // Reset page on toggle
-        updateTableToday();
-      });
+     toggleAllDataBtn.addEventListener('click', () => {
+  currentFilter = currentFilter === 'pending' ? 'history' : 'pending';
+  if (currentFilter === 'pending') {
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
+    toggleAllDataBtn.title = 'รอเบิก';
+  } else {
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
+    toggleAllDataBtn.title = 'ประวัติเบิก';
+  }
+  currentPageToday = 1; // Reset page on toggle
+  updateTableToday();
+});
       // Items per page change event for today tab
       itemsPerPageSelectToday.addEventListener("change", () => {
         itemsPerPageToday = parseInt(itemsPerPageSelectToday.value, 10);
@@ -4521,39 +4521,42 @@ searchButtonImages.addEventListener("click", () => {
         updateTableToday();
       });
       // Function to sort data by column (for sortable headers)
-      function sortByColumn(a, b, column, direction) {
-        let valueA = a[column] || "";
-        let valueB = b[column] || "";
-        if (column === 'IDRow' || column === 'Timestamp') {
-          // Custom sort for IDRow (descending by default) and Timestamp
-          const parseDateOrId = (value) => {
-            if (!value) return 0;
-            if (column === 'IDRow') {
-              return parseInt(value, 10) || 0;
-            }
-            // For Timestamp
-            const [datePart, timePart] = value.split(' ');
-            const [day, month, yearBE] = datePart.split('/');
-            const yearCE = parseInt(yearBE) - 543;
-            if (!timePart) return new Date(yearCE, parseInt(month) - 1, parseInt(day)).getTime();
-            const [hour, minute, second] = timePart.split(':').map(Number);
-            return new Date(yearCE, parseInt(month) - 1, parseInt(day), hour || 0, minute || 0, second || 0).getTime();
-          };
-          const numA = parseDateOrId(valueA);
-          const numB = parseDateOrId(valueB);
-          return direction === 'asc' ? numA - numB : numB - numA;
-        } else {
-          // Default string/numeric sort
-          if (!isNaN(valueA) && !isNaN(valueB)) {
-            valueA = parseFloat(valueA);
-            valueB = parseFloat(valueB);
-            return direction === 'asc' ? valueA - valueB : valueB - valueA;
-          }
-          valueA = valueA.toString().toLowerCase();
-          valueB = valueB.toString().toLowerCase();
-          return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
-        }
+      // แก้ไขใน sortByColumn (ในส่วน if (column === 'Timestamp')) เพื่อ parse ถูกต้อง
+function sortByColumn(a, b, column, direction) {
+  let valueA = a[column] || "";
+  let valueB = b[column] || "";
+  if (column === 'IDRow' || column === 'Timestamp') {
+    // Custom sort for IDRow (descending by default) and Timestamp
+    const parseDateOrId = (value) => {
+      if (!value) return 0;
+      if (column === 'IDRow') {
+        return parseInt(value, 10) || 0;
       }
+      // For Timestamp (assume input is MM/DD/YYYY HH:MM:SS)
+      const [datePart, timePart] = value.split(' ');
+      const parts = datePart.split('/'); // ['MM', 'DD', 'YYYY']
+      const month = parseInt(parts[0]) - 1; // 0-based
+      const day = parseInt(parts[1]);
+      const year = parseInt(parts[2]);
+      if (!timePart) return new Date(year, month, day).getTime();
+      const [hour, minute, second] = timePart.split(':').map(Number);
+      return new Date(year, month, day, hour || 0, minute || 0, second || 0).getTime();
+    };
+    const numA = parseDateOrId(valueA);
+    const numB = parseDateOrId(valueB);
+    return direction === 'asc' ? numA - numB : numB - numA;
+  } else {
+    // Default string/numeric sort
+    if (!isNaN(valueA) && !isNaN(valueB)) {
+      valueA = parseFloat(valueA);
+      valueB = parseFloat(valueB);
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    }
+    valueA = valueA.toString().toLowerCase();
+    valueB = valueB.toString().toLowerCase();
+    return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+  }
+}
       // Add sort listeners for today tab
       function addSortListenersToday() {
         const sortableHeaders = document.querySelectorAll("#today th.sortable");
@@ -4599,17 +4602,19 @@ searchButtonImages.addEventListener("click", () => {
           container.classList.remove("fade-out");
         }, 200);
       }
-      function filterByStatus(data) {
-        let filtered = data;
-        if (pendingOnly) {
-          filtered = data.filter(row => row["status"] === "รอเบิก");
-        }
-        // Apply sort based on config
-        if (sortConfigToday.column) {
-          filtered.sort((a, b) => sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction));
-        }
-        return filtered;
-      }
+     function filterByStatus(data) {
+  let filtered = data;
+  if (currentFilter === 'pending') {
+    filtered = data.filter(row => row["status"] === "รอเบิก");
+  } else if (currentFilter === 'history') {
+    filtered = data.filter(row => row["status"] === "สั่งเบิกแล้ว");
+  }
+  // Apply sort based on config
+  if (sortConfigToday.column) {
+    filtered.sort((a, b) => sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction));
+  }
+  return filtered;
+}
       function updateTableToday() {
         let dataToFilter = allDataToday;
         const keyword = searchInputToday.value.toLowerCase();
@@ -4659,19 +4664,22 @@ searchButtonImages.addEventListener("click", () => {
             "remark",
           ];
           columns.forEach((col) => {
-            const td = document.createElement("td");
-            let value = row[col] || "";
-            if (col === "quantity" || col === "vibhavadi") {
-              if (value && !isNaN(value)) {
-                value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
-              } else if (value === "0" || value === 0) {
-                value = "";
-              }
-            }
-            if (col === "remark" && value) {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
+  const td = document.createElement("td");
+  let value = row[col] || "";
+  if (col === "Timestamp") {
+    value = formatTimestamp(value); // เพิ่มบรรทัดนี้
+  }
+  if (col === "quantity" || col === "vibhavadi") {
+    if (value && !isNaN(value)) {
+      value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    } else if (value === "0" || value === 0) {
+      value = "";
+    }
+  }
+  if (col === "remark" && value) {
+    td.style.color = "#d32f2f";
+    td.style.fontWeight = "bold";
+  }
             if (col === "material" && (row["remark"] || "").trim() !== "") {
               td.style.color = "#d32f2f";
               td.style.fontWeight = "bold";
@@ -4697,11 +4705,11 @@ searchButtonImages.addEventListener("click", () => {
           btn.className = "detail-button";
           btn.onclick = () => {
             modalContent.innerHTML = ["IDRow", ...columns]
-              .map((col) => {
-                let label = "";
-                switch (col) {
-                  case "IDRow": label = "🆔 ลำดับ"; break;
-                  case "Timestamp": label = "📅 วันเวลา"; break;
+  .map((col) => {
+    let label = "";
+    switch (col) {
+      case "IDRow": label = "🆔 ลำดับ"; break;
+      case "Timestamp": label = "📅 วันเวลา"; break;
                   case "material": label = "🔢 Material"; break;
                   case "description": label = "🛠️ Description"; break;
                   case "quantity": label = "🔢 จำนวน"; break;
@@ -4712,14 +4720,17 @@ searchButtonImages.addEventListener("click", () => {
                   case "vibhavadi": label = "📦 คลังวิภาวดี"; break;
                   case "remark": label = "📝 หมายเหตุ"; break;
                   default: label = col;
-                }
-                const value = row[col] || "";
-                const valueHtml = col === "remark" && value
-                  ? `<span class='value' style='color:#d32f2f'>${value}</span>`
-                  : `<span class='value'>${value}</span>`;
-                return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
-              })
-              .join("");
+    }
+    let value = row[col] || "";
+    if (col === "Timestamp") {
+      value = formatTimestamp(value); // เพิ่มบรรทัดนี้
+    }
+    const valueHtml = col === "remark" && value
+      ? `<span class='value' style='color:#d32f2f'>${value}</span>`
+      : `<span class='value'>${value}</span>`;
+    return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
+  })
+  .join("");
             modal.style.display = "block";
             setTimeout(() => {
               modal.style.opacity = "1";
@@ -5258,6 +5269,16 @@ searchButtonImages.addEventListener("click", () => {
       if (appContent.classList.contains('logged-in')) {
         loadData();
       }
+     // เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
+function formatTimestamp(dateTimeStr) {
+  if (!dateTimeStr) return "";
+  const [datePart, timePart] = dateTimeStr.split(' ');
+  const [month, day, year] = datePart.split('/').map(Number);
+  const yearBE = year + 543;
+  const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
+  const formattedTime = timePart || '';
+  return `${formattedDate} ${formattedTime}`;
+}
     </script>
   </body>
 </html>
