@@ -4198,7 +4198,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         console.log("Starting data load from:", url);
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
+          const timeoutId = setTimeout(() => controller.abort(), 120000); // เพิ่ม timeout เป็น 30 วินาที
           const response = await fetch(url, {
             signal: controller.signal,
             mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
