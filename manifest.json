@@ -1,0 +1,21 @@
+{
+  "name": "ระบบขอสั่งอะไหล่คลังสินค้านวนคร",
+  "short_name": "PartGo",
+  "description": "ระบบภายในสำหรับขอสั่งอะไหล่คลังสินค้านวนคร - เครื่องมือสำหรับพนักงานเท่านั้น",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eceff1",
+  "theme_color": "#1877f2",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
