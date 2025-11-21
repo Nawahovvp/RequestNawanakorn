@@ -990,8 +990,8 @@
       #parts a, #images a {
   text-decoration: none;
   color: #2196f3;
-  /* Note: target="_blank" and rel="noopener noreferrer" are HTML attributes, not CSS properties. 
-     Add them directly to <a> tags in HTML/JS for security and new tab behavior. 
+  /* Note: target="_blank" and rel="noopener noreferrer" are HTML attributes, not CSS properties.
+     Add them directly to <a> tags in HTML/JS for security and new tab behavior.
      Example: <a href="..." target="_blank" rel="noopener noreferrer">Link</a> */
   transition: color 0.3s ease;
 }
@@ -4495,11 +4495,11 @@ searchButtonImages.addEventListener("click", () => {
      toggleAllDataBtn.addEventListener('click', () => {
   currentFilter = currentFilter === 'pending' ? 'history' : 'pending';
   if (currentFilter === 'pending') {
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
-    toggleAllDataBtn.title = 'รอเบิก';
-  } else {
     toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
     toggleAllDataBtn.title = 'ประวัติเบิก';
+  } else {
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
+    toggleAllDataBtn.title = 'รอเบิก';
   }
   currentPageToday = 1; // Reset page on toggle
   updateTableToday();
@@ -4620,7 +4620,7 @@ function sortByColumn(a, b, column, direction) {
   if (currentFilter === 'pending') {
     filtered = data.filter(row => row["status"] === "รอเบิก");
   } else if (currentFilter === 'history') {
-    filtered = data.filter(row => row["status"] === "สั่งเบิกแล้ว");
+    filtered = data;
   }
   // Apply sort based on config
   if (sortConfigToday.column) {
