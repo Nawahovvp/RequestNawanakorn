@@ -1,3 +1,6 @@
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", () => clients.claim());
+
 const CACHE_NAME = 'spare-parts-app-v1';
 const urlsToCache = [
   '/',
