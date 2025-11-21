@@ -988,11 +988,13 @@
         text-align: left;
       }
       #parts a, #images a {
-        text-decoration: none;
-        color: #2196f3;
-        target="_blank" rel="noopener noreferrer";
-        transition: color 0.3s ease;
-      }
+  text-decoration: none;
+  color: #2196f3;
+  /* Note: target="_blank" and rel="noopener noreferrer" are HTML attributes, not CSS properties. 
+     Add them directly to <a> tags in HTML/JS for security and new tab behavior. 
+     Example: <a href="..." target="_blank" rel="noopener noreferrer">Link</a> */
+  transition: color 0.3s ease;
+}
       body.dark-mode #parts a, body.dark-mode #images a {
         color: #1abc9c;
       }
@@ -2151,7 +2153,6 @@
         .swal2-backdrop {
           z-index: 99997 !important;
         }
-      }
       @media screen and (max-width: 480px) {
         .header-title {
           font-size: 10px; /* ลด font-size */
@@ -2366,8 +2367,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
+        display: box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
+        box-orient: vertical;
       }
       body.dark-mode #images .gallery-description {
         color: #bdc3c7;
