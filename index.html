@@ -2059,7 +2059,7 @@
       /* Responsive adjustments for mobile devices - Enhanced for Compact */
      @media screen and (max-width: 768px) {
   body {
-    font-size: 14px;
+    font-size: 16px; /* เพิ่มขนาดตัวอักษรฐานสำหรับมือถือ */
   }
   .header {
     padding: 6px 10px;
@@ -2076,7 +2076,7 @@
   .header-title {
     display: flex;
     align-items: center; /* ⭐ จัดกึ่งกลางแนวตั้ง */
-    font-size: 30px;
+    font-size: 24px; /* ปรับให้ใหญ่ขึ้นจาก 30px เพื่อความสมดุล */
     white-space: nowrap;
     text-align: left;
     flex-grow: 1;
@@ -2088,7 +2088,7 @@
   }
   .header-setting-btn {
     padding: 4px 6px;
-    font-size: 14px;
+    font-size: 16px; /* เพิ่มขนาดตัวอักษรปุ่มตั้งค่า */
     flex-shrink: 0;
     margin-left: 5px;
   }
@@ -2101,18 +2101,18 @@
           font-size: 20px; /* ลด icon size */
         }
         .nav-btn::after {
-          font-size: 10px; /* ลด label font-size */
+          font-size: 12px; /* เพิ่มขนาด label จาก 10px */
            margin-top: 3px;
         }
         #parts th, #parts td, #images th, #images td, #today th, #today td {
           padding: 6px 4px; /* ลด padding */
-          font-size: 14px; /* ลด font-size */
+          font-size: 16px; /* เพิ่มขนาดตัวอักษรตารางจาก 14px */
         }
         #parts table, #images table, #today table {
           min-width: 600px; /* Reduced min-width for mobile */
         }
         #parts #searchInput1, #parts #searchInput2, #images #searchInputImages1, #images #searchInputImages2, #today #searchInputToday {
-            font-size: 15px; /* ลด font-size สำหรับ mobile */
+            font-size: 16px; /* เพิ่มขนาดตัวอักษร input จาก 15px */
     max-width: none; /* ยกเลิก max-width */
     min-width: 60px; /* ลด min-width เพื่อให้พอดีใน mobile */
     padding: 6px; /* ลด padding */
@@ -2131,7 +2131,7 @@
           padding: 8px; /* ลด padding */
         }
         .disclaimer {
-          font-size: 10px; /* ลด font-size */
+          font-size: 12px; /* เพิ่มขนาด disclaimer จาก 10px */
           padding: 6px; /* ลด padding */
         }
         /* เพิ่มการปรับสำหรับ Swal บนมือถือ */
@@ -2148,18 +2148,18 @@
           z-index: 99999 !important;
           padding: 12px !important; /* ลด padding */
           border-radius: 10px !important;
-          font-size: 12px !important; /* ลด font-size */
+          font-size: 14px !important; /* เพิ่มขนาดตัวอักษร Swal จาก 12px */
         }
         .swal2-backdrop {
           z-index: 99997 !important;
         }
       @media screen and (max-width: 480px) {
         .header-title {
-          font-size: 10px; /* ลด font-size */
+          font-size: 20px; /* ปรับให้ใหญ่ขึ้นจาก 10px */
         }
         #parts th, #parts td, #images th, #images td, #today th, #today td {
           padding: 3px 1px; /* ลด padding */
-          font-size: 12px; /* ลด font-size */
+          font-size: 14px; /* เพิ่มขนาดตัวอักษรตารางจาก 12px */
         }
       }
       /* Additional styles for #parts image modal (reuse existing modal styles) */
