@@ -4100,7 +4100,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
                       document.body.dispatchEvent(event);
                     }
                   }, 100);
-                }, 2000);
+                }, 4000); // เพิ่ม delay จาก 2000 เป็น 4000ms เพื่อให้ข้อมูลใหม่อัปเดตใน Sheet
               }
             });
           } else {
@@ -4829,7 +4829,9 @@ function sortByColumn(a, b, column, direction) {
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(requestSheetUrl, {
+          // เพิ่ม cache busting เพื่อให้ข้อมูลใหม่แสดงทันที
+          const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
+          const response = await fetch(cacheBustUrl, {
             signal: controller.signal,
             mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
             cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
@@ -5347,7 +5349,6 @@ if ('serviceWorker' in navigator) {
 }
       // PWA Install Prompt Logic - แก้ไขให้ persist state
 let deferredPrompt; // เก็บ event prompt
-
 // ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
@@ -5361,7 +5362,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
   }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
 });
-
 // จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
 document.getElementById('install-btn').addEventListener('click', async () => {
   if (deferredPrompt) {
@@ -5388,7 +5388,6 @@ document.getElementById('install-btn').addEventListener('click', async () => {
     deferredPrompt = null;
   }
 });
-
 // ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
 window.addEventListener('appinstalled', () => {
   console.log('PartsGo ติดตั้งแล้ว!');
