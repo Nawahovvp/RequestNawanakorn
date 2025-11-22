@@ -423,6 +423,39 @@
       body.dark-mode .header-setting-btn:hover {
         background: linear-gradient(135deg, #e67e22, #d68910);
       }
+      /* Install Button Styles - Compact & Themed */
+#install-btn {
+  display: none; /* ซ่อนเริ่มต้น */
+  position: fixed;
+  top: 10px; /* วางมุมขวาบน header */
+  right: 10px;
+  z-index: 1001;
+  padding: 8px 16px; /* Compact */
+  background: linear-gradient(135deg, #42a5f5, #2196f3); /* สีน้ำเงิน Facebook */
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px; /* เล็กเพื่อไม่กินพื้นที่ */
+  font-family: "Kanit", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#install-btn:hover {
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+#install-btn i { font-size: 14px; }
+body.dark-mode #install-btn {
+  background: linear-gradient(135deg, #1abc9c, #16a085); /* เขียวสำหรับ dark mode */
+}
+body.dark-mode #install-btn:hover {
+  background: linear-gradient(135deg, #16a085, #1abc9c);
+}
       /* Bottom Navigation Styles (Facebook Mobile-like) - More Compact */
       .bottom-nav {
         position: fixed;
@@ -2554,6 +2587,9 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
         <div class="header-title">
           <span> ระบบขอสั่งอะไหล่จากคลังสินค้านวนคร</span>
         </div>
+        <button id="install-btn" title="ติดตั้ง PartGo บนหน้าจอหลัก">
+    <i class="fas fa-download"></i> ติดตั้ง
+  </button>
         <span id="userNameSmall" class="user-name-small"></span>
         <button class="header-setting-btn" onclick="showSettings()" title="ตั้งค่า"><i class="fas fa-bars"></i></button>
       </div>
@@ -3130,7 +3166,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           console.error('Login error:', error);
         }
       }
-      function checkLoginStatus() {
+     function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
   if (isLoggedIn && savedUsername) {
@@ -3140,6 +3176,11 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     // Auto-load default tab if needed
     if (document.querySelector('.nav-btn.active')) {
       showTab('parts');
+    }
+    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้น
+    if (localStorage.getItem('partgo-installed')) {
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) installBtn.style.display = 'none';
     }
   } else {
     loginModal.classList.add('active');
@@ -3158,7 +3199,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
     rememberMeCheckbox.checked = true;
   }
 }
-      function handleLogout() {
+     function handleLogout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
         localStorage.removeItem('userName');
@@ -5304,6 +5345,60 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+      // PWA Install Prompt Logic - แก้ไขให้ persist state
+let deferredPrompt; // เก็บ event prompt
+
+// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
+  deferredPrompt = e; // เก็บไว้ใช้
+  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
+  setTimeout(() => {
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.style.display = 'flex';
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartGo'; // อัปเดตข้อความ
+    }
+  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
+});
+
+// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    // แสดง native prompt
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
+    if (outcome === 'accepted') {
+      // Set localStorage เพื่อ persist หลัง reload
+      localStorage.setItem('partgo-installed', 'true');
+      // ซ่อนปุ่มหลังติดตั้ง
+      document.getElementById('install-btn').style.display = 'none';
+      // แสดง toast (ใช้ SweetAlert ถ้ามี) - แก้ชื่อให้ตรง "PartGotest"
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: 'ติดตั้งสำเร็จ!',
+          text: 'PartGotest พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+    deferredPrompt = null;
+  }
+});
+
+// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
+window.addEventListener('appinstalled', () => {
+  console.log('PartGotest ติดตั้งแล้ว!');
+  // Set localStorage เพื่อ persist (fallback ถ้า prompt accepted ไม่ set)
+  localStorage.setItem('partgo-installed', 'true');
+  // ซ่อนปุ่มถ้ามี
+  const installBtn = document.getElementById('install-btn');
+  if (installBtn) installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
     </script>
   </body>
 </html>
