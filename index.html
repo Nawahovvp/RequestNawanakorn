@@ -2503,33 +2503,56 @@ body.dark-mode .gallery-thumbnail-modal {
       height: 250px; /* Adjusted fixed height for mobile */
     }
     }
-  #toggleAllDataBtn {
-  background: linear-gradient(135deg, #42a5f5, #2196f3);
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
+ /* ปรับสไตล์ปุ่ม toggleAllDataBtn ให้เป็นปุ่มแบบ Tab Facebook */
+#toggleAllDataBtn {
+  background-color: transparent !important;
+  color: #65676b !important;
+  padding: 6px 14px !important;
+  border: none !important;
+  border-radius: 999px !important; /* pill shape */
+  font-size: 12px !important;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   margin-left: 8px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: none !important;
 }
+
+/* Hover แบบ Facebook */
 #toggleAllDataBtn:hover {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #e4e6eb !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
+
+/* Active แบบ Facebook (น้ำเงิน + เส้นขีดล่าง) */
+#toggleAllDataBtn.active,
+#toggleAllDataBtn[aria-selected="true"] {
+  color: #1877f2 !important;
+  background-color: #e7f3ff !important;
+  box-shadow: inset 0 -2px 0 #1877f2 !important;
+}
+
+/* ---- Dark Mode ---- */
 body.dark-mode #toggleAllDataBtn {
-  background: linear-gradient(135deg, #1abc9c, #16a085);
+  color: #e4e6eb !important;
+  background-color: transparent !important;
 }
+
 body.dark-mode #toggleAllDataBtn:hover {
-  background: linear-gradient(135deg, #16a085, #1abc9c);
+  background-color: rgba(255,255,255,0.08) !important;
 }
+
+body.dark-mode #toggleAllDataBtn.active,
+body.dark-mode #toggleAllDataBtn[aria-selected="true"] {
+  color: #4599ff !important;
+  background-color: rgba(24, 119, 242, 0.18) !important;
+  box-shadow: inset 0 -2px 0 #4599ff !important;
+}
+
       .new-footer {
   position: fixed;
   bottom: 50px; /* ขึ้นเหนือ bottom-nav */
@@ -2560,6 +2583,82 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
   background: linear-gradient(135deg, #ff8c00, #e67e22) !important; /* ส้มเข้มสำหรับ dark mode */
   color: white !important;
 }
+/* ปุ่มสไตล์ Tab แบบ Facebook */
+.canva-button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;          /* ให้เป็นเม็ดยาแบบแท็บ FB */
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  /* base (เหมือน FB: ตัวอักษรเทา พื้นใส ไม่มีเงา) */
+  background-color: transparent;
+  color: #65676b;
+  box-shadow: none;
+}
+
+/* ไอคอนในปุ่ม */
+.canva-button i {
+  font-size: 14px;
+}
+
+/* hover – พื้นเทาอ่อนแบบ FB */
+.canva-button:hover {
+  background-color: #e4e6eb;
+  box-shadow: none;
+}
+
+/* สถานะ active แบบแท็บที่ถูกเลือกใน FB */
+.canva-button.active,
+.canva-button[aria-selected="true"] {
+  color: #1877f2;
+  background-color: #e7f3ff;
+  /* เส้นเน้นด้านล่างแบบแท็บ FB (ใช้ box-shadow จำลอง) */
+  box-shadow: inset 0 -2px 0 #1877f2;
+}
+
+/* ---- Light mode ---- */
+body.light-mode .canva-button {
+  color: #65676b;
+  background-color: transparent;
+}
+
+body.light-mode .canva-button:hover {
+  background-color: #e4e6eb;
+}
+
+body.light-mode .canva-button.active,
+body.light-mode .canva-button[aria-selected="true"] {
+  color: #1877f2;
+  background-color: #e7f3ff;
+  box-shadow: inset 0 -2px 0 #1877f2;
+}
+
+/* ---- Dark mode (เทาเข้ม + น้ำเงินอ่อนแบบ FB Dark) ---- */
+body.dark-mode .canva-button {
+  color: #e4e6eb;
+  background-color: transparent;
+}
+
+body.dark-mode .canva-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .canva-button.active,
+body.dark-mode .canva-button[aria-selected="true"] {
+  color: #4599ff;
+  background-color: rgba(24, 119, 242, 0.18);
+  box-shadow: inset 0 -2px 0 #4599ff;
+}
+
    </style>
   </head>
   <body class="light-mode">
@@ -2617,9 +2716,9 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           <div id="searchContainer">
             <input type="text" id="searchInput1" placeholder="ค้นหา ตัวกรองหลัก" />
             <input type="text" id="searchInput2" placeholder="ค้นหา ตัวกรองย่อย" />
-            <button id="searchButton" class="refresh-button">
-              <i class="fas fa-redo"></i>
-            </button>
+            <button id="searchButton" class="canva-button">
+                <i class="fas fa-redo"></i> <span>Clear</span>
+                </button>
           </div>
           <div id="error-container">
             <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -2676,8 +2775,8 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           <div id="searchContainerImages">
             <input type="text" id="searchInputImages1" placeholder="ค้นหา ตัวกรองหลัก" />
             <input type="text" id="searchInputImages2" placeholder="ค้นหา ตัวกรองย่อย" />
-            <button id="searchButtonImages" class="refresh-button-images">
-              <i class="fas fa-redo"></i>
+            <button id="searchButtonImages" class="canva-button">
+                <i class="fas fa-redo"></i> <span>Clear</span>
             </button>
           </div>
           <div id="error-container-images">
@@ -2719,7 +2818,10 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
             <!-- Toggle button for all data -->
-            <button id="toggleAllDataBtn" title="รอเบิก"><i class="fas fa-clock"></i></button>
+           <button id="toggleAllDataBtn" class="canva-button" title="รอเบิก" aria-selected="false">
+  <i class="fas fa-clock"></i>
+  <span>รอเบิก</span>
+</button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
             <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -4535,18 +4637,38 @@ searchButtonImages.addEventListener("click", () => {
         if (event.target == modal) closeModal.click();
       };
       // Toggle pending only button event
-     toggleAllDataBtn.addEventListener('click', () => {
+    toggleAllDataBtn.addEventListener('click', () => {
+  // สลับ filter
   currentFilter = currentFilter === 'pending' ? 'history' : 'pending';
+
+  const icon = toggleAllDataBtn.querySelector('i');
+  const span = toggleAllDataBtn.querySelector('span');
+
   if (currentFilter === 'pending') {
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i>';
-    toggleAllDataBtn.title = 'ประวัติเบิก';
-  } else {
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i>';
+    // โหมด "รอเบิก"
+    icon.className = 'fas fa-clock';
+    span.textContent = 'รอเบิก';
     toggleAllDataBtn.title = 'รอเบิก';
+
+    // สไตล์แท็บ Facebook: ถือว่าไม่ active (เป็น default)
+    toggleAllDataBtn.classList.remove('active');
+    toggleAllDataBtn.setAttribute('aria-selected', 'false');
+  } else {
+    // โหมด "ประวัติเบิก"
+    icon.className = 'fas fa-history';
+    span.textContent = 'ประวัติเบิก';
+    toggleAllDataBtn.title = 'ประวัติเบิก';
+
+    // สไตล์แท็บ Facebook: ให้เป็น active (น้ำเงิน + เส้นขีดล่าง)
+    toggleAllDataBtn.classList.add('active');
+    toggleAllDataBtn.setAttribute('aria-selected', 'true');
   }
-  currentPageToday = 1; // Reset page on toggle
+
+  // รีหน้า และโหลดตารางใหม่
+  currentPageToday = 1;
   updateTableToday();
 });
+
       // Items per page change event for today tab
       itemsPerPageSelectToday.addEventListener("change", () => {
         itemsPerPageToday = parseInt(itemsPerPageSelectToday.value, 10);
