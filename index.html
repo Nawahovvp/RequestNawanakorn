@@ -5379,7 +5379,7 @@ document.getElementById('install-btn').addEventListener('click', async () => {
         Swal.fire({
           icon: 'success',
           title: 'ติดตั้งสำเร็จ!',
-          text: 'PartGotest พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
+          text: 'PartsGo พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
           timer: 2000,
           showConfirmButton: false
         });
@@ -5391,7 +5391,7 @@ document.getElementById('install-btn').addEventListener('click', async () => {
 
 // ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
 window.addEventListener('appinstalled', () => {
-  console.log('PartGotest ติดตั้งแล้ว!');
+  console.log('PartsGo ติดตั้งแล้ว!');
   // Set localStorage เพื่อ persist (fallback ถ้า prompt accepted ไม่ set)
   localStorage.setItem('partgo-installed', 'true');
   // ซ่อนปุ่มถ้ามี
