@@ -6,22 +6,29 @@
   "display": "standalone",
   "background_color": "#eceff1",
   "theme_color": "#1877f2",
+  "orientation": "portrait-primary",  // เพิ่ม: แนะนำ portrait สำหรับมือถือ (iOS ชอบ)
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"  // เพิ่ม: สำหรับ maskable icons (Android/iOS)
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "icon-180.png",  // เพิ่ม: iOS-specific (resize จาก 512 ถ้าไม่มี)
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-152.png",  // เพิ่ม: iOS iPad
+      "sizes": "152x152",
+      "type": "image/png"
     }
-  ],
-  "categories": ["business", "productivity"],
-  "lang": "th-TH",
-  "orientation": "portrait-primary",
-  "prefer_related_applications": false
+  ]
 }
