@@ -1,6 +1,6 @@
 {
-  "name": "PartGo",
-  "short_name": "PartGo",
+  "name": "PartsGo",
+  "short_name": "PartsGo",
   "description": "ระบบภายในสำหรับขอสั่งอะไหล่คลังสินค้านวนคร - เครื่องมือสำหรับพนักงานเท่านั้น",
   "start_url": "/",
   "display": "standalone",
