@@ -2666,7 +2666,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
               <label for="itemsPerPage">Show</label>
               <select id="itemsPerPage">
                 <option value="10">10</option>
-                <option value="20">20</option>
+                <option value="20" selected>20</option>
                 <option value="30">30</option>
               </select>
             </div>
@@ -2709,7 +2709,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
               <label for="itemsPerPageImages">Show</label>
               <select id="itemsPerPageImages">
                 <option value="10">10</option>
-                <option value="20">20</option>
+                <option value="20" selected>20</option>
                 <option value="30">30</option>
               </select>
             </div>
@@ -2959,7 +2959,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
       let allData = [];
       let tempFilteredData = [];
       let currentPage = 1;
-      let itemsPerPage = 10;
+      let itemsPerPage = 20;
       let currentFilteredData = [];
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
@@ -2978,7 +2978,7 @@ body.dark-mode #pending-calls .pending-pagination .pending-page-number.active {
       let allDataImages = [];
       let tempFilteredDataImages = [];
       let currentPageImages = 1;
-      let itemsPerPageImages = 10;
+      let itemsPerPageImages = 20;
       let currentFilteredDataImages = [];
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
