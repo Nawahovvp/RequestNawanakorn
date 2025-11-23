@@ -2682,6 +2682,23 @@ body.dark-mode .canva-button[aria-selected="true"] {
   margin-bottom: 6px;           /* ให้มีระยะห่างกับปุ่มค้นหา */
   text-align: left;
 }
+/* Dark mode สำหรับ Settings Modal */
+body.dark-mode .settings-modal-content {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #ecf0f1;
+}
+
+body.dark-mode #modalUserTeam {
+  color: #1abc9c !important;
+}
+
+body.dark-mode .settings-modal-content div[style*="background: linear-gradient(135deg, #e3f2fd"] {
+  background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+}
+
+body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"] {
+  background: rgba(255,255,255,0.1) !important;
+}
    </style>
   </head>
   <body class="light-mode">
@@ -3019,27 +3036,62 @@ body.dark-mode .canva-button[aria-selected="true"] {
         </div>
       </div>
       <!-- Settings Modal -->
-      <div id="settingsModal" class="settings-modal">
-        <div class="settings-modal-content">
-          <span class="close-settings" id="closeSettings">&times;</span>
-          <h2>การตั้งค่า</h2>
-          <div id="userInfo">
-            <p>ชื่อผู้ใช้: <span id="modalUserName"></span></p>
-          </div>
-          <div style="text-align: left; margin: 12px 0;"> <!-- ลด margin -->
-            <label style="display: block; margin-bottom: 8px; font-weight: bold;">โหมดธีม</label> <!-- ลด margin -->
-            <select id="themeSelect" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #ccc;"> <!-- ลด padding -->
-              <option value="dark">โหมดมืด</option>
-              <option value="light">โหมดสว่าง</option>
-            </select>
-          </div>
-          <button class="modal-qr-btn" onclick="showQRCode()" title="QR Code"><i class="fas fa-qrcode"></i></button>
-          <button class="modal-logout-btn" onclick="handleLogout()" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
-          <div style="margin-top: 12px; padding: 8px; background: #e8f4fc; border-radius: 6px; font-size: 11px; color: #0d4a75; text-align: center;">
-    <p style="margin-top: 8px; font-weight: bold; color: #1a3c87;">© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
-  </div>
+<div id="settingsModal" class="settings-modal">
+  <div class="settings-modal-content">
+    <span class="close-settings" id="closeSettings">&times;</span>
+    <h2><i class="fas fa-cog"></i> การตั้งค่า</h2>
+
+    <!-- ข้อมูลผู้ใช้ -->
+    <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24, 118, 242, 0.15);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="width: 60px; height: 60px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+          <i class="fas fa-user"></i>
+        </div>
+        <div>
+          <div style="font-weight: bold; font-size: 16px; color: #0d47a1;" id="modalUserName">ชื่อผู้ใช้</div>
+          <div style="font-size: 13px; color: #555; margin-top: 2px;">รหัสพนักงาน: <span id="modalUserID">-</span></div>
         </div>
       </div>
+      <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <i class="fas fa-building" style="color: #1976d2;"></i>
+          <strong>หน่วยงาน:</strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- เลือกธีม -->
+    <div style="margin: 20px 0;">
+      <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
+        <i class="fas fa-palette"></i> โหมดธีม
+      </label>
+      <select id="themeSelect" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 15px; background: white;">
+        <option value="light">โหมดสว่าง (Light)</option>
+        <option value="dark">โหมดมืด (Dark)</option>
+      </select>
+    </div>
+
+    <!-- ปุ่ม QR Code และ ออกจากระบบ -->
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <button class="modal-qr-btn" onclick="showQRCode()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
+        <i class="fas fa-qrcode"></i> QR Code เข้าหน้าเว็บ
+      </button>
+      <button class="modal-logout-btn" onclick="handleLogout()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+    </div>
+
+    <!-- Footer ลิขสิทธิ์ -->
+    <div style="margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 12px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(13, 71, 161, 0.3);">
+      <p style="margin: 4px 0; font-weight: bold;">
+        © 2025 คลังสินค้า SparePart วิภาวดี 62
+      </p>
+      <p style="margin: 4px 0; opacity: 0.9;">
+        สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น
+      </p>
+    </div>
+  </div>
+</div>
       <!-- Bottom Navigation (Removed Setting Button) -->
       <div class="bottom-nav">
         <button class="nav-btn active" id="nav-parts" data-tab="parts" onclick="showTab('parts')" data-label="ค้นหาอะไหล่"><i class="fas fa-search"></i></button>
@@ -3191,16 +3243,39 @@ body.dark-mode .canva-button[aria-selected="true"] {
           document.getElementById('themeSelect').value = theme;
         }
       }
-      function showSettings() {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        document.getElementById('modalUserName').textContent = localStorage.getItem('userName') || '';
-        document.getElementById('themeSelect').value = currentTheme;
-        document.getElementById('settingsModal').style.display = 'block';
-        // Add event for theme change in modal
-        document.getElementById('themeSelect').onchange = (e) => {
-          setTheme(e.target.value);
-        };
-      }
+      async function showSettings() {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  const savedUsername = localStorage.getItem('username');
+  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+
+  // แสดงข้อมูลพื้นฐาน
+  document.getElementById('modalUserName').textContent = savedUserName;
+  document.getElementById('modalUserID').textContent = savedUsername || '-';
+  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+  document.getElementById('themeSelect').value = currentTheme;
+
+  // ดึงหน่วยงาน
+  try {
+    if (employeeData.length === 0) {
+      employeeData = await loadEmployeeData();
+    }
+    const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+  } catch (err) {
+    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+    document.getElementById('modalUserTeam').style.color = '#e74c3c';
+  }
+
+  // เปิด Modal
+  document.getElementById('settingsModal').style.display = 'block';
+
+  // ← สำคัญมาก: ผูก event ทุกครั้งที่เปิด Settings (เพราะบางที DOM อาจถูกสร้างใหม่)
+  document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
+  document.getElementById('themeSelect').addEventListener('change', function(e) {
+    setTheme(e.target.value);
+  });
+}
       // Close settings modal
       document.getElementById('closeSettings').onclick = () => {
         document.getElementById('settingsModal').style.display = 'none';
