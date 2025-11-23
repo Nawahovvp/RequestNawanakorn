@@ -2837,7 +2837,7 @@ body.dark-mode .canva-button[aria-selected="true"] {
             <!-- Toggle button for all data -->
            <button id="toggleAllDataBtn" class="canva-button" title="รอเบิก" aria-selected="false">
   <i class="fas fa-clock"></i>
-  <span>รอเบิก</span>
+  <span>ประวัติเบิก</span>
 </button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
@@ -4664,7 +4664,7 @@ searchButtonImages.addEventListener("click", () => {
   if (currentFilter === 'pending') {
     // โหมด "รอเบิก"
     icon.className = 'fas fa-clock';
-    span.textContent = 'รอเบิก';
+    span.textContent = 'ประวัติเบิก';
     toggleAllDataBtn.title = 'รอเบิก';
 
     // สไตล์แท็บ Facebook: ถือว่าไม่ active (เป็น default)
@@ -4673,7 +4673,7 @@ searchButtonImages.addEventListener("click", () => {
   } else {
     // โหมด "ประวัติเบิก"
     icon.className = 'fas fa-history';
-    span.textContent = 'ประวัติเบิก';
+    span.textContent = 'รอเบิก';
     toggleAllDataBtn.title = 'ประวัติเบิก';
 
     // สไตล์แท็บ Facebook: ให้เป็น active (น้ำเงิน + เส้นขีดล่าง)
