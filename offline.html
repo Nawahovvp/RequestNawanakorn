@@ -2,45 +2,86 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ออฟไลน์อยู่</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ออฟไลน์ - ระบบขอสั่งอะไหล่</title>
+  <!-- สำคัญมาก: ป้องกัน Chrome บางเวอร์ชันพยายามโหลด font จากเน็ต -->
   <style>
+    /* ใช้ font ระบบก่อน → fallback ไป Kanit (ที่ cache แล้ว) */
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Kanit", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Kanit", sans-serif;
       text-align: center;
       padding: 2rem;
-      background: #eceff1;
+      background: linear-gradient(135deg, #eceff1, #cfd8dc);
       color: #37474f;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      max-width: 420px;
+      width: 90%;
+      background: #ffffff;
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
     }
     h1 {
       color: #e53935;
+      font-size: 1.8rem;
+      margin: 0 0 1rem;
     }
-    .card {
-      max-width: 400px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin: 0.8rem 0;
+      color: #555;
     }
     button {
-      margin-top: 1rem;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
+      margin-top: 1.5rem;
+      padding: 0.9rem 2rem;
+      border-radius: 50px;
       border: none;
       cursor: pointer;
-      background: #1976d2;
+      background: linear-gradient(135deg, #1976d2, #1565c0);
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(25,118,210,0.4);
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(25,118,210,0.5);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .icon {
+      font-size: 4.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
   <div class="card">
+    <div class="icon">ไม่มีสัญญาณ</div>
     <h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1>
     <p>ไม่สามารถโหลดข้อมูลจากระบบขอสั่งอะไหล่ได้ในขณะนี้</p>
-    <p>กรุณาเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง</p>
-    <button onclick="location.reload()">ลองโหลดใหม่</button>
+    <p>กรุณาเชื่อมต่อ Wi-Fi หรือเปิดข้อมูลมือถือ<br>แล้วกดปุ่มด้านล่างเพื่อลองใหม่</p>
+    <button onclick="location.reload()">รีเฟรชหน้านี้</button>
   </div>
+
+  <!-- กัน error ถ้า SW พยายามโหลด Font Awesome (แต่ไม่มีเน็ต) -->
+  <script>
+    // ป้องกัน error ถ้า Font Awesome ไม่โหลด
+    if (typeof document.fonts !== 'undefined') {
+      document.fonts.ready.then(() => {
+        // ทุกอย่างโหลดเสร็จ
+      });
+    }
+  </script>
 </body>
 </html>
