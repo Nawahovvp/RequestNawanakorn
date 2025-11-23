@@ -5815,25 +5815,102 @@ async function showSettings() {
   document.getElementById('themeSelect').onchange = (e) => setTheme(e.target.value);
 }
 
-// แสดงประกาศหลังล็อกอินสำเร็จ (ทุกคนเห็น)
-function showSystemAnnouncement() {
-  const msg = localStorage.getItem('systemAnnouncement');
-  if (msg && msg.trim() !== '') {
-    const formattedMsg = msg.replace(/\n/g, '<br>');
-    Swal.fire({
-      title: '<i class="fas fa-bullhorn" style="color:#e74c3c;"></i> ประกาศจากผู้ดูแลระบบ',
-      html: `<div style="text-align:left; padding:10px; font-size:16px;">${formattedMsg}</div>`,
-      confirmButtonText: 'รับทราบ',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      width: '650px',
-      background: document.body.classList.contains('dark-mode') ? '#2c3e50' : '#fff8e1',
-      customClass: {
-        popup: 'animated fadeInDown'
-      }
-    });
+/// —— เปลี่ยนตรงนี้เป็น Sheet ID ของคุณ ——
+const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o"; // ใส่ ID ของคุณตรงนี้
+const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
+
+// ดึงประกาศจาก Google Sheets
+async function loadSystemAnnouncement() {
+  try {
+    const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
+    const data = await response.json();
+
+    if (data && data.length > 0 && data[0].message && data[0].message.trim() !== "") {
+      const message = data[0].message.trim();
+      const updatedBy = data[0].updatedBy || "ผู้ดูแลระบบ";
+      const updatedAt = data[0].updatedAt || "ไม่ระบุวันที่";
+
+      // แปลง \n เป็น <br> ธรรมดา
+      const messageHtml = message.replace(/\n/g, '<br>');
+
+      Swal.fire({
+        title: `
+          <div style="font-size: 28px; font-weight: 700; color: #2c3e50; margin-bottom: 10px;">
+            ประกาศจากคลังสินค้า
+          </div>
+        `,
+        html: `
+          <div style="text-align: center; line-height: 2; font-size: 18px; color: #2d3436;">
+            <div style="margin: 20px 0;">
+              <strong>วันที่ :</strong> ${updatedAt}
+            </div>
+            <div style="margin-top: 20px; color: #636e72; font-size: 17px;">
+              ${updatedBy}
+            </div>
+            <div style="margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+              ${messageHtml}
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'รับทราบ',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        width: '90%',
+        maxWidth: '560px',
+        padding: '40px 30px',
+        background: '#ffffff',
+        customClass: {
+          popup: 'animated fadeIn faster'
+        },
+        buttonsStyling: false,
+        didOpen: () => {
+          const btn = Swal.getConfirmButton();
+          btn.style.cssText = `
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            color: white !important;
+            padding: 16px 60px !important;
+            border-radius: 50px !important;
+            font-size: 19px !important;
+            font-weight: 700 !important;
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45) !important;
+            border: none !important;
+            margin-top: 15px !important;
+          `;
+        }
+      });
+    }
+  } catch (error) {
+    console.log("ไม่มีประกาศหรือโหลดไม่ได้:", error);
   }
 }
+// บันทึกประกาศ (เฉพาะ 7512411)
+function openAnnouncementEditor() {
+  const currentMsg = ''; // ไม่ต้องดึงจาก localStorage อีกแล้ว
+  Swal.fire({
+    title: 'ตั้งค่าประกาศถึงพนักงาน',
+    html: `<textarea id="announcementText" class="swal2-textarea" style="height:200px;">${currentMsg}</textarea>`,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกประกาศ',
+    preConfirm: () => {
+      const text = document.getElementById('announcementText').value.trim();
+      if (!text) {
+        Swal.showValidationMessage('กรุณากรอกข้อความประกาศ');
+        return false;
+      }
+      // บันทึกลง Google Sheets ผ่าน GAS (ต้องมี GAS ง่าย ๆ ตัวนึง)
+      fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateAnnouncement', message: text })
+      }).then(() => {
+        Swal.fire('สำเร็จ!', 'ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที', 'success');
+        setTimeout(() => loadSystemAnnouncement(), 2000);
+      });
+    }
+  });
+}
+
+// เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
+setTimeout(() => loadSystemAnnouncement(), 1000);
     </script>
   </body>
 </html>
