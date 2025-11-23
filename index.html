@@ -3039,25 +3039,32 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
 <div id="settingsModal" class="settings-modal">
   <div class="settings-modal-content">
     <span class="close-settings" id="closeSettings">&times;</span>
-    <h2><i class="fas fa-cog"></i> การตั้งค่า</h2>
+    <h2>การตั้งค่า</h2>
 
     <!-- ข้อมูลผู้ใช้ -->
-    <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24, 118, 242, 0.15);">
+    <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24,118,242,0.15);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-        <div style="width: 60px; height: 60px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+        <div style="width: 60px; height: 60px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
           <i class="fas fa-user"></i>
         </div>
         <div>
           <div style="font-weight: bold; font-size: 16px; color: #0d47a1;" id="modalUserName">ชื่อผู้ใช้</div>
-          <div style="font-size: 13px; color: #555; margin-top: 2px;">รหัสพนักงาน: <span id="modalUserID">-</span></div>
+          <div style="font-size: 13px; color: #555;">รหัสพนักงาน: <span id="modalUserID">-</span></div>
         </div>
       </div>
       <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
           <i class="fas fa-building" style="color: #1976d2;"></i>
           <strong>หน่วยงาน:</strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
         </div>
       </div>
+    </div>
+
+    <!-- ปุ่มประกาศ (เฉพาะ 7512411) -->
+    <div id="adminAnnouncementSection" style="display: none; margin: 20px 0;">
+      <button onclick="openAnnouncementEditor()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 16px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(231,76,60,0.4);">
+        <i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน
+      </button>
     </div>
 
     <!-- เลือกธีม -->
@@ -3071,24 +3078,18 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       </select>
     </div>
 
-    <!-- ปุ่ม QR Code และ ออกจากระบบ -->
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button class="modal-qr-btn" onclick="showQRCode()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
-        <i class="fas fa-qrcode"></i> QR Code เข้าหน้าเว็บ
+        <i class="fas fa-qrcode"></i> QR Code
       </button>
       <button class="modal-logout-btn" onclick="handleLogout()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
         <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
       </button>
     </div>
 
-    <!-- Footer ลิขสิทธิ์ -->
-    <div style="margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 12px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(13, 71, 161, 0.3);">
-      <p style="margin: 4px 0; font-weight: bold;">
-        © 2025 คลังสินค้า SparePart วิภาวดี 62
-      </p>
-      <p style="margin: 4px 0; opacity: 0.9;">
-        สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น
-      </p>
+    <div style="margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 12px; text-align: center; font-size: 11px;">
+      <p style="margin: 4px 0; font-weight: bold;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
+      <p style="margin: 4px 0; opacity: 0.9;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
     </div>
   </div>
 </div>
@@ -3355,6 +3356,10 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             }
             checkLoginStatus();
             // Focus on search input after login
+            // เพิ่ม 2 บรรทัดนี้ เพื่อแสดงประกาศทันทีหลังล็อกอินสำเร็จ
+            setTimeout(() => {
+              showSystemAnnouncement();
+              }, 800);
             setTimeout(() => {
               const searchInput = document.getElementById('searchInput1');
               if (searchInput) searchInput.focus();
@@ -5744,6 +5749,91 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
   deferredPrompt = null;
 });
+  // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
+function openAnnouncementEditor() {
+  const currentMsg = localStorage.getItem('systemAnnouncement') || '';
+  
+  Swal.fire({
+    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
+    html: `
+      <textarea id="announcementText" class="swal2-textarea" style="height: 180px; font-size: 15px;" placeholder="พิมพ์ข้อความประกาศ...">${currentMsg}</textarea>
+      <div style="margin-top: 10px; text-align: right; color: #666; font-size: 12px;">
+        สามารถใช้ \n เพื่อขึ้นบรรทัดใหม่
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกประกาศ',
+    cancelButtonText: 'ยกเลิก',
+    width: '600px',
+    preConfirm: () => {
+      const text = document.getElementById('announcementText').value.trim();
+      localStorage.setItem('systemAnnouncement', text);
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกสำเร็จ',
+        text: 'ประกาศใหม่จะแสดงทันทีที่ทุกคนล็อกอิน',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  });
+}
+
+// แก้ไข showSettings() เพื่อแสดงปุ่มเฉพาะ 7512411
+async function showSettings() {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  const savedUsername = localStorage.getItem('username');
+  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+
+  document.getElementById('modalUserName').textContent = savedUserName;
+  document.getElementById('modalUserID').textContent = savedUsername || '-';
+  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+  document.getElementById('themeSelect').value = currentTheme;
+
+  // ดึงหน่วยงาน
+  try {
+    if (employeeData.length === 0) employeeData = await loadEmployeeData();
+    const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
+    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+  } catch (err) {
+    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+    document.getElementById('modalUserTeam').style.color = '#e74c3c';
+  }
+
+  // แสดงปุ่มประกาศเฉพาะ 7512411
+  const adminSection = document.getElementById('adminAnnouncementSection');
+  if (savedUsername === '7512411') {
+    adminSection.style.display = 'block';
+  } else {
+    adminSection.style.display = 'none';
+  }
+
+  document.getElementById('settingsModal').style.display = 'block';
+
+  // ผูก event เปลี่ยนธีม
+  document.getElementById('themeSelect').onchange = (e) => setTheme(e.target.value);
+}
+
+// แสดงประกาศหลังล็อกอินสำเร็จ (ทุกคนเห็น)
+function showSystemAnnouncement() {
+  const msg = localStorage.getItem('systemAnnouncement');
+  if (msg && msg.trim() !== '') {
+    const formattedMsg = msg.replace(/\n/g, '<br>');
+    Swal.fire({
+      title: '<i class="fas fa-bullhorn" style="color:#e74c3c;"></i> ประกาศจากผู้ดูแลระบบ',
+      html: `<div style="text-align:left; padding:10px; font-size:16px;">${formattedMsg}</div>`,
+      confirmButtonText: 'รับทราบ',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      width: '650px',
+      background: document.body.classList.contains('dark-mode') ? '#2c3e50' : '#fff8e1',
+      customClass: {
+        popup: 'animated fadeInDown'
+      }
+    });
+  }
+}
     </script>
   </body>
 </html>
