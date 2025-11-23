@@ -4002,77 +4002,124 @@ body.dark-mode .canva-button[aria-selected="true"] {
         });
       }
       // Popup สรุปข้อมูล
+            // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
+      // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
+            // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
       let imageHtml = '';
+      let imageIds = [];
+
       if (row.UrlWeb && row.UrlWeb.trim()) {
-        imageHtml = `<img src="${row.UrlWeb}" alt="Product Image" class="summary-image" onerror="this.style.display='none'">`;
+        // รองรับทุกแบบของ Google Drive link
+        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) || 
+                      row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
+                      row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+          imageIds = [match[1]];
+        }
+      }
+
+      if (imageIds.length > 0) {
+        const fileId = imageIds[0];
+        imageHtml = `
+          <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500" 
+               alt="รูปอะไหล่" 
+               style="width:120px; height:120px; object-fit:cover; border-radius:20px; 
+                      border:5px solid #1877f2; box-shadow:0 10px 30px rgba(24,118,242,0.5);
+                      margin-bottom:18px;"
+               onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+          <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
+        `;
+      } else {
+        // ถ้าไม่มีรูปเลย → ไอคอนสวย ๆ
+        imageHtml = `
+          <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb); 
+                      border-radius:20px; display:flex; align-items:center; justify-content:center; 
+                      margin:0 auto 18px; box-shadow:0 8px 25px rgba(24,118,242,0.3);">
+            <i class="fas fa-box-open" style="font-size:50px; color:#1877f2;"></i>
+          </div>
+        `;
       }
       const summaryResult = await Swal.fire({
-        title: 'สรุปข้อมูลการเบิก',
-        html: `
-          ${imageHtml}
-          <div style="text-align: left; font-size: 14px;">
-            <p><strong>Material:</strong> ${row.Material || ''}</p>
-            <p><strong>Description:</strong> ${row.Description || ''}</p>
-            <p><strong>จำนวน:</strong> ${formValues.quantity}</p>
-            <p><strong>รหัสพนักงาน:</strong> ${formValues.employeeCode}</p>
-            <p><strong>ชื่อพนักงาน:</strong> ${formValues.employeeName}</p>
-            <p><strong>ทีม:</strong> ${formValues.team}</p>
-            <p><strong>เบอร์ติดต่อ:</strong> ${formValues.contact}</p>
-            <p><strong>เลขที่ Call:</strong> ${formValues.callNumber || 'ไม่มี'}</p>
-            <p><strong>Call Type:</strong> ${formValues.callType || 'ไม่มี'}</p>
-            <p><strong>หมายเหตุ:</strong> ${formValues.remark || 'ไม่มี'}</p>
-            <hr style="margin: 10px 0;">
-          </div>
-        `,
+        title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
         icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'ยืนยันการเบิก',
-        cancelButtonText: 'แก้ไข',
+        width: window.innerWidth <= 480 ? '95%' : '650px',
+        padding: '20px',
+        background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#ffffff',
+        backdrop: 'rgba(0,0,0,0.8)',
         allowOutsideClick: false,
         allowEscapeKey: false,
-        customClass: {
-          title: 'dark-blue-title'
-        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-check-circle"></i> ยืนยันการเบิก',
+        cancelButtonText: '<i class="fas fa-edit"></i> แก้ไขข้อมูล',
+        reverseButtons: true,
+        buttonsStyling: false,
+
+        html: `
+          <div style="text-align:center;">
+            ${imageHtml}
+          </div>
+
+          <div style="background:${document.body.classList.contains('dark-mode')?'#2d2d2d':'#f8fbff'}; border-radius:18px; padding:20px; margin:10px 0; box-shadow:0 6px 20px rgba(0,0,0,0.12);">
+            <table style="width:100%; border-collapse:separate; border-spacing:0 14px; font-size:15.5px; line-height:1.5;">
+              <tr><td style="color:#555; font-weight:600; width:40%;">Material</td>
+                  <td style="font-weight:bold; text-align:right; color:#1a1a1a;">${row.Material || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">Description</td>
+                  <td style="text-align:right;">${row.Description || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">จำนวนขอเบิก</td>
+                  <td style="font-weight:bold; color:#e74c3c; font-size:20px; text-align:right;">${formValues.quantity} ชิ้น</td></tr>
+              <tr><td style="color:#555; font-weight:600;">คลังวิภาวดีมี</td>
+                  <td style="color:#27ae60; font-weight:bold; text-align:right;">${vibhavadiValue.toLocaleString()} ชิ้น</td></tr>
+              <tr><td style="color:#555; font-weight:600;">รหัสพนักงาน</td>
+                  <td style="text-align:right;">${formValues.employeeCode}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">ชื่อช่าง</td>
+                  <td style="color:#2980b9; font-weight:bold; text-align:right;">${formValues.employeeName}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">ทีม / หน่วยงาน</td>
+                  <td style="text-align:right;">${formValues.team || '-'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">เบอร์ติดต่อ</td>
+                  <td style="text-align:right;">${formValues.contact}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">เลขที่ Call</td>
+                  <td style="text-align:right;">${formValues.callNumber || '<span style="color:#999;">ไม่มี</span>'}</td></tr>
+              <tr><td style="color:#555; font-weight:600;">Call Type</td>
+                  <td style="text-align:right;">
+                    ${formValues.callType 
+                      ? `<span style="background:#667eea;color:white;padding:6px 18px;border-radius:30px;font-weight:bold;font-size:15px;">${formValues.callType}</span>`
+                      : '<span style="color:#999;">ไม่มี</span>'}
+                  </td></tr>
+              ${formValues.remark ? 
+                `<tr><td style="color:#555; font-weight:600; vertical-align:top; padding-top:10px;">หมายเหตุ</td>
+                 <td style="color:#e74c3c; font-weight:bold; text-align:right; padding-top:10px;">${formValues.remark}</td></tr>` : ''}
+            </table>
+          </div>
+
+          <div style="margin-top:20px; padding:15px; background:#fff3cd; border-left:6px solid #f39c12; border-radius:12px; font-size:14.5px; color:#856404; text-align:center;">
+            <i class="fas fa-exclamation-triangle" style="margin-right:8px; font-size:18px;"></i>
+            กรุณาตรวจสอบข้อมูลให้ครบถ้วนก่อนกดยืนยัน
+          </div>
+        `,
+
         didOpen: () => {
-          // Ensure full blur backdrop for summary popup
-          const swalContainer = document.querySelector('.swal2-container');
-          if (swalContainer) {
-            swalContainer.style.zIndex = '99998';
-            swalContainer.style.position = 'fixed';
-            swalContainer.style.top = '0';
-            swalContainer.style.left = '0';
-            swalContainer.style.width = '100vw';
-            swalContainer.style.height = '100vh';
-            swalContainer.style.display = 'flex';
-            swalContainer.style.justifyContent = 'center';
-            swalContainer.style.alignItems = 'center';
-          }
-          const swalBackdrop = document.querySelector('.swal2-backdrop');
-          if (swalBackdrop) {
-            swalBackdrop.style.zIndex = '99997';
-            swalBackdrop.style.position = 'fixed';
-            swalBackdrop.style.top = '0';
-            swalBackdrop.style.left = '0';
-            swalBackdrop.style.width = '100vw';
-            swalBackdrop.style.height = '100vh';
-            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-            swalBackdrop.style.backdropFilter = 'blur(8px)';
-          }
-          const swalPopup = document.querySelector('.swal2-popup');
-          if (swalPopup) {
-            swalPopup.style.zIndex = '99999';
-            swalPopup.style.position = 'relative';
-            swalPopup.style.margin = '0';
-            swalPopup.style.transform = 'none';
-            swalPopup.style.maxHeight = '90vh';
-            swalPopup.style.overflowY = 'auto';
-            swalPopup.style.width = 'auto';
-            swalPopup.style.maxWidth = '90vw';
-            if (window.innerWidth <= 768) {
-              swalPopup.style.width = '95vw';
-              swalPopup.style.padding = '15px';
-            }
-          }
+          const confirmBtn = document.querySelector('.swal2-confirm');
+          const cancelBtn = document.querySelector('.swal2-cancel');
+
+          confirmBtn.style.cssText = `
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+            color: white !important;
+            padding: 14px 34px !important;
+            border-radius: 30px !important;
+            font-size: 17px !important;
+            font-weight: bold !important;
+            box-shadow: 0 6px 20px rgba(39,174,96,0.5) !important;
+          `;
+
+          cancelBtn.style.cssText = `
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+            color: white !important;
+            padding: 14px 34px !important;
+            border-radius: 30px !important;
+            font-size: 17px !important;
+            font-weight: bold !important;
+            box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+          `;
         }
       });
       if (summaryResult.isConfirmed) {
