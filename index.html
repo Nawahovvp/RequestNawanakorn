@@ -5827,85 +5827,139 @@ async function showSettings() {
 /// —— เปลี่ยนตรงนี้เป็น Sheet ID ของคุณ ——
 const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o"; // ใส่ ID ของคุณตรงนี้
 const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
+function parseDdMmYyyyWithTime(dateTimeStr) {
+  if (!dateTimeStr) return null;
 
+  // รูปแบบ: "18/11/2025, 21:58:07"
+  const [datePart, timePart] = dateTimeStr.split(',');
+  if (!datePart) return null;
+
+  const [dayStr, monthStr, yearStr] = datePart.trim().split('/');
+  const day = parseInt(dayStr, 10);
+  const month = parseInt(monthStr, 10);
+  const year = parseInt(yearStr, 10);
+
+  let hours = 0, minutes = 0, seconds = 0;
+  if (timePart) {
+    const [hStr, mStr, sStr] = timePart.trim().split(':');
+    hours = parseInt(hStr || '0', 10);
+    minutes = parseInt(mStr || '0', 10);
+    seconds = parseInt(sStr || '0', 10);
+  }
+
+  // ตรวจสอบความถูกต้องของตัวเลข
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+  // month - 1 เพราะ JS ใช้เดือน 0-11
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+}
 // ดึงประกาศจาก Google Sheets
 async function loadSystemAnnouncement() {
   try {
     const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
     const data = await response.json();
 
-    if (data && data.length > 0 && data[0].message && data[0].message.trim() !== "") {
-      const message = data[0].message.trim();
-      const updatedBy = data[0].updatedBy || "ผู้ดูแลระบบ";
-      const updatedAt = data[0].updatedAt || "ไม่ระบุวันที่";
-
-      // แปลง \n เป็น <br> ธรรมดา
-       const messageHtml = message
-  .replace(/\n\n+/g, '</p><p style="margin:16px 0;">')  // ย่อหน้าใหม่
-  .replace(/\n/g, '<br>')
-  .replace(/^/, '<p style="margin:0; line-height:1.8;">')
-  .replace(/$/, '</p>');
-
-      Swal.fire({
-       html: `
-    <!-- บังคับให้หัวข้อเป็นสีน้ำเงินแน่นอน 100% -->
-    <div style="
-      font-size: 28px; 
-      font-weight: 700; 
-      color: #0066cc !important; 
-      margin-bottom: 12px;
-      text-align: center;
-      text-shadow: 0 1px 3px rgba(0,102,204,0.3);
-    ">
-      ประกาศจากคลังวิภาวดี 62
-    </div>
-
-    <div style="text-align: center; line-height: 1.6; font-size: 18px; color: #2d3436;">
-      <div style="margin: 12px 0;">
-        <strong>วันที่ :</strong> ${updatedAt}
-      </div>
-
-      <div style="
-        margin: 10px 0;
-        padding: 18px 22px;
-        background: #f8f9fa;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        line-height: 1.7;
-        font-size: 17.5px;
-      ">
-        ${messageHtml}
-      </div>
-    </div>
-  `,
-        confirmButtonText: 'รับทราบ',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        width: '560px',
-        padding: '40px 30px',
-        background: '#ffffff',
-        customClass: {
-          popup: 'animated fadeIn faster'
-        },
-        buttonsStyling: false,
-        didOpen: () => {
-          const btn = Swal.getConfirmButton();
-          btn.style.cssText = `
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
-            color: white !important;
-            padding: 16px 60px !important;
-            border-radius: 50px !important;
-            font-size: 19px !important;
-            font-weight: 700 !important;
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45) !important;
-            border: none !important;
-            margin-top: 15px !important;
-          `;
-        }
-      });
+    // ถ้าไม่มีประกาศ → ไม่ต้องทำอะไร
+    if (!data || data.length === 0 || !data[0].message) {
+      return;
     }
+
+    const message = data[0].message.trim();
+    const updatedAt = data[0].updatedAt || "";
+
+    if (message === "" || updatedAt === "") return;
+
+    // --------------------------------------------
+    // ✅ แปลงวันที่ด้วยฟังก์ชัน parseDdMmYyyyWithTime
+    // --------------------------------------------
+    const today = new Date();
+    const updatedTime = parseDdMmYyyyWithTime(updatedAt);
+
+    if (!updatedTime || isNaN(updatedTime.getTime())) {
+      console.log("⏹ ฟอร์แมตวันที่อ่านไม่ได้:", updatedAt);
+      return;
+    }
+
+    const diffDays = Math.floor((today - updatedTime) / (1000 * 60 * 60 * 24));
+
+    console.log("ตรวจสอบประกาศ:", { today, updatedTime, updatedAt, diffDays });
+
+    // --------------------------------------------
+    // 🔥 ถ้าเกิน 2 วัน ไม่ต้องแสดงประกาศ
+    // --------------------------------------------
+    if (diffDays > 2) {
+      console.log("⏹ ประกาศเก่าเกิน 2 วัน – ไม่แสดง");
+      return;
+    }
+
+    // --------------------------------------------
+    // จัดรูปแบบข้อความให้รองรับ \n และย่อหน้า
+    // --------------------------------------------
+    const messageHtml = message
+      .replace(/\n\n+/g, '</p><p style="margin:16px 0;">')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p style="margin:0; line-height:1.8;">')
+      .replace(/$/, '</p>');
+
+    // --------------------------------------------
+    // 🔔 แสดง Swal
+    // --------------------------------------------
+    Swal.fire({
+      html: `
+        <div style="
+          font-size: 28px; 
+          font-weight: 700; 
+          color: #0066cc !important; 
+          margin-bottom: 12px;
+          text-align: center;
+          text-shadow: 0 1px 3px rgba(0,102,204,0.3);
+        ">
+          ประกาศจากคลังวิภาวดี 62
+        </div>
+
+        <div style="text-align: center; line-height: 1.6; font-size: 18px; color: #2d3436;">
+          <div style="margin: 12px 0;">
+            <strong>วันที่ :</strong> ${updatedAt}
+          </div>
+
+          <div style="
+            margin: 10px 0;
+            padding: 18px 22px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            line-height: 1.7;
+            font-size: 17.5px;
+          ">
+            ${messageHtml}
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'รับทราบ',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      width: '560px',
+      padding: '40px 30px',
+      background: '#ffffff',
+      buttonsStyling: false,
+      didOpen: () => {
+        const btn = Swal.getConfirmButton();
+        btn.style.cssText = `
+          background: linear-gradient(135deg, #667eea, #764ba2) !important;
+          color: white !important;
+          padding: 16px 60px !important;
+          border-radius: 50px !important;
+          font-size: 19px !important;
+          font-weight: 700 !important;
+          box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45) !important;
+          border: none !important;
+          margin-top: 15px !important;
+        `;
+      }
+    });
+
   } catch (error) {
-    console.log("ไม่มีประกาศหรือโหลดไม่ได้:", error);
+    console.log("โหลดประกาศไม่ได้:", error);
   }
 }
 // บันทึกประกาศ (เฉพาะ 7512411)
