@@ -3991,16 +3991,77 @@ body.dark-mode .canva-button[aria-selected="true"] {
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
       // เช็คเงื่อนไขเตือน
+           // เช็คเงื่อนไขเตือน – เวอร์ชันสวย + กดยกเลิก = ออกจากการเบิกทันที
       if (quantity <= vibhavadiValue) {
-        await Swal.fire({
+        const warningResult = await Swal.fire({
+          title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
           icon: 'warning',
-          title: '⚠️ คำเตือน',
-          text: `ที่คลังวิภาวดีมีอะไหล่ ${vibhavadiValue.toLocaleString()} ชิ้น (จำนวนที่เบิก ${quantity} ชิ้น)`,
-          confirmButtonText: 'ยืนยันดำเนินการต่อ',
+          iconColor: '#f39c12',
+          width: window.innerWidth <= 480 ? '90%' : '560px',
+          padding: '30px 20px',
+          background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
+          backdrop: 'rgba(0,0,0,0.85)',
           allowOutsideClick: false,
-          allowEscapeKey: false
+          allowEscapeKey: false,
+          showCancelButton: true,
+          confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
+          cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+          reverseButtons: true,
+          buttonsStyling: false,
+
+          html: `
+            <div style="text-align:center; margin:20px 0;">
+              <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
+              <div style="font-size:18px; font-weight:600; color:#e67e22; margin:15px 0;">
+                คลังวิภาวาวดีมีอะไหล่อยู่
+              </div>
+              <div style="font-size:32px; font-weight:bold; color:#e74c3c; margin:10px 0;">
+                ${vibhavadiValue.toLocaleString()} ชิ้น
+              </div>
+              <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
+                แต่คุณกำลังขอเบิก <strong style="color:#e74c3c;">${quantity} ชิ้น</strong>
+              </div>
+              <div style="margin-top:20px; padding:16px; background:#fff9e6; border-left:6px solid #f39c12; border-radius:12px; font-size:15px; color:#d35400;">
+                <i class="fas fa-info-circle"></i> 
+                ระบบจะดึงจากคลังนวนครแทน (ถ้ามีของ)
+              </div>
+            </div>
+          `,
+
+          didOpen: () => {
+            const confirmBtn = document.querySelector('.swal2-confirm');
+            const cancelBtn   = document.querySelector('.swal2-cancel');
+
+            confirmBtn.style.cssText = `
+              background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+              color: white !important;
+              padding: 14px 36px !important;
+              border-radius: 30px !important;
+              font-size: 17px !important;
+              font-weight: bold !important;
+              box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
+            `;
+
+            cancelBtn.style.cssText = `
+              background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+              color: white !important;
+              padding: 14px 36px !important;
+              border-radius: 30px !important;
+              font-size: 17px !important;
+              font-weight: bold !important;
+              box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+            `;
+          }
         });
+
+        // ถ้ากด "ยกเลิก" → ปิดหน้าต่างเบิกทั้งหมด แล้วหยุดทุกอย่าง
+        if (warningResult.isDismissed || warningResult.dismiss === Swal.DismissReason.cancel) {
+          Swal.close();  // ปิด Swal หลัก (หน้าต่าง 📋 เบิกอะไหล่นวนคร)
+          return;        // หยุดการทำงานทั้งหมด ไม่ไปสรุปข้อมูล ไม่ส่ง GAS
+        }
+        // ถ้ากด "ยืนยันเบิกต่อ" → ดำเนินการต่อไปตามปกติ
       }
+      
       // Popup สรุปข้อมูล
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
@@ -4122,6 +4183,13 @@ body.dark-mode .canva-button[aria-selected="true"] {
         }
       });
       if (summaryResult.isConfirmed) {
+        // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
+        const detailModal = document.getElementById('imageModal');
+        if (detailModal) detailModal.style.display = 'none';
+
+        const imageModalImages = document.getElementById('imageModalImages');
+        if (imageModalImages) imageModalImages.style.display = 'none';
+        // สร้าง JSON payload
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
