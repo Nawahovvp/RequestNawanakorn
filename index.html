@@ -4206,6 +4206,15 @@ body.dark-mode .canva-button[aria-selected="true"] {
               confirmButtonText: 'OK'
             }).then((result) => {
               if (result.isConfirmed) {
+                // ปิด Modal รายละเอียดอะไหล่ (ทั้ง #parts และ #images) ถ้าเปิดอยู่
+                const imageModal = document.getElementById('imageModal');
+                const imageModalImages = document.getElementById('imageModalImages');
+                if (imageModal && imageModal.style.display === 'block') {
+                  imageModal.style.display = 'none';
+                }
+                if (imageModalImages && imageModalImages.style.display === 'block') {
+                  imageModalImages.style.display = 'none';
+                }
                 Swal.fire({
                   title: 'กำลังเปลี่ยนหน้า...',
                   html: `
