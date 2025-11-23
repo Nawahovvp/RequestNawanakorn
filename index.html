@@ -3727,8 +3727,8 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
           }
         });
 
-       // ถ้ากดยกเลิก → ออกเลย
-if (warningResult.isDismissed) {
+        // ถ้ากดยกเลิก → ออกเลย
+        if (warningResult.isDismissed) {
   Swal.close(); // ปิดหน้าต่างเบิกทั้งหมด (จริง ๆ ไม่ใส่ก็ได้ แต่ไม่เป็นไร)
 
   // ✅ รีเซ็ตสภาพหน้าจอให้กลับมาดู tab ค้นหาได้ปกติ
@@ -3741,7 +3741,7 @@ if (warningResult.isDismissed) {
 
   return;       // หยุดทุกอย่าง
 }
-    }
+      }
   if (employeeData.length === 0) {
     employeeData = await loadEmployeeData();
   }
