@@ -2675,7 +2675,13 @@ body.dark-mode .canva-button[aria-selected="true"] {
   background-color: rgba(24, 119, 242, 0.18);
   box-shadow: inset 0 -2px 0 #4599ff;
 }
-
+.today-warning {
+  font-size: 18px;
+  color: #e74c3c;               /* สีแดงแบบเตือน */
+  font-weight: 600;
+  margin-bottom: 6px;           /* ให้มีระยะห่างกับปุ่มค้นหา */
+  text-align: left;
+}
    </style>
   </head>
   <body class="light-mode">
@@ -2832,6 +2838,10 @@ body.dark-mode .canva-button[aria-selected="true"] {
           </div>
         </div>
         <div id="today" class="tab-content">
+           <!-- ข้อความเตือนใหม่ -->
+            <div class="today-warning">
+              ระบบจะตัดรอบการเบิกในเวลา 14.50น.
+            </div>
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
             <!-- Toggle button for all data -->
