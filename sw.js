@@ -7,16 +7,15 @@ const OFFLINE_URL = '/offline.html';
 
 // รายการไฟล์ที่ต้อง cache (App Shell)
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/offline.html',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/icon-180.png',
-  '/icon-152.png'
+  './',
+  './index.html',      // หรือ ./test.html ถ้าคุณใช้ test.html เป็นหน้าแรก
+  './manifest.json',
+  './offline.html',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-180.png',
+  './icon-152.png'
 ];
-
 // CDN ที่ใช้บ่อย (cache แยกเพื่อความเร็ว)
 const CDN_RESOURCES = [
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
