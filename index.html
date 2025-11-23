@@ -4122,13 +4122,6 @@ body.dark-mode .canva-button[aria-selected="true"] {
         }
       });
       if (summaryResult.isConfirmed) {
-        // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
-        const detailModal = document.getElementById('imageModal');
-        if (detailModal) detailModal.style.display = 'none';
-
-        const imageModalImages = document.getElementById('imageModalImages');
-        if (imageModalImages) imageModalImages.style.display = 'none';
-        // สร้าง JSON payload
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
