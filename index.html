@@ -399,8 +399,48 @@
         color: #ecf0f1;
       }
       /* Header Setting Button */
-      .header-setting-btn
-      /* Install Button Styles - Compact & Themed */
+      /* ปุ่มเมนูสไตล์ Facebook (มุมขวาบน) */
+.header-setting-btn {
+  background-color: transparent;      /* พื้นใสแบบ FB */
+  color: #ffffff;                     /* ไอคอนสีขาวบน header น้ำเงิน */
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;                 /* วงกลมเหมือนปุ่มเมนู FB */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;                   /* ระยะห่างจากข้อความหัว */
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+/* ไอคอนเมนู */
+.header-setting-btn i {
+  font-size: 18px;
+}
+
+/* hover – วงกลมเทาอ่อนแบบ FB */
+.header-setting-btn:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+}
+
+/* active – กดลงนิดนึง */
+.header-setting-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---- Dark mode (เหมือน Facebook dark) ---- */
+body.dark-mode .header-setting-btn {
+  color: #e4e6eb;
+  background-color: transparent;
+}
+
+body.dark-mode .header-setting-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
 #install-btn {
   display: none; /* ซ่อนเริ่มต้น */
   position: fixed;
