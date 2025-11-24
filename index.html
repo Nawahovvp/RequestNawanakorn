@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=1.0" />
   <title>ระบบขอสั่งอะไหล่คลังสินค้านวนคร</title>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1877f2">
   <meta name="mobile-web-app-capable" content="yes"> <!-- Fixed: Deprecated tag replaced -->
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2682,6 +2682,23 @@ body.dark-mode .canva-button[aria-selected="true"] {
   margin-bottom: 6px;           /* ให้มีระยะห่างกับปุ่มค้นหา */
   text-align: left;
 }
+/* Dark mode สำหรับ Settings Modal */
+body.dark-mode .settings-modal-content {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #ecf0f1;
+}
+
+body.dark-mode #modalUserTeam {
+  color: #1abc9c !important;
+}
+
+body.dark-mode .settings-modal-content div[style*="background: linear-gradient(135deg, #e3f2fd"] {
+  background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+}
+
+body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"] {
+  background: rgba(255,255,255,0.1) !important;
+}
    </style>
   </head>
   <body class="light-mode">
@@ -3019,27 +3036,63 @@ body.dark-mode .canva-button[aria-selected="true"] {
         </div>
       </div>
       <!-- Settings Modal -->
-      <div id="settingsModal" class="settings-modal">
-        <div class="settings-modal-content">
-          <span class="close-settings" id="closeSettings">&times;</span>
-          <h2>การตั้งค่า</h2>
-          <div id="userInfo">
-            <p>ชื่อผู้ใช้: <span id="modalUserName"></span></p>
-          </div>
-          <div style="text-align: left; margin: 12px 0;"> <!-- ลด margin -->
-            <label style="display: block; margin-bottom: 8px; font-weight: bold;">โหมดธีม</label> <!-- ลด margin -->
-            <select id="themeSelect" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #ccc;"> <!-- ลด padding -->
-              <option value="dark">โหมดมืด</option>
-              <option value="light">โหมดสว่าง</option>
-            </select>
-          </div>
-          <button class="modal-qr-btn" onclick="showQRCode()" title="QR Code"><i class="fas fa-qrcode"></i></button>
-          <button class="modal-logout-btn" onclick="handleLogout()" title="ออกจากระบบ"><i class="fas fa-sign-out-alt"></i></button>
-          <div style="margin-top: 12px; padding: 8px; background: #e8f4fc; border-radius: 6px; font-size: 11px; color: #0d4a75; text-align: center;">
-    <p style="margin-top: 8px; font-weight: bold; color: #1a3c87;">© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
-  </div>
+<div id="settingsModal" class="settings-modal">
+  <div class="settings-modal-content">
+    <span class="close-settings" id="closeSettings">&times;</span>
+    <h2>การตั้งค่า</h2>
+
+    <!-- ข้อมูลผู้ใช้ -->
+    <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24,118,242,0.15);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="width: 60px; height: 60px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+          <i class="fas fa-user"></i>
+        </div>
+        <div>
+          <div style="font-weight: bold; font-size: 16px; color: #0d47a1;" id="modalUserName">ชื่อผู้ใช้</div>
+          <div style="font-size: 13px; color: #555;">รหัสพนักงาน: <span id="modalUserID">-</span></div>
         </div>
       </div>
+      <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-building" style="color: #1976d2;"></i>
+          <strong>หน่วยงาน:</strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ปุ่มประกาศ (เฉพาะ 7512411) -->
+    <div id="adminAnnouncementSection" style="display: none; margin: 20px 0;">
+      <button onclick="openAnnouncementEditor()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 16px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(231,76,60,0.4);">
+        <i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน
+      </button>
+    </div>
+
+    <!-- เลือกธีม -->
+    <div style="margin: 20px 0;">
+      <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
+        <i class="fas fa-palette"></i> โหมดธีม
+      </label>
+      <select id="themeSelect" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 15px; background: white;">
+        <option value="light">โหมดสว่าง (Light)</option>
+        <option value="dark">โหมดมืด (Dark)</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <button class="modal-qr-btn" onclick="showQRCode()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
+        <i class="fas fa-qrcode"></i> QR Code
+      </button>
+      <button class="modal-logout-btn" onclick="handleLogout()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+    </div>
+
+    <div style="margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 12px; text-align: center; font-size: 11px;">
+      <p style="margin: 4px 0; font-weight: bold;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
+      <p style="margin: 4px 0; opacity: 0.9;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
+    </div>
+  </div>
+</div>
       <!-- Bottom Navigation (Removed Setting Button) -->
       <div class="bottom-nav">
         <button class="nav-btn active" id="nav-parts" data-tab="parts" onclick="showTab('parts')" data-label="ค้นหาอะไหล่"><i class="fas fa-search"></i></button>
@@ -3048,7 +3101,7 @@ body.dark-mode .canva-button[aria-selected="true"] {
         <button class="nav-btn" id="nav-pending" data-tab="pending-calls" onclick="showTab('pending-calls')" data-label="Call"><i class="fas fa-phone"></i></button>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
       // Global employee data
@@ -3191,16 +3244,39 @@ body.dark-mode .canva-button[aria-selected="true"] {
           document.getElementById('themeSelect').value = theme;
         }
       }
-      function showSettings() {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        document.getElementById('modalUserName').textContent = localStorage.getItem('userName') || '';
-        document.getElementById('themeSelect').value = currentTheme;
-        document.getElementById('settingsModal').style.display = 'block';
-        // Add event for theme change in modal
-        document.getElementById('themeSelect').onchange = (e) => {
-          setTheme(e.target.value);
-        };
-      }
+      async function showSettings() {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  const savedUsername = localStorage.getItem('username');
+  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+
+  // แสดงข้อมูลพื้นฐาน
+  document.getElementById('modalUserName').textContent = savedUserName;
+  document.getElementById('modalUserID').textContent = savedUsername || '-';
+  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+  document.getElementById('themeSelect').value = currentTheme;
+
+  // ดึงหน่วยงาน
+  try {
+    if (employeeData.length === 0) {
+      employeeData = await loadEmployeeData();
+    }
+    const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+  } catch (err) {
+    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+    document.getElementById('modalUserTeam').style.color = '#e74c3c';
+  }
+
+  // เปิด Modal
+  document.getElementById('settingsModal').style.display = 'block';
+
+  // ← สำคัญมาก: ผูก event ทุกครั้งที่เปิด Settings (เพราะบางที DOM อาจถูกสร้างใหม่)
+  document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
+  document.getElementById('themeSelect').addEventListener('change', function(e) {
+    setTheme(e.target.value);
+  });
+}
       // Close settings modal
       document.getElementById('closeSettings').onclick = () => {
         document.getElementById('settingsModal').style.display = 'none';
@@ -3280,6 +3356,10 @@ body.dark-mode .canva-button[aria-selected="true"] {
             }
             checkLoginStatus();
             // Focus on search input after login
+            // เพิ่ม 2 บรรทัดนี้ เพื่อแสดงประกาศทันทีหลังล็อกอินสำเร็จ
+            setTimeout(() => {
+              showSystemAnnouncement();
+              }, 800);
             setTimeout(() => {
               const searchInput = document.getElementById('searchInput1');
               if (searchInput) searchInput.focus();
@@ -3582,7 +3662,86 @@ body.dark-mode .canva-button[aria-selected="true"] {
     contact: getFromLocalStorage('contact'),
     callNumber: getFromLocalStorage('callNumber'),
     callType: getFromLocalStorage('callType'),
+    
   };
+  const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+  const hasStockVibha = vibhavadiValue > 0;
+  if (hasStockVibha) {
+        const warningResult = await Swal.fire({
+          title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
+          iconColor: '#f39c12',
+          width: window.innerWidth <= 480 ? '90%' : '560px',
+          padding: '30px 20px',
+          background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
+          backdrop: 'rgba(0,0,0,0.85)',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showCancelButton: true,
+          confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
+          cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+          reverseButtons: true,
+          buttonsStyling: false,
+
+          html: `
+            <div style="text-align:center; margin:20px 0;">
+              <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
+              <div style="font-size:18px; font-weight:600; color:#e67e22;">
+                คลังวิภาวดีมีของอยู่
+              </div>
+              <div style="font-size:32px; font-weight:bold; color:#27ae60; margin:12px 0;">
+                ${vibhavadiValue.toLocaleString()} ชิ้น
+              </div>
+              <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
+                กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
+              </div>
+              <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
+                <i class="fas fa-info-circle"></i> 
+                หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
+              </div>
+            </div>
+          `,
+
+          didOpen: () => {
+            const confirmBtn = document.querySelector('.swal2-confirm');
+            const cancelBtn   = document.querySelector('.swal2-cancel');
+
+            confirmBtn.style.cssText = `
+              background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+              color: white !important;
+              padding: 14px 36px !important;
+              border-radius: 30px !important;
+              font-size: 17px !important;
+              font-weight: bold !important;
+              box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
+            `;
+
+            cancelBtn.style.cssText = `
+              background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+              color: white !important;
+              padding: 14px 36px !important;
+              border-radius: 30px !important;
+              font-size: 17px !important;
+              font-weight: bold !important;
+              box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+            `;
+          }
+        });
+
+        // ถ้ากดยกเลิก → ออกเลย
+        if (warningResult.isDismissed) {
+  Swal.close(); // ปิดหน้าต่างเบิกทั้งหมด (จริง ๆ ไม่ใส่ก็ได้ แต่ไม่เป็นไร)
+
+  // ✅ รีเซ็ตสภาพหน้าจอให้กลับมาดู tab ค้นหาได้ปกติ
+  document.body.style.overflow = 'auto';    // เผื่อ SweetAlert ล็อก scroll ไว้
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant' // หรือ 'smooth' ถ้าอยากให้เลื่อนนิ่ม ๆ
+  });
+
+  return;       // หยุดทุกอย่าง
+}
+      }
   if (employeeData.length === 0) {
     employeeData = await loadEmployeeData();
   }
@@ -3990,79 +4149,7 @@ body.dark-mode .canva-button[aria-selected="true"] {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-      // เช็คเงื่อนไขเตือน
-           // เช็คเงื่อนไขเตือน – เวอร์ชันสวย + กดยกเลิก = ออกจากการเบิกทันที
-      if (quantity <= vibhavadiValue) {
-        const warningResult = await Swal.fire({
-          title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
-          icon: 'warning',
-          iconColor: '#f39c12',
-          width: window.innerWidth <= 480 ? '90%' : '560px',
-          padding: '30px 20px',
-          background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
-          backdrop: 'rgba(0,0,0,0.85)',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          showCancelButton: true,
-          confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
-          cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
-          reverseButtons: true,
-          buttonsStyling: false,
-
-          html: `
-            <div style="text-align:center; margin:20px 0;">
-              <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
-              <div style="font-size:18px; font-weight:600; color:#e67e22; margin:15px 0;">
-                คลังวิภาวาวดีมีอะไหล่อยู่
-              </div>
-              <div style="font-size:32px; font-weight:bold; color:#e74c3c; margin:10px 0;">
-                ${vibhavadiValue.toLocaleString()} ชิ้น
-              </div>
-              <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
-                แต่คุณกำลังขอเบิก <strong style="color:#e74c3c;">${quantity} ชิ้น</strong>
-              </div>
-              <div style="margin-top:20px; padding:16px; background:#fff9e6; border-left:6px solid #f39c12; border-radius:12px; font-size:15px; color:#d35400;">
-                <i class="fas fa-info-circle"></i> 
-                ระบบจะดึงจากคลังนวนครแทน (ถ้ามีของ)
-              </div>
-            </div>
-          `,
-
-          didOpen: () => {
-            const confirmBtn = document.querySelector('.swal2-confirm');
-            const cancelBtn   = document.querySelector('.swal2-cancel');
-
-            confirmBtn.style.cssText = `
-              background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
-            `;
-
-            cancelBtn.style.cssText = `
-              background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
-            `;
-          }
-        });
-
-        // ถ้ากด "ยกเลิก" → ปิดหน้าต่างเบิกทั้งหมด แล้วหยุดทุกอย่าง
-        if (warningResult.isDismissed || warningResult.dismiss === Swal.DismissReason.cancel) {
-          Swal.close();  // ปิด Swal หลัก (หน้าต่าง 📋 เบิกอะไหล่นวนคร)
-          return;        // หยุดการทำงานทั้งหมด ไม่ไปสรุปข้อมูล ไม่ส่ง GAS
-        }
-        // ถ้ากด "ยืนยันเบิกต่อ" → ดำเนินการต่อไปตามปกติ
-      }
-      
-      // Popup สรุปข้อมูล
+     
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
             // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
@@ -5671,6 +5758,238 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
   deferredPrompt = null;
 });
+  // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
+function openAnnouncementEditor() {
+  const currentMsg = localStorage.getItem('systemAnnouncement') || '';
+  
+  Swal.fire({
+    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
+    html: `
+      <textarea id="announcementText" class="swal2-textarea" style="height: 180px; font-size: 15px;" placeholder="พิมพ์ข้อความประกาศ...">${currentMsg}</textarea>
+      <div style="margin-top: 10px; text-align: right; color: #666; font-size: 12px;">
+        สามารถใช้ \n เพื่อขึ้นบรรทัดใหม่
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกประกาศ',
+    cancelButtonText: 'ยกเลิก',
+    width: '600px',
+    preConfirm: () => {
+      const text = document.getElementById('announcementText').value.trim();
+      localStorage.setItem('systemAnnouncement', text);
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกสำเร็จ',
+        text: 'ประกาศใหม่จะแสดงทันทีที่ทุกคนล็อกอิน',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  });
+}
+
+// แก้ไข showSettings() เพื่อแสดงปุ่มเฉพาะ 7512411
+async function showSettings() {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  const savedUsername = localStorage.getItem('username');
+  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+
+  document.getElementById('modalUserName').textContent = savedUserName;
+  document.getElementById('modalUserID').textContent = savedUsername || '-';
+  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+  document.getElementById('themeSelect').value = currentTheme;
+
+  // ดึงหน่วยงาน
+  try {
+    if (employeeData.length === 0) employeeData = await loadEmployeeData();
+    const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
+    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+  } catch (err) {
+    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+    document.getElementById('modalUserTeam').style.color = '#e74c3c';
+  }
+
+  // แสดงปุ่มประกาศเฉพาะ 7512411
+  const adminSection = document.getElementById('adminAnnouncementSection');
+  if (savedUsername === '7512411') {
+    adminSection.style.display = 'block';
+  } else {
+    adminSection.style.display = 'none';
+  }
+
+  document.getElementById('settingsModal').style.display = 'block';
+
+  // ผูก event เปลี่ยนธีม
+  document.getElementById('themeSelect').onchange = (e) => setTheme(e.target.value);
+}
+
+/// —— เปลี่ยนตรงนี้เป็น Sheet ID ของคุณ ——
+const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o"; // ใส่ ID ของคุณตรงนี้
+const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
+function parseDdMmYyyyWithTime(dateTimeStr) {
+  if (!dateTimeStr) return null;
+
+  // รูปแบบ: "18/11/2025, 21:58:07"
+  const [datePart, timePart] = dateTimeStr.split(',');
+  if (!datePart) return null;
+
+  const [dayStr, monthStr, yearStr] = datePart.trim().split('/');
+  const day = parseInt(dayStr, 10);
+  const month = parseInt(monthStr, 10);
+  const year = parseInt(yearStr, 10);
+
+  let hours = 0, minutes = 0, seconds = 0;
+  if (timePart) {
+    const [hStr, mStr, sStr] = timePart.trim().split(':');
+    hours = parseInt(hStr || '0', 10);
+    minutes = parseInt(mStr || '0', 10);
+    seconds = parseInt(sStr || '0', 10);
+  }
+
+  // ตรวจสอบความถูกต้องของตัวเลข
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+  // month - 1 เพราะ JS ใช้เดือน 0-11
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+}
+// ดึงประกาศจาก Google Sheets
+async function loadSystemAnnouncement() {
+  try {
+    const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
+    const data = await response.json();
+
+    // ถ้าไม่มีประกาศ → ไม่ต้องทำอะไร
+    if (!data || data.length === 0 || !data[0].message) {
+      return;
+    }
+
+    const message = data[0].message.trim();
+    const updatedAt = data[0].updatedAt || "";
+
+    if (message === "" || updatedAt === "") return;
+
+    // --------------------------------------------
+    // ✅ แปลงวันที่ด้วยฟังก์ชัน parseDdMmYyyyWithTime
+    // --------------------------------------------
+    const today = new Date();
+    const updatedTime = parseDdMmYyyyWithTime(updatedAt);
+
+    if (!updatedTime || isNaN(updatedTime.getTime())) {
+      console.log("⏹ ฟอร์แมตวันที่อ่านไม่ได้:", updatedAt);
+      return;
+    }
+
+    const diffDays = Math.floor((today - updatedTime) / (1000 * 60 * 60 * 24));
+
+    console.log("ตรวจสอบประกาศ:", { today, updatedTime, updatedAt, diffDays });
+
+    // --------------------------------------------
+    // 🔥 ถ้าเกิน 2 วัน ไม่ต้องแสดงประกาศ
+    // --------------------------------------------
+    if (diffDays > 2) {
+      console.log("⏹ ประกาศเก่าเกิน 2 วัน – ไม่แสดง");
+      return;
+    }
+
+    // --------------------------------------------
+    // จัดรูปแบบข้อความให้รองรับ \n และย่อหน้า
+    // --------------------------------------------
+    const messageHtml = message
+      .replace(/\n\n+/g, '</p><p style="margin:16px 0;">')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p style="margin:0; line-height:1.8;">')
+      .replace(/$/, '</p>');
+
+    // --------------------------------------------
+    // 🔔 แสดง Swal
+    // --------------------------------------------
+    Swal.fire({
+      html: `
+        <div style="
+          font-size: 28px; 
+          font-weight: 700; 
+          color: #0066cc !important; 
+          margin-bottom: 12px;
+          text-align: center;
+          text-shadow: 0 1px 3px rgba(0,102,204,0.3);
+        ">
+          ประกาศจากคลังวิภาวดี 62
+        </div>
+
+        <div style="text-align: center; line-height: 1.6; font-size: 18px; color: #2d3436;">
+          <div style="margin: 12px 0;">
+            <strong>วันที่ :</strong> ${updatedAt}
+          </div>
+
+          <div style="
+            margin: 10px 0;
+            padding: 18px 22px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            line-height: 1.7;
+            font-size: 17.5px;
+          ">
+            ${messageHtml}
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'รับทราบ',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      width: '560px',
+      padding: '40px 30px',
+      background: '#ffffff',
+      buttonsStyling: false,
+      didOpen: () => {
+        const btn = Swal.getConfirmButton();
+        btn.style.cssText = `
+          background: linear-gradient(135deg, #667eea, #764ba2) !important;
+          color: white !important;
+          padding: 16px 60px !important;
+          border-radius: 50px !important;
+          font-size: 19px !important;
+          font-weight: 700 !important;
+          box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45) !important;
+          border: none !important;
+          margin-top: 15px !important;
+        `;
+      }
+    });
+
+  } catch (error) {
+    console.log("โหลดประกาศไม่ได้:", error);
+  }
+}
+// บันทึกประกาศ (เฉพาะ 7512411)
+function openAnnouncementEditor() {
+  const currentMsg = ''; // ไม่ต้องดึงจาก localStorage อีกแล้ว
+  Swal.fire({
+    title: 'ตั้งค่าประกาศถึงพนักงาน',
+    html: `<textarea id="announcementText" class="swal2-textarea" style="height:200px;">${currentMsg}</textarea>`,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกประกาศ',
+    preConfirm: () => {
+      const text = document.getElementById('announcementText').value.trim();
+      if (!text) {
+        Swal.showValidationMessage('กรุณากรอกข้อความประกาศ');
+        return false;
+      }
+      // บันทึกลง Google Sheets ผ่าน GAS (ต้องมี GAS ง่าย ๆ ตัวนึง)
+      fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateAnnouncement', message: text })
+      }).then(() => {
+        Swal.fire('สำเร็จ!', 'ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที', 'success');
+        setTimeout(() => loadSystemAnnouncement(), 2000);
+      });
+    }
+  });
+}
+
+// เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
+setTimeout(() => loadSystemAnnouncement(), 1000);
     </script>
   </body>
 </html>
