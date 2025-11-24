@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=1.0" />
   <title>ระบบขอสั่งอะไหล่คลังสินค้านวนคร</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1877f2">
   <meta name="mobile-web-app-capable" content="yes"> <!-- Fixed: Deprecated tag replaced -->
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2213,63 +2213,20 @@ body.dark-mode #install-btn:hover {
         }
       }
       /* Additional styles for #parts image modal (reuse existing modal styles) */
-      #parts .image-modal, #images .image-modal-images {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-      }
+      
       body.dark-mode #parts .image-modal, body.dark-mode #images .image-modal-images {
         background: rgba(0, 0, 0, 0.8);
       }
-     #parts .image-modal-content, #images .image-modal-content-images {
-  background: linear-gradient(to bottom right, #ffffff, #f5f7fa);
-  margin: 5% auto;
-  padding: 15px 15px 0px !important; /* padding-bottom: 0 !important; เพื่อชิดล่างสุด */
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px; /* เพิ่มจาก 800px ถ้าต้องการให้กว้างขึ้น */
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  position: relative;
-  transition: background 0.3s ease;
-  display: flex; /* เพิ่ม: ใช้ flex เพื่อ layout ชิดล่าง */
-  flex-direction: column; /* เพิ่ม: column layout */
-}
+     
      body.dark-mode #parts .image-modal-content, body.dark-mode #images .image-modal-content-images {
   background: linear-gradient(to bottom right, #2c3e50, #34495e);
   color: #ecf0f1;
-}
-      #parts .image-close, #images .image-close-images {
-        color: #78909c;
-        float: right;
-        font-size: 24px; /* ลด font-size */
-        font-weight: bold;
-        cursor: pointer;
-        transition: color 0.3s;
       }
       body.dark-mode #parts .image-close, body.dark-mode #images .image-close-images {
         color: #bdc3c7;
       }
       #parts .image-close:hover, #images .image-close-images:hover {
         color: #e53935;
-      }
-     #parts #imageModalContent, #images #imageModalContentImages {
-  margin-top: 10px; /* ลด margin */
-  flex-grow: 1; /* เพิ่ม: ให้ content ด้านบน grow แต่ไม่เกิน */
-  overflow-y: auto; /* เพิ่ม: scroll เฉพาะ content ด้านบน ถ้าจำเป็น */
-}
-      #parts #imageModalContent div, #images #imageModalContentImages div {
-        padding: 8px 0; /* ลด padding */
-        border-bottom: 1px solid #eceff1;
-        transition: border-bottom-color 0.3s ease;
       }
       body.dark-mode #parts #imageModalContent div, body.dark-mode #images #imageModalContentImages div {
         border-bottom-color: #555;
@@ -2296,26 +2253,10 @@ body.dark-mode #install-btn:hover {
       body.dark-mode #parts #imageModalContent span.value, body.dark-mode #images #imageModalContentImages span.value {
         color: #bdc3c7;
       }
-      #parts .image-modal-content h2, #images .image-modal-content-images h2 {
-        color: #e91e63;
-        font-size: 18px; /* ลด font-size */
-        font-weight: bold;
-        margin-bottom: 0px; /* ลด margin */
-        transition: color 0.3s ease;
-      }
       body.dark-mode #parts .image-modal-content h2, body.dark-mode #images .image-modal-content-images h2 {
         color: #ff6b9d;
       }
-      #parts .drive-iframe, #images .drive-iframe-images {
-  width: 100%;
-  height: 300px; /* ถ้าต้องการเต็มล่าง ให้เปลี่ยนเป็น flex-grow: 1; หรือ calc(100% - height ด้านบน) */
-  border: none;
-  border-radius: 8px;
-  margin: 0 !important; /* !important เพื่อชิดติด */
-  margin-bottom: -8px !important; /* เพิ่ม: ชดเชย border-radius + shadow ด้านล่าง */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ลด shadow กระจายจาก 10px เป็น 5px เพื่อลดช่องว่าง illusion */
-  flex-shrink: 0; /* เพิ่ม: ไม่ให้ iframe หดตัว */
-}
+      
      body.dark-mode #parts .drive-iframe, body.dark-mode #images .drive-iframe-images {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* ลดใน dark mode ด้วย */
 }
@@ -2479,35 +2420,98 @@ body.dark-mode .gallery-thumbnail-modal {
     height: 250px; /* Adjusted fixed height for mobile */
   }
 }
+/* ===== ปรับ layout Modal รายละเอียดอะไหล่ ===== */
+
+/* ให้กล่อง modal กว้างขึ้นนิดนึง */
+#parts .image-modal-content,
+#images .image-modal-content-images {
+  max-width: 900px;
+}
+
+/* layout ใหม่: ซ้ายเป็นรูป ขวาเป็นรายละเอียด */
+.part-detail-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.part-detail-left {
+  flex: 0 0 340px;      /* ความกว้าง fix ของโซนรูป */
+}
+
+.part-detail-right {
+  flex: 1;              /* รายละเอียดกินพื้นที่ที่เหลือ */
+}
+
+/* แสดงรูปเดียวให้ใหญ่เต็มกล่อง */
 .image-gallery-parts {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+}
+
+.gallery-thumbnail-modal-parts {
+  width: 100%;
+  max-width: 360px;   /* ขนาด fix สูงสุดของรูป */
+  height: 360px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* แถว Material + ปุ่มเบิก อยู่ในบรรทัดเดียวกัน */
+#parts #imageModalContent .material-row,
+#images #imageModalContentImages .material-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#parts #imageModalContent .material-row .value,
+#images #imageModalContentImages .material-row .value {
+  font-weight: 600;
+}
+
+/* ปุ่มเบิกใน modal */
+#parts #imageModalContent .material-row .requisition-button,
+#images #imageModalContentImages .material-row .requisition-button {
+  margin-left: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+/* ให้รายละเอียดอ่านง่าย กระชับ */
+#parts #imageModalContent span.label,
+#images #imageModalContentImages span.label {
+  min-width: 90px;
+  font-size: 12px;
+}
+
+#parts #imageModalContent span.value,
+#images #imageModalContentImages span.value {
+  font-size: 12px;
+}
+
+/* มือถือ: เปลี่ยนเป็นซ้อนกันบนล่าง */
+@media (max-width: 768px) {
+  .part-detail-layout {
+    flex-direction: column;
   }
-  body.dark-mode .image-gallery-parts {
-    background: #2c3e50;
+
+  .part-detail-left {
+    flex: 0 0 auto;
   }
+
   .gallery-thumbnail-modal-parts {
-    width: 400px; /* Fixed width for default frame */
-    height: 300px; /* Fixed height for default frame */
-    object-fit: contain; /* Default: show full image without cropping, fit within frame */
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    border: 1px solid #e0e0e0;
-    display: block;
-    margin: 0 auto; /* Center the image */
+    max-width: 100%;
+    width: 100%;
+    height: 260px;
   }
-  .gallery-thumbnail-modal-parts:hover {
-    transform: scale(1.05);
-  }
-  body.dark-mode .gallery-thumbnail-modal-parts {
-    border-color: #555;
-  }
+}
+
   /* Responsive for Mobile */
   @media (max-width: 768px) {
     .image-gallery-parts {
@@ -2699,6 +2703,142 @@ body.dark-mode .settings-modal-content div[style*="background: linear-gradient(1
 body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"] {
   background: rgba(255,255,255,0.1) !important;
 }
+#imageModal, #imageModalImages {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+}
+#imageModal .image-modal-content,
+#imageModalImages .image-modal-content-images {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  width: 94%;
+  max-width: 460px;
+  max-height: 94vh;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+.part-image-fixed {
+  width: 100%;
+  height: 380px;
+  object-fit: contain;
+  background: #000;
+}
+.detail-info {
+  padding: 16px 20px 24px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.detail-info h2 {
+  margin: 0 0 16px 0;
+  font-size: 21px;
+  text-align: center;
+  color: #e91e63;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 15.5px;
+}
+.detail-row:last-child { border: none; }
+.detail-row .label {
+  font-weight: 600;
+  color: #2196f3;
+  min-width: 100px;
+}
+.detail-row .value {
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+}
+.detail-row .requisition-button {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 16px;
+}
+.image-close, .image-close-images {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: pointer;
+}
+/* Dark Mode */
+body.dark-mode #imageModal .image-modal-content,
+body.dark-mode #imageModalImages .image-modal-content-images {
+  background: #1e1e1e;
+  color: #ecf0f1;
+}
+body.dark-mode .detail-info h2 { color: #ff6b9d; }
+body.dark-mode .detail-row { border-color: #444; }
+body.dark-mode .detail-row .label { color: #1abc9c; }
+body.dark-mode .detail-row .requisition-button {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+}
+rebuilt-text {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 14px;
+}
+.spec-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+}
+body.dark-mode .spec-text { color: #bbb; }
+body.dark-mode .rebuilt-text { color: #ff6b6b; }
+/* หัวข้อ + ปุ่มเบิก บรรทัดเดียวกัน (สวยสุด ๆ) */
+.detail-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px 16px 20px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+}
+.detail-header-row h2 {
+  margin: 0;
+  font-size: 21px;
+  color: #e91e63;
+}
+.header-btn {
+  padding: 10px 26px !important;
+  font-size: 15px !important;
+  border-radius: 30px !important;
+}
+
+/* Dark Mode */
+body.dark-mode .detail-header-row {
+  border-bottom-color: #444;
+}
+body.dark-mode .detail-header-row h2 {
+  color: #ff6b9d;
+}
    </style>
   </head>
   <body class="light-mode">
@@ -2786,7 +2926,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
           <!-- Image Modal for #parts -->
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
-              <span class="image-close" id="closeImageModal">&times;</span>
+              <span class="image-close" id="closeImageModal">×</span>
               <h2>รายละเอียดอะไหล่</h2>
               <div id="imageModalContent"></div>
             </div>
@@ -2829,7 +2969,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
           <!-- Image Modal for #images -->
           <div id="imageModalImages" class="image-modal-images">
             <div class="image-modal-content-images">
-              <span class="image-close-images" id="closeImageModalImages">&times;</span>
+              <span class="image-close-images" id="closeImageModalImages">×</span>
               <h2>รายละเอียดอะไหล่</h2>
               <div id="imageModalContentImages"></div>
             </div>
@@ -3331,73 +3471,50 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
         }
       }
       async function handleLogin() {
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value.trim();
-  loginError.style.display = 'none';
-
-  if (!username || !password) {
-    loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-    loginError.style.display = 'block';
-    return;
-  }
-
-  try {
-    // โหลดข้อมูลพนักงาน (ถ้ายังไม่มี)
-    if (employeeData.length === 0) {
-      employeeData = await loadEmployeeData();
-    }
-
-    const expectedPassword = username.slice(-4);
-    const employee = employeeData.find(e => 
-      e.IDRec && 
-      e.IDRec.toString().trim() === username && 
-      expectedPassword === password
-    );
-
-    if (employee && employee.Name) {
-      // บันทึกข้อมูลล็อกอิน
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', username);
-      localStorage.setItem('userName', employee.Name);
-
-      // Remember me
-      if (rememberMeCheckbox.checked) {
-        localStorage.setItem('savedUsername', username);
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('savedUsername');
-        localStorage.removeItem('rememberMe');
-      }
-
-      // อัปเดต UI ทันที
-      checkLoginStatus();
-
-      // โฟกัสช่องค้นหาเร็ว ๆ
-      setTimeout(() => {
-        const searchInput = document.getElementById('searchInput1');
-        if (searchInput) {
-          searchInput.focus();
-          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        loginError.style.display = 'none';
+        if (!username || !password) {
+          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+          loginError.style.display = 'block';
+          return;
         }
-      }, 300);
-
-      // แสดงประกาศล่าสุดทันที (เร็ว + แน่นอน)
-      setTimeout(() => {
-        loadSystemAnnouncement(); // ใช้ loadSystemAnnouncement() แทน showSystemAnnouncement()
-      }, 600);
-
-    } else {
-      loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-      loginError.style.display = 'block';
-      passwordInput.value = '';
-      passwordInput.focus();
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    loginError.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่';
-    loginError.style.display = 'block';
-  }
-}
+        try {
+          employeeData = await loadEmployeeData();
+          const expectedPassword = username.slice(-4);
+          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
+          if (employee && employee.Name) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            localStorage.setItem('userName', employee.Name);
+            if (rememberMeCheckbox.checked) {
+              localStorage.setItem('savedUsername', username);
+              localStorage.setItem('rememberMe', 'true');
+            } else {
+              localStorage.removeItem('savedUsername');
+              localStorage.removeItem('rememberMe');
+            }
+            checkLoginStatus();
+            // Focus on search input after login
+            // เพิ่ม 2 บรรทัดนี้ เพื่อแสดงประกาศทันทีหลังล็อกอินสำเร็จ
+            setTimeout(() => {
+              showSystemAnnouncement();
+              }, 800);
+            setTimeout(() => {
+              const searchInput = document.getElementById('searchInput1');
+              if (searchInput) searchInput.focus();
+            }, 500);
+          } else {
+            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+            loginError.style.display = 'block';
+            passwordInput.value = ''; // Clear password on error
+          }
+        } catch (error) {
+          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
+          loginError.style.display = 'block';
+          console.error('Login error:', error);
+        }
+      }
      function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
@@ -3497,83 +3614,76 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
         });
       }
       // Unified function for showing detail modal (shared event for both tabs)
-      function showDetailModal(row, modalId, contentId) {
-        const fields = [
-          { key: 'Material', label: 'Material' },
-          { key: 'Description', label: 'Description' },
-          { key: 'วิภาวดี', label: 'วิภาวดี' },
-          { key: 'Unrestricted', label: 'นวนคร' },
-          { key: 'Rebuilt', label: 'Rebuilt' },
-          { key: 'หมายเหตุ', label: 'หมายเหตุ' },
-          { key: 'Product', label: 'Product' },
-          { key: 'OCRTAXT', label: 'Spec' }
-        ];
-        let html = '';
-        fields.forEach(field => {
-          let value = row[field.key] || '';
-          if (field.key === 'วิภาวดี' || field.key === 'Unrestricted') {
-            if (value && !isNaN(value)) {
-              value = Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
-            } else if (value === '0' || value === 0) {
-              value = '';
-            }
-          }
-          if ((field.key === 'หมายเหตุ' || field.key === 'Rebuilt') && value) {
-            value = `<span style="color: #d32f2f; font-weight: bold;">${value}</span>`;
-          }
-          if (field.key === 'Material') {
-            // Special handling for Material row: add flex layout and requisition button
-            html += `
-              <div class="material-row">
-                <span class="label">${field.label}:</span>
-                <div style="display: flex; align-items: center; flex-grow: 1;">
-                  <span class="value">${value}</span>
-                  <button class="requisition-button" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">เบิก</button>
-                </div>
-              </div>
-            `;
-          } else {
-            html += `<div><span class="label">${field.label}:</span> <span class="value">${value}</span></div>`;
-          }
-        });
-        // Gallery for images (shared logic)
-        let imageGalleryHtml = '<div class="image-gallery-parts">';
-        let imageIds = [];
-        if (row.id) {
-          if (typeof row.id === 'string' && row.id.includes(',')) {
-            imageIds = row.id.split(',').map(id => id.trim()).filter(id => id);
-          } else {
-            imageIds = [row.id];
-          }
-        } else if (row.UrlWeb) {
-          // Extract ID from Google Drive URL in parts tab
-          const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/);
-          if (match) {
-            imageIds = [match[1]];
-          }
-        }
-        if (imageIds.length > 0) {
-          imageIds.forEach(id => {
-            const thumbnailSrc = `https://drive.google.com/thumbnail?id=${id}&sz=w400-h400`;
-            imageGalleryHtml += `
-              <img src="${thumbnailSrc}"
-                   alt="Thumbnail"
-                   class="gallery-thumbnail-modal-parts"
-                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                   style="display: block;">
-              <div style="text-align: center; font-size: 12px; color: #666; margin-top: 4px; display: none;">ไม่พบรูปภาพ</div>
-            `;
-          });
-        } else {
-          imageGalleryHtml += '<p style="text-align: center; color: #999; grid-column: 1 / -1;">ไม่พบข้อมูลรูปภาพ</p>';
-        }
-        imageGalleryHtml += '</div>';
-        html = imageGalleryHtml + html; // Gallery first, then fields
-        const modal = document.getElementById(modalId);
-        const content = document.getElementById(contentId);
-        content.innerHTML = html;
-        modal.style.display = 'block';
-      }
+      // ฟังก์ชันแสดงรายละเอียดใหม่ (ใช้ร่วมกันทั้ง 2 แท็บ)
+// ฟังก์ชันแสดงรายละเอียดอะไหล่ (เวอร์ชันใหม่ ทำงานแน่นอน)
+// ฟังก์ชันแสดงรายละเอียดอะไหล่ (เวอร์ชันล่าสุด ทำงาน 100% แน่นอน)
+function showDetailModal(row, modalId, contentId) {
+  let imageHtml = '<div class="part-image-fixed" style="display:flex;align-items:center;justify-content:center;background:#000;color:#ccc;font-size:20px;">ไม่มีรูปภาพ</div>';
+
+  // ดึงรูปภาพ
+  if (row.UrlWeb || row.id) {
+    let fileId = '';
+    if (row.UrlWeb) {
+      const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) || row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/);
+      if (match) fileId = match[1];
+    } else if (row.id) {
+      fileId = typeof row.id === 'string' ? row.id.split(',')[0].trim() : row.id;
+    }
+    if (fileId) {
+      imageHtml = `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w1000" class="part-image-fixed" alt="รูปอะไหล่" onerror="this.src='https://via.placeholder.com/600x380/000/fff?text=ไม่มีรูปภาพ';">`;
+    }
+  }
+
+  // ข้อมูลที่แสดง (เพิ่ม Rebuilt, Product, Spec)
+  const info = `
+  <div class="detail-info">
+    <!-- หัวข้อ + ปุ่มเบิก บรรทัดเดียวกัน -->
+    <div class="detail-header-row">
+      <h2>รายละเอียดอะไหล่</h2>
+      <button class="requisition-button header-btn" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
+        เบิกเลย
+      </button>
+    </div>
+
+    <div class="detail-row"><span class="label">Material</span><span class="value">${row.Material || '-'}</span></div>
+    <div class="detail-row"><span class="label">Description</span><span class="value">${row.Description || '-'}</span></div>
+    <div class="detail-row"><span class="label">วิภาวดี</span><span class="value">${row["วิภาวดี"] ? Number(row["วิภาวดี"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
+    <div class="detail-row"><span class="label">นวนคร</span><span class="value">${row["Unrestricted"] ? Number(row["Unrestricted"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
+
+    ${row["Rebuilt"] ? `<div class="detail-row"><span class="label">Rebuilt</span><span class="value rebuilt-text">${row["Rebuilt"]}</span></div>` : ''}
+    ${row["Product"] ? `<div class="detail-row"><span class="label">Product</span><span class="value">${row["Product"]}</span></div>` : ''}
+    ${row["OCRTAXT"] ? `<div class="detail-row"><span class="label">Spec</span><span class="value spec-text">${row["OCRTAXT"]}</span></div>` : ''}
+
+    ${row["หมายเหตุ"] ? `<div class="detail-row"><span class="label" style="color:#e74c3c;font-weight:bold;">หมายเหตุ</span><span class="value" style="color:#e74c3c;font-weight:bold;">${row["หมายเหตุ"]}</span></div>` : ''}
+  </div>
+`;
+
+  const modal = document.getElementById(modalId);
+  const content = document.getElementById(contentId);
+  if (!modal || !content) return console.error("Modal not found!");
+
+  content.innerHTML = imageHtml + info;
+  modal.style.display = 'block';
+
+  // Animation เปิดสวย ๆ
+  setTimeout(() => {
+    modal.style.opacity = '1';
+    modal.style.transform = 'translateY(0)';
+  }, 10);
+}
+
+// ปิด modal เมื่อกด X หรือพื้นหลัง
+document.querySelectorAll('.image-close, .image-close-images').forEach(btn => {
+  btn.onclick = () => {
+    document.getElementById('imageModal').style.display = 'none';
+    document.getElementById('imageModalImages').style.display = 'none';
+  };
+});
+window.addEventListener('click', (e) => {
+  if (e.target.id === 'imageModal' || e.target.id === 'imageModalImages') {
+    e.target.style.display = 'none';
+  }
+});
       // Event listener for lightbox close on ESC key
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
@@ -5052,15 +5162,6 @@ function sortByColumn(a, b, column, direction) {
   }
   return filtered;
 }
-function formatTimestamp(dateTimeStr) {
-  if (!dateTimeStr) return "";
-  const [datePart, timePart] = dateTimeStr.split(' ');
-  const [month, day, year] = datePart.split('/').map(Number);
-  const yearBE = year + 543;
-  const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
-  const formattedTime = timePart || '';
-  return `${formattedDate} ${formattedTime}`;
-}
       function updateTableToday() {
         let dataToFilter = allDataToday;
         const keyword = searchInputToday.value.toLowerCase();
@@ -5718,7 +5819,27 @@ function formatTimestamp(dateTimeStr) {
         loadData();
       }
      // เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
-
+function formatTimestamp(dateTimeStr) {
+  if (!dateTimeStr) return "";
+  const [datePart, timePart] = dateTimeStr.split(' ');
+  const [month, day, year] = datePart.split('/').map(Number);
+  const yearBE = year + 543;
+  const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
+  const formattedTime = timePart || '';
+  return `${formattedDate} ${formattedTime}`;
+}
+      // Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registered: ', registration);
+      })
+      .catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
       // PWA Install Prompt Logic - แก้ไขให้ persist state
 let deferredPrompt; // เก็บ event prompt
 // ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
@@ -5999,79 +6120,9 @@ function openAnnouncementEditor() {
     }
   });
 }
-function isRunningStandalone() {
-  return (window.matchMedia('(display-mode: standalone)').matches) ||
-         (window.navigator.standalone === true);
-}
 
-window.addEventListener('load', () => {
-  const installBtn = document.getElementById('install-btn');
-
-  // ถ้าเปิดจาก Home Screen แล้ว หรือเคยกดติดตั้งแล้ว → ซ่อนปุ่มทิ้งเลย
-  if (isRunningStandalone() || localStorage.getItem('partgo-installed') === 'true') {
-    installBtn.style.display = 'none';
-    return;
-  }
-
-  // ยังไม่ติดตั้ง → แสดงปุ่มหลัง 2 วินาที
-  setTimeout(() => {
-    installBtn.style.display = 'flex';
-  }, 2000);
-
-  // เมื่อกดปุ่ม → ซ่อนปุ่ม + จำว่าเคยติดตั้งแล้ว
-  installBtn.onclick = () => {
-    installBtn.style.display = 'none';
-    localStorage.setItem('partgo-installed', 'true');
-
-    // เฉพาะ iOS แสดงคำแนะนำ
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      Swal.fire({
-        icon: 'info',
-        title: 'ติดตั้งบน iPhone / iPad',
-        html: `
-          <p style="font-size:18px; text-align:left; line-height:1.8;">
-            1. แตะไอคอน <strong style="color:#007AFF;">แชร์</strong> ที่ด้านล่างของ Safari<br><br>
-            2. เลื่อนลงมาแล้วเลือก <strong>เพิ่มลงหน้าจอหลัก</strong><br><br>
-            <span style="color:#888; font-size:14px;">หลังเพิ่มแล้ว ปุ่มนี้จะหายไปเองในครั้งถัดไป</span>
-          </p>
-        `,
-        confirmButtonText: 'เข้าใจแล้ว',
-        width: '90%',
-        padding: '20px'
-      });
-    }
-  };
-});
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
-// ลงทะเบียน Service Worker (อยู่ท้ายสุดก่อน </body>)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then(reg => {
-          console.log('Service Worker ลงทะเบียนสำเร็จ', reg);
-
-          // ถ้ามีการอัปเดต SW → รีเฟรชอัตโนมัติเมื่อผู้ใช้กด "รีเฟรช"
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                Swal.fire({
-                  title: 'มีเวอร์ชันใหม่!',
-                  text: 'กดรีเฟรชเพื่ออัปเดตแอป',
-                  showCancelButton: true,
-                  confirmButtonText: 'รีเฟรชเลย',
-                  cancelButtonText: 'เดี๋ยวก่อน'
-                }).then(result => {
-                  if (result.isConfirmed) window.location.reload();
-                });
-              }
-            });
-          });
-        })
-        .catch(err => console.log('SW ลงทะเบียนไม่สำเร็จ', err));
-    });
-  }
     </script>
   </body>
 </html>
