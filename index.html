@@ -2804,10 +2804,10 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             <div class="items-per-page">
               <label for="itemsPerPage">Show</label>
               <select id="itemsPerPage">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="30">30</option>
-              </select>
+  <option value="10" selected>10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+</select>
             </div>
           </div>
         </div>
@@ -2847,10 +2847,10 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             <div class="items-per-page-images">
               <label for="itemsPerPageImages">Show</label>
               <select id="itemsPerPageImages">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="30">30</option>
-              </select>
+  <option value="10" selected>10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+</select>
             </div>
           </div>
         </div>
@@ -2910,11 +2910,11 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             </button>
             <div class="items-per-page-today">
               <label for="itemsPerPageToday">Show</label>
-              <select id="itemsPerPageToday">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="30">30</option>
-              </select>
+             <select id="itemsPerPageToday">
+  <option value="10" selected>10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+</select>
             </div>
           </div>
           <div id="detailModal" class="modal">
@@ -2967,10 +2967,10 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             <div class="all-items-per-page">
               <label for="itemsPerPageAll">:</label>
               <select id="itemsPerPageAll">
-                <option value="10">10 รายการ</option>
-                <option value="20">20 รายการ</option>
-                <option value="30">30 รายการ</option>
-              </select>
+  <option value="10" selected>10 รายการ</option>
+  <option value="20">20 รายการ</option>
+  <option value="30">30 รายการ</option>
+</select>
             </div>
           </div>
         </div>
@@ -3026,11 +3026,11 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
             </button>
             <div class="pending-items-per-page">
               <label for="itemsPerPagePending">รายการต่อหน้า:</label>
-              <select id="itemsPerPagePending">
-                <option value="10">10 รายการ</option>
-                <option value="20" selected>20 รายการ</option>
-                <option value="30">30 รายการ</option>
-              </select>
+             <select id="itemsPerPagePending">
+  <option value="10" selected>10</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+</select>
             </div>
           </div>
         </div>
@@ -3115,7 +3115,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
       // Pagination config for today tab
       let currentPageToday = 1;
-      let itemsPerPageToday = 20; // Default to 20 items per page
+      let itemsPerPageToday = 10; // Default to 10 items per page
       // Opensheet URL for Request sheet
       const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
       // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
@@ -3141,7 +3141,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       let allData = [];
       let tempFilteredData = [];
       let currentPage = 1;
-      let itemsPerPage = 20;
+      let itemsPerPage = 10;
       let currentFilteredData = [];
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
@@ -3160,7 +3160,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       let allDataImages = [];
       let tempFilteredDataImages = [];
       let currentPageImages = 1;
-      let itemsPerPageImages = 20;
+      let itemsPerPageImages = 10;
       let currentFilteredDataImages = [];
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
@@ -3215,7 +3215,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
       let allDataPending = [];
       let currentPagePending = 1;
-      let itemsPerPagePending = 20;
+      let itemsPerPagePending = 10;
       let sortConfigPending = { column: null, direction: 'asc' };
       // Image Modal Handling for #parts (moved up)
       const imageModal = document.getElementById('imageModal');
