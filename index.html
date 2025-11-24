@@ -3103,7 +3103,17 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
     </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
+        
+      'use strict';
+      // วางตรงนี้เลยครับ! หลัง 'use strict'; ทันที
+  let cachedPartsData = null;           // แคชแท็บ "ค้นหาอะไหล่"
+  let cachedImagesData = null;          // แคชแท็บ "รูปภาพ"
+  let lastCacheTime = 0;
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 นาที (ปรับได้)
+
+  function shouldRefreshCache() {
+    return Date.now() - lastCacheTime > CACHE_DURATION;
+  } // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
       // Global employee data
       let employeeData = [];
       // Global search values for syncing between parts and images tabs
@@ -3426,35 +3436,48 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
         }
       });
       function showTab(tabId) {
-        const contents = document.querySelectorAll(".tab-content");
-        contents.forEach((tab) => tab.classList.remove("active"));
-        const targetTab = document.getElementById(tabId);
-        targetTab.classList.add("active");
-        // Update bottom nav active state
-        const navButtons = document.querySelectorAll(".nav-btn");
-        navButtons.forEach((btn) => btn.classList.remove("active"));
-        const clickedNav = document.querySelector(`[data-tab="${tabId}"]`);
-        if (clickedNav) clickedNav.classList.add("active");
-        if (tabId !== "pending-calls") {
-          document.getElementById("loading").style.display = "flex";
-        }
-        if (tabId === "parts") {
-          document.getElementById('searchInput1').value = globalSearch1;
-          document.getElementById('searchInput2').value = globalSearch2;
-          loadData();
-        } else if (tabId === "images") {
-          document.getElementById('searchInputImages1').value = globalSearch1;
-          document.getElementById('searchInputImages2').value = globalSearch2;
-          loadImagesData();
-        } else if (tabId === "today") {
-          loadTodayData();
-        } else if (tabId === "all") {
-          loadAllData();
-        } else if (tabId === "pending-calls") {
-          loadPendingCallsData();
-        }
-        // Removed hideLoading() from here to allow load functions to control it
-      }
+  const contents = document.querySelectorAll(".tab-content");
+  contents.forEach((tab) => tab.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+
+  // อัพเดท bottom nav
+  document.querySelectorAll(".nav-btn").forEach((btn) => btn.classList.remove("active"));
+  const navBtn = document.querySelector(`[data-tab="${tabId}"]`);
+  if (navBtn) navBtn.classList.add("active");
+
+  // ใช้แคชแทนการโหลดใหม่ทุกครั้ง
+  if (tabId === "parts") {
+    if (cachedPartsData) {
+      hideLoading();
+      applyFilters(); // ใช้ข้อมูลที่มีอยู่แล้ว
+    } else {
+      loadData();
+    }
+  } else if (tabId === "images") {
+    if (cachedImagesData) {
+      hideLoading();
+      applyFiltersImages();
+    } else {
+      loadImagesData();
+    }
+  } else if (tabId === "today") {
+    loadTodayData();
+  } else if (tabId === "all") {
+    loadAllData();
+  } else if (tabId === "pending-calls") {
+    loadPendingCallsData();
+  }
+}
+function forceRefreshCache() {
+  cachedPartsData = null;
+  cachedImagesData = null;
+  localStorage.removeItem('partsCache');
+  localStorage.removeItem('imagesCache');
+  loadData();
+  if (document.getElementById('images').classList.contains('active')) {
+    loadImagesData();
+  }
+}
       function hideLoading() {
         document.getElementById("loading").style.display = "none";
       }
@@ -4533,7 +4556,7 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
       });
       searchInput2.addEventListener("input", (e) => {
         globalSearch2 = e.target.value;
-        document.getElementById("searchInput2").value = globalSearch2;
+        document.getElementById("searchInputImages2").value = globalSearch2;
         applyFilters();
       });
                // ปุ่มแว่นตาใกล้ searchInput2 -> เคลียร์เฉพาะช่องของแท็บอะไหล่
@@ -4585,57 +4608,55 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
         renderTableData();
         renderPagination(currentFilteredData.length);
       });
-      async function loadData() {
-        document.getElementById("loading").style.display = "flex";
-        errorContainer.style.display = "none";
-        console.log("Starting data load from:", url);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(url, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allData = data;
-          tempFilteredData = [...data];
-          currentFilteredData = [...data];
-          applyFilters();
-          document.getElementById("loading").style.display = "none";
-        } catch (error) {
-          console.error("Error loading data:", error);
-          document.getElementById("loading").style.display = "none";
-          errorContainer.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
-      }
+      // ————————————————————————————————————————
+// 2. loadData() – แท็บค้นหาอะไหล่ (แทนของเดิมทั้งหมด)
+async function loadData() {
+  // ถ้ามีแคชและยังไม่เกิน 5 นาที → ใช้แคชทันที ไม่โหลดใหม่
+  if (cachedPartsData && !shouldRefreshCache()) {
+    console.log("ใช้แคชข้อมูลอะไหล่ (ไม่โหลดใหม่)");
+    allData = cachedPartsData;
+    tempFilteredData = [...allData];
+    currentFilteredData = [...allData];
+    applyFilters();
+    hideLoading();
+    return;
+  }
+
+  document.getElementById("loading").style.display = "flex";
+  errorContainer.style.display = "none";
+
+  try {
+    const cacheBuster = '?_=' + Date.now();
+    const response = await fetch(url + cacheBuster, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("No data");
+
+    allData = data;
+    cachedPartsData = data;                    // บันทึกแคชในหน่วยความจำ
+    lastCacheTime = Date.now();
+
+    // บันทึกแคชลง localStorage ด้วย (กันรีเฟรชหน้า)
+    localStorage.setItem('partsCache', JSON.stringify({
+      data: data,
+      timestamp: Date.now()
+    }));
+
+    tempFilteredData = [...data];
+    currentFilteredData = [...data];
+    applyFilters();
+    hideLoading();
+  } catch (error) {
+    console.error("Error loading parts data:", error);
+    document.getElementById("loading").style.display = "none";
+    errorContainer.style.display = "block";
+    document.getElementById("error-message").textContent =
+      error.name === 'AbortError' ? "การเชื่อมต่อช้าเกินไป" :
+      error.message.includes('403') ? "กรุณาแชร์ Sheet เป็น Public" :
+      `ไม่สามารถโหลดข้อมูลได้: ${error.message}`;
+  }
+}
       // Images tab functions (now after variables)
       itemsPerPageSelectImages.addEventListener("change", () => {
         itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
@@ -4808,57 +4829,86 @@ searchButtonImages.addEventListener("click", () => {
         renderTableDataImages();
         renderPaginationImages(currentFilteredDataImages.length);
       });
-      async function loadImagesData() {
-        document.getElementById("loading").style.display = "flex";
-        errorContainerImages.style.display = "none";
-        console.log("Starting data load for images from:", url);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(url, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Images data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allDataImages = data.filter(row => row.id); // Filter only rows with 'id' data
-          tempFilteredDataImages = [...allDataImages];
-          currentFilteredDataImages = [...allDataImages];
-          applyFiltersImages();
-          document.getElementById("loading").style.display = "none";
-        } catch (error) {
-          console.error("Error loading images data:", error);
-          document.getElementById("loading").style.display = "none";
-          errorContainerImages.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message-images").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message-images").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message-images").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message-images").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
+      // ————————————————————————————————————————
+// 3. loadImagesData() – แท็บรูปภาพ (แทนของเดิมทั้งหมด)
+async function loadImagesData() {
+  // ถ้ามีแคชและยังไม่เกิน 5 นาที → ใช้แคชทันที
+  if (cachedImagesData && !shouldRefreshCache()) {
+    console.log("ใช้แคชข้อมูลรูปภาพ (ไม่โหลดใหม่)");
+    allDataImages = cachedImagesData;
+    tempFilteredDataImages = [...allDataImages];
+    currentFilteredDataImages = [...allDataImages];
+    applyFiltersImages();
+    hideLoading();
+    return;
+  }
+
+  document.getElementById("loading").style.display = "flex";
+  errorContainerImages.style.display = "none";
+
+  try {
+    const cacheBuster = '?_=' + Date.now();
+    const response = await fetch(url + cacheBuster, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("No data");
+
+    const filtered = data.filter(row => row.id);
+    allDataImages = filtered;
+    cachedImagesData = filtered;               // บันทึกแคช
+    lastCacheTime = Date.now();
+
+    // บันทึกแคชลง localStorage
+    localStorage.setItem('imagesCache', JSON.stringify({
+      data: filtered,
+      timestamp: Date.now()
+    }));
+
+    tempFilteredDataImages = [...filtered];
+    currentFilteredDataImages = [...filtered];
+    applyFiltersImages();
+    hideLoading();
+  } catch (error) {
+    console.error("Error loading images data:", error);
+    document.getElementById("loading").style.display = "none";
+    errorContainerImages.style.display = "block";
+    document.getElementById("error-message-images").textContent =
+      error.name === 'AbortError' ? "การเชื่อมต่อช้าเกินไป" :
+      error.message.includes('403') ? "กรุณาแชร์ Sheet เป็น Public" :
+      `ไม่สามารถโหลดข้อมูลได้: ${error.message}`;
+  }
+}
+function loadCacheFromStorage() {
+  try {
+    const savedParts = localStorage.getItem('partsCache');
+    if (savedParts) {
+      const { data, timestamp } = JSON.parse(savedParts);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        cachedPartsData = data;
+        lastCacheTime = timestamp;
+        console.log("โหลดแคชอะไหล่จาก localStorage");
       }
+    }
+
+    const savedImages = localStorage.getItem('imagesCache');
+    if (savedImages) {
+      const { data, timestamp } = JSON.parse(savedImages);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        cachedImagesData = data;
+        lastCacheTime = timestamp;
+        console.log("โหลดแคชรูปภาพจาก localStorage");
+      }
+    }
+  } catch (e) {
+    console.warn("อ่านแคชจาก localStorage ไม่ได้", e);
+  }
+}
+
+// เรียกตอนเริ่มแอป
+window.addEventListener('load', () => {
+  loadCacheFromStorage();
+});
       // Today tab functions (now after variables)
       retryButtonToday.addEventListener("click", () => {
         errorContainerToday.style.display = "none";
