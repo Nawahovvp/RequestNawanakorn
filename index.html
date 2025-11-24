@@ -3331,50 +3331,73 @@ body.dark-mode .settings-modal-content div[style*="background: rgba(255,255,255"
         }
       }
       async function handleLogin() {
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        loginError.style.display = 'none';
-        if (!username || !password) {
-          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-          loginError.style.display = 'block';
-          return;
-        }
-        try {
-          employeeData = await loadEmployeeData();
-          const expectedPassword = username.slice(-4);
-          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
-          if (employee && employee.Name) {
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('username', username);
-            localStorage.setItem('userName', employee.Name);
-            if (rememberMeCheckbox.checked) {
-              localStorage.setItem('savedUsername', username);
-              localStorage.setItem('rememberMe', 'true');
-            } else {
-              localStorage.removeItem('savedUsername');
-              localStorage.removeItem('rememberMe');
-            }
-            checkLoginStatus();
-            // Focus on search input after login
-            // เพิ่ม 2 บรรทัดนี้ เพื่อแสดงประกาศทันทีหลังล็อกอินสำเร็จ
-            setTimeout(() => {
-              showSystemAnnouncement();
-              }, 800);
-            setTimeout(() => {
-              const searchInput = document.getElementById('searchInput1');
-              if (searchInput) searchInput.focus();
-            }, 500);
-          } else {
-            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-            loginError.style.display = 'block';
-            passwordInput.value = ''; // Clear password on error
-          }
-        } catch (error) {
-          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
-          loginError.style.display = 'block';
-          console.error('Login error:', error);
-        }
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+  loginError.style.display = 'none';
+
+  if (!username || !password) {
+    loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+    loginError.style.display = 'block';
+    return;
+  }
+
+  try {
+    // โหลดข้อมูลพนักงาน (ถ้ายังไม่มี)
+    if (employeeData.length === 0) {
+      employeeData = await loadEmployeeData();
+    }
+
+    const expectedPassword = username.slice(-4);
+    const employee = employeeData.find(e => 
+      e.IDRec && 
+      e.IDRec.toString().trim() === username && 
+      expectedPassword === password
+    );
+
+    if (employee && employee.Name) {
+      // บันทึกข้อมูลล็อกอิน
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('userName', employee.Name);
+
+      // Remember me
+      if (rememberMeCheckbox.checked) {
+        localStorage.setItem('savedUsername', username);
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('rememberMe');
       }
+
+      // อัปเดต UI ทันที
+      checkLoginStatus();
+
+      // โฟกัสช่องค้นหาเร็ว ๆ
+      setTimeout(() => {
+        const searchInput = document.getElementById('searchInput1');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+
+      // แสดงประกาศล่าสุดทันที (เร็ว + แน่นอน)
+      setTimeout(() => {
+        loadSystemAnnouncement(); // ใช้ loadSystemAnnouncement() แทน showSystemAnnouncement()
+      }, 600);
+
+    } else {
+      loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+      loginError.style.display = 'block';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    loginError.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่';
+    loginError.style.display = 'block';
+  }
+}
      function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
@@ -5029,6 +5052,15 @@ function sortByColumn(a, b, column, direction) {
   }
   return filtered;
 }
+function formatTimestamp(dateTimeStr) {
+  if (!dateTimeStr) return "";
+  const [datePart, timePart] = dateTimeStr.split(' ');
+  const [month, day, year] = datePart.split('/').map(Number);
+  const yearBE = year + 543;
+  const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
+  const formattedTime = timePart || '';
+  return `${formattedDate} ${formattedTime}`;
+}
       function updateTableToday() {
         let dataToFilter = allDataToday;
         const keyword = searchInputToday.value.toLowerCase();
@@ -5686,15 +5718,7 @@ function sortByColumn(a, b, column, direction) {
         loadData();
       }
      // เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
-function formatTimestamp(dateTimeStr) {
-  if (!dateTimeStr) return "";
-  const [datePart, timePart] = dateTimeStr.split(' ');
-  const [month, day, year] = datePart.split('/').map(Number);
-  const yearBE = year + 543;
-  const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
-  const formattedTime = timePart || '';
-  return `${formattedDate} ${formattedTime}`;
-}
+
       // PWA Install Prompt Logic - แก้ไขให้ persist state
 let deferredPrompt; // เก็บ event prompt
 // ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
