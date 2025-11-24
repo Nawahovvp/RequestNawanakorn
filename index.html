@@ -5999,7 +5999,49 @@ function openAnnouncementEditor() {
     }
   });
 }
+function isRunningStandalone() {
+  return (window.matchMedia('(display-mode: standalone)').matches) ||
+         (window.navigator.standalone === true);
+}
 
+window.addEventListener('load', () => {
+  const installBtn = document.getElementById('install-btn');
+
+  // ถ้าเปิดจาก Home Screen แล้ว หรือเคยกดติดตั้งแล้ว → ซ่อนปุ่มทิ้งเลย
+  if (isRunningStandalone() || localStorage.getItem('partgo-installed') === 'true') {
+    installBtn.style.display = 'none';
+    return;
+  }
+
+  // ยังไม่ติดตั้ง → แสดงปุ่มหลัง 2 วินาที
+  setTimeout(() => {
+    installBtn.style.display = 'flex';
+  }, 2000);
+
+  // เมื่อกดปุ่ม → ซ่อนปุ่ม + จำว่าเคยติดตั้งแล้ว
+  installBtn.onclick = () => {
+    installBtn.style.display = 'none';
+    localStorage.setItem('partgo-installed', 'true');
+
+    // เฉพาะ iOS แสดงคำแนะนำ
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      Swal.fire({
+        icon: 'info',
+        title: 'ติดตั้งบน iPhone / iPad',
+        html: `
+          <p style="font-size:18px; text-align:left; line-height:1.8;">
+            1. แตะไอคอน <strong style="color:#007AFF;">แชร์</strong> ที่ด้านล่างของ Safari<br><br>
+            2. เลื่อนลงมาแล้วเลือก <strong>เพิ่มลงหน้าจอหลัก</strong><br><br>
+            <span style="color:#888; font-size:14px;">หลังเพิ่มแล้ว ปุ่มนี้จะหายไปเองในครั้งถัดไป</span>
+          </p>
+        `,
+        confirmButtonText: 'เข้าใจแล้ว',
+        width: '90%',
+        padding: '20px'
+      });
+    }
+  };
+});
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
 // ลงทะเบียน Service Worker (อยู่ท้ายสุดก่อน </body>)
