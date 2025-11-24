@@ -5695,18 +5695,6 @@ function formatTimestamp(dateTimeStr) {
   const formattedTime = timePart || '';
   return `${formattedDate} ${formattedTime}`;
 }
-      // Register Service Worker for PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
       // PWA Install Prompt Logic - แก้ไขให้ persist state
 let deferredPrompt; // เก็บ event prompt
 // ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
@@ -5990,6 +5978,34 @@ function openAnnouncementEditor() {
 
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
+// ลงทะเบียน Service Worker (อยู่ท้ายสุดก่อน </body>)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(reg => {
+          console.log('Service Worker ลงทะเบียนสำเร็จ', reg);
+
+          // ถ้ามีการอัปเดต SW → รีเฟรชอัตโนมัติเมื่อผู้ใช้กด "รีเฟรช"
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                Swal.fire({
+                  title: 'มีเวอร์ชันใหม่!',
+                  text: 'กดรีเฟรชเพื่ออัปเดตแอป',
+                  showCancelButton: true,
+                  confirmButtonText: 'รีเฟรชเลย',
+                  cancelButtonText: 'เดี๋ยวก่อน'
+                }).then(result => {
+                  if (result.isConfirmed) window.location.reload();
+                });
+              }
+            });
+          });
+        })
+        .catch(err => console.log('SW ลงทะเบียนไม่สำเร็จ', err));
+    });
+  }
     </script>
   </body>
 </html>
