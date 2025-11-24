@@ -1,159 +1,99 @@
-// sw.js — Service Worker สำหรับระบบขอเบิกอะไหล่คลังนวนคร
-// เวอร์ชัน: 2.0.0 (แก้ไขสมบูรณ์แล้ว)
-// วันที่: 23 พ.ย. 2568
+// sw.js — เวอร์ชันสุดยอด สำหรับระบบขอเบิกอะไหล่ (แนะนำ 100%)
+// ปรับปรุง: 24 พ.ย. 2568
 
-const CACHE_NAME = 'spare-parts-app-v8';
-const OFFLINE_URL = '/offline.html';
+const VERSION = 'v9';
+const SHELL_CACHE = `shell-${VERSION}`;
+const DATA_CACHE = `data-${VERSION}`;   // แยก cache ข้อมูลต่างหาก
 
-// รายการไฟล์ที่ต้อง cache (App Shell)
+// === App Shell (สิ่งที่ต้องโหลดทันที) ===
 const APP_SHELL = [
-  './',
-  './index.html',      // หรือ ./test.html ถ้าคุณใช้ test.html เป็นหน้าแรก
-  './manifest.json',
-  './offline.html',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-180.png',
-  './icon-152.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/offline.html'
 ];
-// CDN ที่ใช้บ่อย (cache แยกเพื่อความเร็ว)
-const CDN_RESOURCES = [
-  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Itim&family=Poppins:wght@300;400;600&display=swap'
+
+// === ข้อมูลที่ต้องการเร็ว + ออฟไลน์ได้ ===
+const DATA_URLS = [
+  'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap',
+  'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request',
+  'https://opensheet.elk.sh/1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk/Call_Report',
+  'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information'
 ];
 
 // ============= INSTALL =============
-self.addEventListener('install', event => {
-  console.log('Service Worker: กำลังติดตั้ง...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: ทำการ cache App Shell');
-        return cache.addAll(APP_SHELL);
-      })
-      .then(() => {
-        console.log('Service Worker: ติดตั้งสำเร็จ');
-        return self.skipWaiting(); // บังคับให้ SW ใหม่ใช้งานทันที
-      })
-      .catch(err => console.error('Service Worker: ติดตั้งล้มเหลว', err))
+self.addEventListener('install', e => {
+  console.log('SW: ติดตั้งเวอร์ชัน', VERSION);
+  e.waitUntil(
+    caches.open(SHELL_CACHE).then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
 // ============= ACTIVATE =============
-self.addEventListener('activate', event => {
-  console.log('Service Worker: กำลังเปิดใช้งาน...');
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(name => {
-          if (name !== CACHE_NAME) {
-            console.log('Service Worker: ลบ cache เก่า →', name);
-            return caches.delete(name);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Service Worker: เปิดใช้งานสำเร็จ');
-      return self.clients.claim(); // ควบคุมทุกแท็บทันที
-    })
+self.addEventListener('activate', e => {
+  console.log('SW: เปิดใช้งานเวอร์ชัน', VERSION);
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.map(key => {
+        if (key !== SHELL_CACHE && key !== DATA_CACHE) {
+          console.log('SW: ลบ cache เก่า →', key);
+          return caches.delete(key);
+        }
+      })
+    )).then(() => self.clients.claim())
   );
 });
 
-// ============= FETCH =============
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  const url = new URL(request.url);
+// ============= FETCH (สำคัญที่สุด!) =============
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  const url = new URL(req.url);
 
-  // ข้าม request ที่ไม่ใช่ GET
-  if (request.method !== 'GET') return;
+  // ข้าม POST, chrome-extension, googleusercontent
+  if (req.method !== 'GET' || 
+      url.protocol === 'chrome-extension:' || 
+      url.hostname.includes('googleusercontent.com')) {
+    return;
+  }
 
-  // ข้าม chrome-extension และ admin.google.com
-  if (url.protocol === 'chrome-extension:' || url.hostname.includes('googleusercontent.com')) return;
-
-  // === 1. หน้าเว็บหลัก + Navigation ===
-  if (request.mode === 'navigate' || url.pathname.endsWith('.html')) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          // ถ้าโหลดได้ → เก็บลง cache ใหม่
-          if (response && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // ถ้าเน็ตล่ม → แสดง offline.html
-          return caches.match('/offline.html') ||
-                 caches.match('/index.html');
-        })
+  // 1. App Shell + Static files → Cache First
+  if (url.origin === location.origin || APP_SHELL.some(u => url.pathname === u)) {
+    e.respondWith(
+      caches.match(req).then(cached => cached || fetch(req).then(res => {
+        caches.open(SHELL_CACHE).then(c => c.put(req, res.clone()));
+        return res;
+      }))
     );
     return;
   }
 
-  // === 2. ไฟล์ static (js, css, รูป, font) ===
-  if (url.origin === self.location.origin ||
-      CDN_RESOURCES.some(cdn => url.href.startsWith(cdn))) {
-    event.respondWith(
-      caches.match(request)
-        .then(cached => {
-          // มีใน cache → ใช้เลย (เร็วสุด)
-          if (cached) return cached;
-
-          // ไม่มี → โหลดจากเน็ต แล้วเก็บลง cache
-          return fetch(request).then(response => {
-            if (response && response.status === 200) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-            }
-            return response;
-          }).catch(() => {
-            // ถ้าโหลดไม่ได้ → แสดง fallback (ถ้ามี)
-            if (request.destination === 'image') {
-              return new Response(
-                '<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#f0f0f0"/><text x="50" y="50" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">ไม่พบรูป</text></svg>',
-                { headers: { 'Content-Type': 'image/svg+xml' } }
-              );
-            }
+  // 2. ข้อมูลจาก Opensheet → Stale-While-Revalidate (เร็วสุด + ข้อมูลสดเสมอ)
+  if (DATA_URLS.some(dataUrl => url.href.startsWith(dataUrl))) {
+    e.respondWith(
+      caches.open(DATA_CACHE).then(cache => {
+        return cache.match(req).then(cached => {
+          // มีแคช → ส่งทันที (เร็วสุด!)
+          if (cached) {
+            // อัปเดตพื้นหลังเงียบ ๆ
+            fetch(req).then(fresh => {
+              cache.put(req, fresh.clone());
+            }).catch(() => {}); // ออฟไลน์ก็ไม่เป็นไร
+            return cached;
+          }
+          // ไม่มีแคช → ดึงจริง แล้วเก็บ
+          return fetch(req).then(res => {
+            if (res.ok) cache.put(req, res.clone());
+            return res;
           });
-        })
+        });
+      })
     );
     return;
   }
 
-  // === 3. ข้อมูลจาก Opensheet / Google Apps Script ===
-  if (url.hostname.includes('opensheet.elk.sh') || 
-      url.hostname.includes('script.google.com')) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          // เก็บข้อมูลใหม่ลง cache
-          if (response && response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // ถ้าเน็ตล่ม → ใช้ข้อมูลเก่าใน cache
-          return caches.match(request);
-        })
-    );
-    return;
-  }
-
-  // === 4. อื่น ๆ (ปล่อยให้ fetch ปกติ) ===
-  event.respondWith(fetch(request));
-});
-
-// ============= หน้า Offline (สร้างไฟล์นี้ด้วยนะ) =============
-self.addEventListener('fetch', event => {
-  if (event.request.mode === 'navigate' && !navigator.onLine) {
-    event.respondWith(
-      caches.match('/offline.html')
-    );
-  }
+  // 3. ทุกอย่างอื่น ๆ → Network First (เช่น GAS POST)
+  e.respondWith(fetch(req).catch(() => caches.match('/offline.html')));
 });
