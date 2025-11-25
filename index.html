@@ -6367,86 +6367,7 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-      // PWA Install Prompt Logic - แก้ไขให้ persist state
-let deferredPrompt; // เก็บ event prompt
-// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
-  deferredPrompt = e; // เก็บไว้ใช้
-  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
-  setTimeout(() => {
-    const installBtn = document.getElementById('install-btn');
-    if (installBtn) {
-      installBtn.style.display = 'flex';
-      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo'; // อัปเดตข้อความ
-    }
-  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
-});
-// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
-document.getElementById('install-btn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    // แสดง native prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
-    if (outcome === 'accepted') {
-      // Set localStorage เพื่อ persist หลัง reload
-      localStorage.setItem('partgo-installed', 'true');
-      // ซ่อนปุ่มหลังติดตั้ง
-      document.getElementById('install-btn').style.display = 'none';
-      // แสดง toast (ใช้ SweetAlert ถ้ามี) - แก้ชื่อให้ตรง "PartGotest"
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'success',
-          title: 'ติดตั้งสำเร็จ!',
-          text: 'PartsGo พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
-          timer: 2000,
-          showConfirmButton: false
-        });
-      }
-    }
-    deferredPrompt = null;
-  }
-});
-// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
-window.addEventListener('appinstalled', () => {
-  console.log('PartsGo ติดตั้งแล้ว!');
-  // Set localStorage เพื่อ persist (fallback ถ้า prompt accepted ไม่ set)
-  localStorage.setItem('partgo-installed', 'true');
-  // ซ่อนปุ่มถ้ามี
-  const installBtn = document.getElementById('install-btn');
-  if (installBtn) installBtn.style.display = 'none';
-  deferredPrompt = null;
-});
-  // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
-function openAnnouncementEditor() {
-  const currentMsg = localStorage.getItem('systemAnnouncement') || '';
-  
-  Swal.fire({
-    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
-    html: `
-      <textarea id="announcementText" class="swal2-textarea" style="height: 180px; font-size: 15px;" placeholder="พิมพ์ข้อความประกาศ...">${currentMsg}</textarea>
-      <div style="margin-top: 10px; text-align: right; color: #666; font-size: 12px;">
-        สามารถใช้ \n เพื่อขึ้นบรรทัดใหม่
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'บันทึกประกาศ',
-    cancelButtonText: 'ยกเลิก',
-    width: '600px',
-    preConfirm: () => {
-      const text = document.getElementById('announcementText').value.trim();
-      localStorage.setItem('systemAnnouncement', text);
-      Swal.fire({
-        icon: 'success',
-        title: 'บันทึกสำเร็จ',
-        text: 'ประกาศใหม่จะแสดงทันทีที่ทุกคนล็อกอิน',
-        timer: 2000,
-        showConfirmButton: false
-      });
-    }
-  });
-}
+   
 
 // แก้ไข showSettings() เพื่อแสดงปุ่มเฉพาะ 7512411
 async function showSettings() {
@@ -6469,7 +6390,6 @@ async function showSettings() {
     document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
     document.getElementById('modalUserTeam').style.color = '#e74c3c';
   }
-
   // แสดงปุ่มประกาศเฉพาะ 7512411
   const adminSection = document.getElementById('adminAnnouncementSection');
   if (savedUsername === '7512411') {
@@ -6650,6 +6570,86 @@ function openAnnouncementEditor() {
 
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
+         // PWA Install Prompt Logic - แก้ไขให้ persist state
+let deferredPrompt; // เก็บ event prompt
+// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
+  deferredPrompt = e; // เก็บไว้ใช้
+  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
+  setTimeout(() => {
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.style.display = 'flex';
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo'; // อัปเดตข้อความ
+    }
+  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
+});
+// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    // แสดง native prompt
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
+    if (outcome === 'accepted') {
+      // Set localStorage เพื่อ persist หลัง reload
+      localStorage.setItem('partgo-installed', 'true');
+      // ซ่อนปุ่มหลังติดตั้ง
+      document.getElementById('install-btn').style.display = 'none';
+      // แสดง toast (ใช้ SweetAlert ถ้ามี) - แก้ชื่อให้ตรง "PartGotest"
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: 'ติดตั้งสำเร็จ!',
+          text: 'PartsGo พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+    deferredPrompt = null;
+  }
+});
+// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
+window.addEventListener('appinstalled', () => {
+  console.log('PartsGo ติดตั้งแล้ว!');
+  // Set localStorage เพื่อ persist (fallback ถ้า prompt accepted ไม่ set)
+  localStorage.setItem('partgo-installed', 'true');
+  // ซ่อนปุ่มถ้ามี
+  const installBtn = document.getElementById('install-btn');
+  if (installBtn) installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
+  // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
+function openAnnouncementEditor() {
+  const currentMsg = localStorage.getItem('systemAnnouncement') || '';
+  
+  Swal.fire({
+    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
+    html: `
+      <textarea id="announcementText" class="swal2-textarea" style="height: 180px; font-size: 15px;" placeholder="พิมพ์ข้อความประกาศ...">${currentMsg}</textarea>
+      <div style="margin-top: 10px; text-align: right; color: #666; font-size: 12px;">
+        สามารถใช้ \n เพื่อขึ้นบรรทัดใหม่
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกประกาศ',
+    cancelButtonText: 'ยกเลิก',
+    width: '600px',
+    preConfirm: () => {
+      const text = document.getElementById('announcementText').value.trim();
+      localStorage.setItem('systemAnnouncement', text);
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกสำเร็จ',
+        text: 'ประกาศใหม่จะแสดงทันทีที่ทุกคนล็อกอิน',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  });
+}
     </script>
   </body>
 </html>
