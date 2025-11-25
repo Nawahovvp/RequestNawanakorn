@@ -3564,63 +3564,42 @@ function openAnnouncementEditor() {
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
-<script>
-// === PWA Install Button – แก้ปัญหาปุ่มไม่หาย 100% ===
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-// ฟังก์ชันซ่อน + ลบปุ่มออกจาก DOM ถาวร
-function hideInstallButtonPermanently() {
-  if (installBtn) {
-    installBtn.remove(); // ลบออกจาก DOM เลย ไม่มีวันกลับมา
-    localStorage.setItem('partgo-installed', 'true');
-    console.log('ปุ่มติดตั้งถูกลบเรียบร้อยแล้ว (ติดตั้งสำเร็จ)');
-  }
-}
-
-// 1. ตรวจสอบทันทีตอนโหลดหน้า
-document.addEventListener('DOMContentLoaded', () => {
-  const isInstalled = localStorage.getItem('partgo-installed') === 'true';
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                       (window.navigator.standalone === true); // iOS
-
-  if (isInstalled || isStandalone) {
-    hideInstallButtonPermanently();
-    return;
-  }
-
-  // ถ้ายังไม่ติดตั้ง → แสดงปุ่ม
-  if (installBtn) installBtn.style.display = 'flex';
-});
-
-// 2. ดัก beforeinstallprompt (Chrome จะยิงทุกครั้งที่เปิด)
+let deferredPrompt; // เก็บ event prompt
+// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('beforeinstallprompt ถูกเรียก');
   e.preventDefault();
   deferredPrompt = e;
 
-  // ถ้าเคยติดตั้งแล้ว → อย่าแสดงปุ่มอีก
-  if (localStorage.getItem('partgo-installed') === 'true' || 
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true) {
-    hideInstallButtonPermanently();
-    return;
+  // แก้ตรงนี้! เช็คว่าเคยติดตั้งแล้วไหม ก่อนแสดงปุ่ม
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    return; // ไม่ต้องแสดงปุ่มเลย
   }
 
-  // แสดงปุ่มถ้ายังไม่เคยติดตั้ง
-  if (installBtn) installBtn.style.display = 'flex';
+  setTimeout(() => {
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn && !localStorage.getItem('partgo-installed')) {
+      installBtn.style.display = 'flex';
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo';
+    }
+  }, 2000);
 });
-
-// 3. เมื่อผู้ใช้กดติดตั้ง
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-
+// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+    console.log('ผู้ใช้เลือก:', outcome);
 
     if (outcome === 'accepted') {
-      hideInstallButtonPermanently();
+      localStorage.setItem('partgo-installed', 'true');
+
+      // แก้ตรงนี้! ซ่อนปุ่มทันที + ป้องกันทุกกรณี
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) {
+        installBtn.style.display = 'none';  // ซ่อนทันที
+        installBtn.remove();                // ลบออกจาก DOM เลย (ดีที่สุด)
+      }
+
       Swal.fire({
         icon: 'success',
         title: 'ติดตั้งสำเร็จ!',
@@ -3630,23 +3609,8 @@ if (installBtn) {
       });
     }
     deferredPrompt = null;
-  });
-}
-
-// 4. ดักเหตุการณ์ appinstalled (บางเครื่องยิง บางเครื่องไม่ยิง)
-window.addEventListener('appinstalled', () => {
-  console.log('appinstalled event ทำงาน!');
-  hideInstallButtonPermanently();
-});
-
-// 5. ป้องกันกรณีเปิดจาก Home Screen แล้วยังเห็นปุ่ม (iOS/Android)
-setInterval(() => {
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                       (window.navigator.standalone === true);
-  if (isStandalone && installBtn && installBtn.offsetParent !== null) {
-    hideInstallButtonPermanently();
   }
-}, 3000); // เช็คทุก 3 วินาที
+});
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
@@ -3688,22 +3652,11 @@ window.addEventListener('appinstalled', () => {
 
 // ป้องกันรีเฟรชแล้วปุ่มกลับมา
 document.addEventListener('DOMContentLoaded', () => {
-  // ตรวจว่าเปิดแบบ PWA อยู่ไหม (รองรับทั้ง Android + iOS)
-  const isStandalone =
-    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-    window.navigator.standalone === true; // safari iOS เวลาเปิดจากไอคอนบนจอ
-
-  if (localStorage.getItem('partgo-installed') === 'true' || isStandalone) {
-    // ถ้าเคยติดตั้ง หรือกำลังรันแบบ PWA → ถือว่าติดตั้งแล้ว
-    localStorage.setItem('partgo-installed', 'true');
-
+  if (localStorage.getItem('partgo-installed') === 'true') {
     const btn = document.getElementById('install-btn');
-    if (btn) {
-      btn.remove(); // ลบออกจาก DOM ไปเลย จะได้ไม่กลับมาอีก
-    }
+    if (btn) btn.remove();
   }
 });
-
     </script>
   </body>
 </html>
