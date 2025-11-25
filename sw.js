@@ -1,11 +1,10 @@
-// sw.js — เวอร์ชันสมบูรณ์แบบ 100% (แนะนำใช้ตัวนี้เลย)
+// sw.js — เวอร์ชันกระชับสุด ๆ แต่ทรงพลัง (PartsGo)
 // ปรับปรุงล่าสุด: 25 พ.ย. 2568
 
-const VERSION = 'v10.2';
-const SHELL_CACHE = `partgo-shell-${VERSION}`;
-const DATA_CACHE  = `partgo-data-${VERSION}`;
+const VERSION = 'v10.3'; // เปลี่ยนแค่บรรทัดนี้ทุกครั้งที่อัปเดต
+const CACHE = `partgo-${VERSION}`;
 
-const APP_SHELL = [
+const SHELL = [
   '/', '/index.html', '/manifest.json',
   '/icon-192.png', '/icon-512.png', '/offline.html',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
@@ -20,65 +19,55 @@ const DATA_URLS = [
   'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information'
 ];
 
-// INSTALL
+// ติดตั้ง + ข้ามรอทันที
 self.addEventListener('install', e => {
-  console.log('%cSW: ติดตั้งเวอร์ชันใหม่ → ' + VERSION, 'color: #00ff00; font-weight: bold');
   e.waitUntil(
-    caches.open(SHELL_CACHE)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())
   );
 });
 
-// ACTIVATE
+// เปิดใช้งาน + ลบแคชเก่า + ควบคุมทันที
 self.addEventListener('activate', e => {
-  console.log('%cSW: เปิดใช้งานเวอร์ชัน → ' + VERSION, 'color: #0066ff; font-weight: bold');
   e.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if (key !== SHELL_CACHE && key !== DATA_CACHE) {
-          console.log('SW: ลบ Cache เก่า →', key);
-          return caches.delete(key);
-        }
-      })
-    ))
-    .then(() => self.clients.claim())
+      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+    )).then(() => self.clients.claim())
   );
 });
 
-// FETCH
+// ดักทุก request
 self.addEventListener('fetch', e => {
-  const req = e.request;
-  const url = new URL(req.url);
+  const url = e.request.url;
 
-  if (req.method !== 'GET' ||
-      url.protocol === 'chrome-extension:' ||
-      url.hostname.includes('googleusercontent.com') ||
-      url.hostname.includes('script.google.com')) {
-    return;
-  }
+  // ข้าม POST และบาง domain
+  if (e.request.method !== 'GET' ||
+      url.includes('googleusercontent.com') ||
+      url.includes('script.google.com') ||
+      url.includes('chrome-extension:')) return;
 
-  // App Shell
-  if (url.origin === location.origin || APP_SHELL.some(u => url.href.includes(u))) {
+  // App Shell → Cache First
+  if (SHELL.some(u => url.includes(u)) || url.startsWith(location.origin)) {
     e.respondWith(
-      caches.match(req).then(cached => cached || fetch(req).then(res => {
-        if (res.ok) caches.open(SHELL_CACHE).then(c => c.put(req, res.clone()));
-        return res;
-      }).catch(() => caches.match('/offline.html')))
+      caches.match(e.request).then(cached =>
+        cached || fetch(e.request).then(res => {
+          if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+          return res;
+        }).catch(() => caches.match('/offline.html'))
+      )
     );
     return;
   }
 
-  // ข้อมูล opensheet (แก้ตรงนี้ให้สมบูรณ์)
-  const cleanDataUrl = DATA_URLS.find(u => url.href.startsWith(u.split('?')[0]));
-  if (cleanDataUrl) {
-    const cacheKey = new Request(cleanDataUrl.split('?')[0]);
+  // ข้อมูล opensheet → Stale-While-Revalidate (เร็วสุด)
+  const dataBase = DATA_URLS.find(u => url.startsWith(u.split('?')[0]));
+  if (dataBase) {
+    const key = new Request(dataBase.split('?')[0]);
     e.respondWith(
-      caches.open(DATA_CACHE).then(cache =>
-        cache.match(cacheKey).then(cached =>
-          cached || fetch(req).then(fresh => {
-            if (fresh.ok) cache.put(cacheKey, fresh.clone());
-            return fresh;
+      caches.open(CACHE).then(cache =>
+        cache.match(key).then(cached =>
+          cached || fetch(e.request).then(res => {
+            if (res.ok) cache.put(key, res.clone());
+            return res;
           })
         )
       )
@@ -87,17 +76,13 @@ self.addEventListener('fetch', e => {
   }
 
   // อื่น ๆ → Network First
-  e.respondWith(
-    fetch(req).catch(() => caches.match('/offline.html') || new Response('ออฟไลน์', {status: 503}))
-  );
+  e.respondWith(fetch(e.request).catch(() => caches.match('/offline.html')));
 });
 
-// MESSAGE (ส่งเวอร์ชัน + SKIP_WAITING)
-self.addEventListener('message', event => {
-  if (event.data?.type === 'GET_VERSION') {
-    event.source.postMessage({ type: 'VERSION', version: VERSION });
-  }
-  if (event.data?.type === 'SKIP_WAITING') {
+// รับคำสั่งจากหน้าเว็บ
+self.addEventListener('message', e => {
+  if (e.data?.type === 'GET_VERSION')
+    e.source.postMessage({ type: 'VERSION', version: VERSION });
+  if (e.data?.type === 'SKIP_WAITING')
     self.skipWaiting();
-  }
 });
