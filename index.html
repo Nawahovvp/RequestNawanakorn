@@ -623,13 +623,13 @@ toggleAllDataBtn.addEventListener("click", () => {
 
   if (showOnlyPending) {
     // โหมด: แสดงเฉพาะรอเบิก
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>รอเบิก</span>';
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ประวัติเบิก</span>';
     toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
     toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
     toggleAllDataBtn.style.color = "white";
   } else {
     // โหมด: แสดงประวัติทั้งหมด
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>ประวัติเบิก</span>';
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>รอเบิก</span>';
     toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
     toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
     toggleAllDataBtn.style.color = "white";
