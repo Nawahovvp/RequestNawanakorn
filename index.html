@@ -3231,10 +3231,11 @@ body.dark-mode .detail-header-row h2 {
       </button>
     </div>
 
-    <div style="margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 12px; text-align: center; font-size: 11px;">
-      <p style="margin: 4px 0; font-weight: bold;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
-      <p style="margin: 4px 0; opacity: 0.9;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
-    </div>
+    <div style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 16px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+  <p style="margin: 6px 0; font-weight: bold; font-size: 13px;">PartsGo เวอร์ชัน <span id="appVersion">v10</span></p>
+  <p style="margin: 4px 0; opacity: 0.9;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
+  <p style="margin: 4px 0; opacity: 0.8; font-size: 10px;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
+</div>
   </div>
 </div>
       <!-- Bottom Navigation (Removed Setting Button) -->
@@ -3304,6 +3305,38 @@ body.dark-mode .detail-header-row h2 {
       window.location.reload();
     });
   }
+  // === แสดงเวอร์ชันแอปในเมนูตั้งค่า (อัตโนมัติจาก sw.js) ===
+function updateAppVersionDisplay() {
+  // ดึงเวอร์ชันจาก sw.js โดยตรง (ถ้า Service Worker โหลดแล้ว)
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+  }
+
+  // สำรอง: ถ้ายังไม่โหลด SW → ดึงจาก cache หรือแสดง v??
+  const versionElement = document.getElementById('appVersion');
+  if (versionElement) {
+    versionElement.textContent = 'v??';
+  }
+}
+
+// รับเวอร์ชันจาก sw.js
+navigator.serviceWorker.addEventListener('message', event => {
+  if (event.data && event.data.type === 'VERSION') {
+    const versionElement = document.getElementById('appVersion');
+    if (versionElement) {
+      versionElement.textContent = event.data.version;
+      versionElement.style.fontWeight = 'bold';
+      versionElement.style.color = '#00ff88';
+    }
+  }
+});
+
+// เรียกตอนเปิดหน้า + ตอนเปิด Settings
+document.addEventListener('DOMContentLoaded', updateAppVersionDisplay);
+window.showSettings = function() {
+  // ... โค้ดเดิมของคุณ ...
+  updateAppVersionDisplay(); // เพิ่มบรรทัดนี้ในฟังก์ชัน showSettings()
+};
       'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
       // Global employee data
       let employeeData = [];
