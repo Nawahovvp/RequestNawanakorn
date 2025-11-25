@@ -1,25 +1,18 @@
-// sw.js — เวอร์ชันสุดท้าย สำหรับระบบขอเบิกอะไหล่ (PartsGo)
+// sw.js — เวอร์ชันสมบูรณ์แบบ 100% (แนะนำใช้ตัวนี้เลย)
 // ปรับปรุงล่าสุด: 25 พ.ย. 2568
-// รองรับ: อัปเดตทันที + แจ้งเตือนผู้ใช้ + แสดงเวอร์ชันในเมนู + ออฟไลน์เต็มรูปแบบ
 
-const VERSION = 'v10.2';                        // เปลี่ยนตรงนี้ทุกครั้งที่อัปเดตแอป !!
+const VERSION = 'v10.2';
 const SHELL_CACHE = `partgo-shell-${VERSION}`;
 const DATA_CACHE  = `partgo-data-${VERSION}`;
 
-// === ไฟล์ที่ต้องโหลดทันที (App Shell) ===
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/offline.html',
+  '/', '/index.html', '/manifest.json',
+  '/icon-192.png', '/icon-512.png', '/offline.html',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
 ];
 
-// === URL ที่เป็นข้อมูล (opensheet) → ใช้ Stale-While-Revalidate ===
 const DATA_URLS = [
   'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap',
   'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request',
@@ -27,7 +20,7 @@ const DATA_URLS = [
   'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information'
 ];
 
-// ============= INSTALL =============
+// INSTALL
 self.addEventListener('install', e => {
   console.log('%cSW: ติดตั้งเวอร์ชันใหม่ → ' + VERSION, 'color: #00ff00; font-weight: bold');
   e.waitUntil(
@@ -37,7 +30,7 @@ self.addEventListener('install', e => {
   );
 });
 
-// ============= ACTIVATE =============
+// ACTIVATE
 self.addEventListener('activate', e => {
   console.log('%cSW: เปิดใช้งานเวอร์ชัน → ' + VERSION, 'color: #0066ff; font-weight: bold');
   e.waitUntil(
@@ -53,12 +46,11 @@ self.addEventListener('activate', e => {
   );
 });
 
-// ============= FETCH (หัวใจหลัก) =============
+// FETCH
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
 
-  // ข้าม POST, chrome-extension, googleusercontent (Drive preview), script.google.com
   if (req.method !== 'GET' ||
       url.protocol === 'chrome-extension:' ||
       url.hostname.includes('googleusercontent.com') ||
@@ -66,58 +58,46 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // 1. App Shell + CDN → Cache First + Update Background
+  // App Shell
   if (url.origin === location.origin || APP_SHELL.some(u => url.href.includes(u))) {
     e.respondWith(
-      caches.match(req).then(cached => {
-        const networked = fetch(req)
-          .then(res => {
-            if (res.ok) caches.open(SHELL_CACHE).then(c => c.put(req, res.clone()));
-            return res;
-          })
-          .catch(() => cached || caches.match('/offline.html'));
-        return cached || networked;
-      })
+      caches.match(req).then(cached => cached || fetch(req).then(res => {
+        if (res.ok) caches.open(SHELL_CACHE).then(c => c.put(req, res.clone()));
+        return res;
+      }).catch(() => caches.match('/offline.html')))
     );
     return;
   }
 
-  // 2. ข้อมูล opensheet → Stale-While-Revalidate (เร็ว + สดเสมอ)
-  if (DATA_URLS.some(dataUrl => url.href.startsWith(dataUrl))) {
+  // ข้อมูล opensheet (แก้ตรงนี้ให้สมบูรณ์)
+  const cleanDataUrl = DATA_URLS.find(u => url.href.startsWith(u.split('?')[0]));
+  if (cleanDataUrl) {
+    const cacheKey = new Request(cleanDataUrl.split('?')[0]);
     e.respondWith(
-      caches.open(DATA_CACHE).then(cache => {
-        return cache.match(req).then(cached => {
-          const fetchPromise = fetch(req).then(fresh => {
-            if (fresh.ok) cache.put(req, fresh.clone());
+      caches.open(DATA_CACHE).then(cache =>
+        cache.match(cacheKey).then(cached =>
+          cached || fetch(req).then(fresh => {
+            if (fresh.ok) cache.put(cacheKey, fresh.clone());
             return fresh;
-          });
-          return cached || fetchPromise;
-        });
-      })
+          })
+        )
+      )
     );
     return;
   }
 
-  // 3. ทุกอย่างอื่น → Network First → ตกออฟไลน์ใช้ offline.html
+  // อื่น ๆ → Network First
   e.respondWith(
-    fetch(req)
-      .then(res => res)
-      .catch(() => caches.match('/offline.html') || new Response('คุณอยู่ในโหมดออฟไลน์', {status: 503}))
+    fetch(req).catch(() => caches.match('/offline.html') || new Response('ออฟไลน์', {status: 503}))
   );
 });
 
-// ============= รับคำสั่งจากหน้าเว็บ + ส่งเวอร์ชันกลับ =============
+// MESSAGE (ส่งเวอร์ชัน + SKIP_WAITING)
 self.addEventListener('message', event => {
-  // ส่งเวอร์ชันกลับเมื่อหน้าเว็บถาม
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.source.postMessage({
-      type: 'VERSION',
-      version: VERSION
-    });
+  if (event.data?.type === 'GET_VERSION') {
+    event.source.postMessage({ type: 'VERSION', version: VERSION });
   }
-
-  // รองรับการอัปเดตทันทีเมื่อผู้ใช้กด "รีเฟรชเลย"
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
