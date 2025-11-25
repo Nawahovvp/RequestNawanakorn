@@ -840,11 +840,7 @@ window.showSettings = function() {
     if (document.querySelector('.nav-btn.active')) {
       showTab('parts');
     }
-    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้น
-    if (localStorage.getItem('partgo-installed')) {
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) installBtn.style.display = 'none';
-    }
+    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้
   } else {
     loginModal.classList.add('active');
     appContent.classList.remove('logged-in');
