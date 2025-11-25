@@ -3581,25 +3581,27 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
 document.getElementById('install-btn').addEventListener('click', async () => {
   if (deferredPrompt) {
-    // แสดง native prompt
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    console.log('ผู้ใช้เลือก:', outcome); // 'accepted' หรือ 'dismissed'
+    console.log('ผู้ใช้เลือก:', outcome);
+
     if (outcome === 'accepted') {
-      // Set localStorage เพื่อ persist หลัง reload
       localStorage.setItem('partgo-installed', 'true');
-      // ซ่อนปุ่มหลังติดตั้ง
-      document.getElementById('install-btn').style.display = 'none';
-      // แสดง toast (ใช้ SweetAlert ถ้ามี) - แก้ชื่อให้ตรง "PartGotest"
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'success',
-          title: 'ติดตั้งสำเร็จ!',
-          text: 'PartsGo พร้อมใช้งานบนหน้าจอหลักแล้ว', // เปลี่ยนชื่อให้ตรง
-          timer: 2000,
-          showConfirmButton: false
-        });
+
+      // แก้ตรงนี้! ซ่อนปุ่มทันที + ป้องกันทุกกรณี
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) {
+        installBtn.style.display = 'none';  // ซ่อนทันที
+        installBtn.remove();                // ลบออกจาก DOM เลย (ดีที่สุด)
       }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'ติดตั้งสำเร็จ!',
+        text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
+        timer: 2500,
+        showConfirmButton: false
+      });
     }
     deferredPrompt = null;
   }
@@ -3640,13 +3642,15 @@ function openAnnouncementEditor() {
     if (btn) btn.style.display = 'none';
     deferredPrompt = null;
   });
-
   document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('partgo-installed') === 'true') {
-      const btn = document.getElementById('install-btn');
-      if (btn) btn.style.display = 'none';
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    const btn = document.getElementById('install-btn');
+    if (btn) {
+      btn.style.display = 'none';
+      btn.remove(); // ลบออกจาก DOM ถาวร
     }
-  });
+  }
+});
     </script>
   </body>
 </html>
