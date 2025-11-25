@@ -3564,55 +3564,89 @@ function openAnnouncementEditor() {
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
+<script>
+// === PWA Install Button – แก้ปัญหาปุ่มไม่หาย 100% ===
 let deferredPrompt;
+const installBtn = document.getElementById('install-btn');
 
-// 1. ดักเหตุการณ์พร้อมติดตั้ง
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+// ฟังก์ชันซ่อน + ลบปุ่มออกจาก DOM ถาวร
+function hideInstallButtonPermanently() {
+  if (installBtn) {
+    installBtn.remove(); // ลบออกจาก DOM เลย ไม่มีวันกลับมา
+    localStorage.setItem('partgo-installed', 'true');
+    console.log('ปุ่มติดตั้งถูกลบเรียบร้อยแล้ว (ติดตั้งสำเร็จ)');
+  }
+}
 
-  // ถ้าเคยติดตั้งแล้ว → ลบปุ่มทิ้งเลย
-  if (localStorage.getItem('partgo-installed') === 'true') {
-    const btn = document.getElementById('install-btn');
-    if (btn) btn.remove();
+// 1. ตรวจสอบทันทีตอนโหลดหน้า
+document.addEventListener('DOMContentLoaded', () => {
+  const isInstalled = localStorage.getItem('partgo-installed') === 'true';
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       (window.navigator.standalone === true); // iOS
+
+  if (isInstalled || isStandalone) {
+    hideInstallButtonPermanently();
     return;
   }
 
-  // ถ้ายังไม่ติดตั้ง → แสดงปุ่ม (ข้อความใน HTML อยู่แล้ว)
-  const btn = document.getElementById('install-btn');
-  if (btn) btn.style.display = 'flex';
+  // ถ้ายังไม่ติดตั้ง → แสดงปุ่ม
+  if (installBtn) installBtn.style.display = 'flex';
 });
 
-// 2. กดปุ่ม → ติดตั้ง + ลบปุ่มทันที
-document.getElementById('install-btn')?.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
+// 2. ดัก beforeinstallprompt (Chrome จะยิงทุกครั้งที่เปิด)
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt ถูกเรียก');
+  e.preventDefault();
+  deferredPrompt = e;
 
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === 'accepted') {
-    localStorage.setItem('partgo-installed', 'true');
-    const btn = document.getElementById('install-btn');
-    if (btn) btn.remove(); // ลบปุ่มทิ้งเลย
-
-    Swal.fire({
-      icon: 'success',
-      title: 'ติดตั้งสำเร็จ!',
-      text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
-      timer: 2500,
-      showConfirmButton: false
-    });
+  // ถ้าเคยติดตั้งแล้ว → อย่าแสดงปุ่มอีก
+  if (localStorage.getItem('partgo-installed') === 'true' || 
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true) {
+    hideInstallButtonPermanently();
+    return;
   }
-  deferredPrompt = null;
+
+  // แสดงปุ่มถ้ายังไม่เคยติดตั้ง
+  if (installBtn) installBtn.style.display = 'flex';
 });
 
-// 3. เปิดใหม่ → ลบปุ่มทิ้งถ้าเคยติดตั้ง
-document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('partgo-installed') === 'true') {
-    const btn = document.getElementById('install-btn');
-    if (btn) btn.remove();
-  }
+// 3. เมื่อผู้ใช้กดติดตั้ง
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      hideInstallButtonPermanently();
+      Swal.fire({
+        icon: 'success',
+        title: 'ติดตั้งสำเร็จ!',
+        text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    }
+    deferredPrompt = null;
+  });
+}
+
+// 4. ดักเหตุการณ์ appinstalled (บางเครื่องยิง บางเครื่องไม่ยิง)
+window.addEventListener('appinstalled', () => {
+  console.log('appinstalled event ทำงาน!');
+  hideInstallButtonPermanently();
 });
+
+// 5. ป้องกันกรณีเปิดจาก Home Screen แล้วยังเห็นปุ่ม (iOS/Android)
+setInterval(() => {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       (window.navigator.standalone === true);
+  if (isStandalone && installBtn && installBtn.offsetParent !== null) {
+    hideInstallButtonPermanently();
+  }
+}, 3000); // เช็คทุก 3 วินาที
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
