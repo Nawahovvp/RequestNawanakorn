@@ -3567,16 +3567,21 @@ setTimeout(() => loadSystemAnnouncement(), 1000);
 let deferredPrompt; // เก็บ event prompt
 // ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); // ป้องกัน prompt อัตโนมัติ
-  deferredPrompt = e; // เก็บไว้ใช้
-  // แสดงปุ่มหลัง delay เล็กน้อย (2 วินาที เพื่อให้ผู้ใช้เห็นเนื้อหา)
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // แก้ตรงนี้! เช็คว่าเคยติดตั้งแล้วไหม ก่อนแสดงปุ่ม
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    return; // ไม่ต้องแสดงปุ่มเลย
+  }
+
   setTimeout(() => {
     const installBtn = document.getElementById('install-btn');
-    if (installBtn) {
+    if (installBtn && !localStorage.getItem('partgo-installed')) {
       installBtn.style.display = 'flex';
-      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo'; // อัปเดตข้อความ
+      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo';
     }
-  }, 2000); // Delay 2s สำหรับ UX (ปรับได้)
+  }, 2000);
 });
 // จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
 document.getElementById('install-btn').addEventListener('click', async () => {
@@ -3634,21 +3639,22 @@ function openAnnouncementEditor() {
       });
     }
   });
-}    // 2. วางโค้ดซ่อนปุ่มติดตั้ง เป็นอันสุดท้ายเลย (หลังสุดใน <script>)
-  window.addEventListener('appinstalled', () => {
-    console.log('ติดตั้งสำเร็จแล้ว!');
-    localStorage.setItem('partgo-installed', 'true');
-    const btn = document.getElementById('install-btn');
-    if (btn) btn.style.display = 'none';
-    deferredPrompt = null;
-  });
-  document.addEventListener('DOMContentLoaded', () => {
+}  
+ // ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('partgo-installed', 'true');
+  const btn = document.getElementById('install-btn');
+  if (btn) {
+    btn.remove(); // ลบออกเลย ไม่มีทางกลับมา
+  }
+  deferredPrompt = null;
+});
+
+// ป้องกันรีเฟรชแล้วปุ่มกลับมา
+document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('partgo-installed') === 'true') {
     const btn = document.getElementById('install-btn');
-    if (btn) {
-      btn.style.display = 'none';
-      btn.remove(); // ลบออกจาก DOM ถาวร
-    }
+    if (btn) btn.remove();
   }
 });
     </script>
