@@ -3565,36 +3565,42 @@ function openAnnouncementEditor() {
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
 // === PWA Install Logic – แก้ให้หายขาด 100% ===
+// ===== PWA ติดตั้ง – เวอร์ชันแก้หายขาด 100% (2025) =====
 let deferredPrompt = null;
-let isInstalled = false;
 
-// 1. เช็คทันทีว่าเคยติดตั้งแล้วหรือยัง
-function checkInstalledStatus() {
-  const installed = localStorage.getItem('partgo-installed') === 'true';
+// ฟังก์ชันเช็ค + ลบปุ่มทิ้งถาวร
+function permanentlyHideInstallButton() {
   const btn = document.getElementById('install-btn');
-  if (installed && btn) {
-    btn.remove(); // ลบออกจาก DOM เลย ไม่มีวันกลับมา
-    isInstalled = true;
+  if (btn) {
+    btn.remove(); // ลบออกจาก DOM เลย
+    console.log('ปุ่มติดตั้งถูกลบถาวร');
   }
 }
 
-// 2. ดัก beforeinstallprompt
+// 1. เช็คทันทีตอนโหลดหน้า
+if (localStorage.getItem('partgo-installed') === 'true') {
+  permanentlyHideInstallButton();
+}
+
+// 2. ดัก beforeinstallprompt – ป้องกันไม่ให้โผล่ถ้าติดตั้งแล้ว
 window.addEventListener('beforeinstallprompt', (e) => {
-  if (isInstalled || localStorage.getItem('partgo-installed') === 'true') {
+  // ถ้าเคยติดตั้งแล้ว → บล็อกเหตุการณ์นี้ทันที
+  if (localStorage.getItem('partgo-installed') === 'true') {
     e.preventDefault();
-    return; // ไม่ต้องเก็บ prompt ถ้าติดตั้งแล้ว
+    return;
   }
 
   e.preventDefault();
   deferredPrompt = e;
 
+  // แสดงปุ่ม (เฉพาะครั้งแรก)
   const btn = document.getElementById('install-btn');
   if (btn) {
     btn.style.display = 'flex';
   }
 });
 
-// 3. เมื่อกดปุ่มติดตั้ง
+// 3. เมื่อผู้ใช้กดปุ่มติดตั้ง
 document.getElementById('install-btn')?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
 
@@ -3603,10 +3609,7 @@ document.getElementById('install-btn')?.addEventListener('click', async () => {
 
   if (outcome === 'accepted') {
     localStorage.setItem('partgo-installed', 'true');
-    isInstalled = true;
-
-    const btn = document.getElementById('install-btn');
-    if (btn) btn.remove(); // ลบออกทันที
+    permanentlyHideInstallButton();
 
     Swal.fire({
       icon: 'success',
@@ -3620,23 +3623,26 @@ document.getElementById('install-btn')?.addEventListener('click', async () => {
   deferredPrompt = null;
 });
 
-// 4. ดักเหตุการณ์เมื่อติดตั้งจริง ๆ (เบราว์เซอร์ยิง)
+// 4. ดักเหตุการณ์เมื่อติดตั้งจริง ๆ (Chrome ยิง event นี้)
 window.addEventListener('appinstalled', () => {
   localStorage.setItem('partgo-installed', 'true');
-  isInstalled = true;
-  const btn = document.getElementById('install-btn');
-  if (btn) btn.remove();
+  permanentlyHideInstallButton();
   console.log('PWA ติดตั้งสำเร็จโดยสมบูรณ์');
 });
 
-// 5. เรียกเช็คตอนโหลดหน้า (สำคัญมาก!)
+// 5. ป้องกันกรณีรีเฟรชเร็ว / เปิดแท็บใหม่
 document.addEventListener('DOMContentLoaded', () => {
-  checkInstalledStatus();
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    permanentlyHideInstallButton();
+  }
 });
 
-// 6. เพิ่มป้องกันกรณีรีเฟรชเร็ว ๆ
-setTimeout(checkInstalledStatus, 100);
-setTimeout(checkInstalledStatus, 1000);
+// สำรองเผื่อ Chrome โหลดช้า
+setTimeout(() => {
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    permanentlyHideInstallButton();
+  }
+}, 500);
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
