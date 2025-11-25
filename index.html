@@ -3331,11 +3331,40 @@ navigator.serviceWorker.addEventListener('message', event => {
   }
 });
 
-// เรียกตอนเปิดหน้า + ตอนเปิด Settings
+// === แสดงเวอร์ชันแอปในเมนูตั้งค่า (อัตโนมัติจาก sw.js) ===
+function updateAppVersionDisplay() {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+  }
+  const el = document.getElementById('appVersion');
+  if (el) el.textContent = 'v??';
+}
+
+// รับเวอร์ชันจาก sw.js
+navigator.serviceWorker.addEventListener('message', event => {
+  if (event.data && event.data.type === 'VERSION') {
+    const el = document.getElementById('appVersion');
+    if (el) {
+      el.textContent = event.data.version;
+      el.style.fontWeight = 'bold';
+      el.style.color = '#00ff88';
+    }
+  }
+});
+
+// เรียกอัปเดตเวอร์ชันทุกครั้งที่เปิดหน้า
 document.addEventListener('DOMContentLoaded', updateAppVersionDisplay);
+
+// แก้ไข showSettings() เดิมของคุณ ให้เรียกอัปเดตเวอร์ชันด้วย
+const originalShowSettings = window.showSettings; // เก็บฟังก์ชันเดิมไว้
 window.showSettings = function() {
-  // ... โค้ดเดิมของคุณ ...
-  updateAppVersionDisplay(); // เพิ่มบรรทัดนี้ในฟังก์ชัน showSettings()
+  // เรียกฟังก์ชันเดิมของคุณก่อน
+  if (typeof originalShowSettings === 'function') {
+    originalShowSettings();
+  }
+
+  // แล้วค่อยอัปเดตเวอร์ชัน
+  updateAppVersionDisplay();
 };
       'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
       // Global employee data
