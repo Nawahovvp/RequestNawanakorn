@@ -188,10 +188,10 @@
           <div id="searchContainer">
             <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
             <!-- Toggle button for all data -->
-           <button id="toggleAllDataBtn" class="canva-button" title="รอเบิก" aria-selected="false">
-  <i class="fas fa-clock"></i>
-  <span>ประวัติเบิก</span>
-</button>
+           <button id="toggleAllDataBtn" class="canva-button" title="กำลังแสดงเฉพาะรายการที่รอเบิก">
+                   <i class="fas fa-clock"></i>
+                <span>รอเบิก</span>
+              </button>
           </div>
           <div id="error-container-today" class="error-container" style="display: none;">
             <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
@@ -555,7 +555,7 @@ window.showSettings = function() {
       let globalSearch1 = '';
       let globalSearch2 = '';
       // Global for today tab: toggle pending only
-      let currentFilter = 'pending'; // 'pending' or 'history'
+      let showOnlyPending = true;        // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
       // Sort config for today tab
       let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
       // Pagination config for today tab
@@ -617,7 +617,29 @@ window.showSettings = function() {
       const tableBodyToday = document.querySelector("#data-table-today tbody");
       const errorContainerToday = document.getElementById("error-container-today");
       const retryButtonToday = document.getElementById("retry-button-today");
-      const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
+      // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
+toggleAllDataBtn.addEventListener("click", () => {
+  showOnlyPending = !showOnlyPending;
+
+  if (showOnlyPending) {
+    // โหมด: แสดงเฉพาะรอเบิก
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>รอเบิก</span>';
+    toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
+    toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+    toggleAllDataBtn.style.color = "white";
+  } else {
+    // โหมด: แสดงประวัติทั้งหมด
+    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>ประวัติเบิก</span>';
+    toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
+    toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+    toggleAllDataBtn.style.color = "white";
+  }
+
+  // รีเซ็ตหน้าแรก + อัปเดตตารางทันที
+  currentPageToday = 1;
+  updateTableToday();
+});
+      
       // Pagination elements for today tab
       const paginationToday = document.getElementById("paginationToday");
       const pageNumbersToday = document.getElementById("pageNumbersToday");
@@ -2682,29 +2704,56 @@ function sortByColumn(a, b, column, direction) {
   }
   return filtered;
 }
-      function updateTableToday() {
-        let dataToFilter = allDataToday;
-        const keyword = searchInputToday.value.toLowerCase();
-        if (keyword) {
-          dataToFilter = allDataToday.filter((row) => {
-            return (
-              (row["IDRow"] || "").toLowerCase().includes(keyword) ||
-              (row["material"] || "").toLowerCase().includes(keyword) ||
-              (row["description"] || "").toLowerCase().includes(keyword) ||
-              (row["employeeName"] || "").toLowerCase().includes(keyword) ||
-              (row["team"] || "").toLowerCase().includes(keyword)
-            );
-          });
-        }
-        const filteredData = filterByStatus(dataToFilter);
-        currentFilteredDataToday = filteredData;
-        // Paginate
-        const startIndex = (currentPageToday - 1) * itemsPerPageToday;
-        const endIndex = startIndex + itemsPerPageToday;
-        const paginatedData = filteredData.slice(startIndex, endIndex);
-        renderTableToday(paginatedData);
-        renderPaginationToday(filteredData.length);
-      }
+     // ฟังก์ชันกรองข้อมูลตามโหมด + คำค้นหา + การเรียงลำดับ
+function filterDataToday(data) {
+  let filtered = data;
+
+  // 1. กรองตามโหมดปุ่ม (รอเบิก หรือ ทั้งหมด)
+  if (showOnlyPending) {
+    filtered = data.filter(row => 
+      row["status"] && row["status"].trim() === "รอเบิก"
+    );
+  }
+  // ถ้าเป็น false → แสดงทั้งหมด (ไม่กรอง)
+
+  // 2. กรองตามคำค้นหา
+  const keyword = searchInputToday.value.trim().toLowerCase();
+  if (keyword) {
+    filtered = filtered.filter(row => {
+      return (
+        (row["IDRow"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["material"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["description"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["employeeName"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["team"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["CallNumber"] || "").toString().toLowerCase().includes(keyword) ||
+        (row["CallType"] || "").toString().toLowerCase().includes(keyword)
+      );
+    });
+  }
+
+  // 3. เรียงลำดับตามที่ผู้ใช้กดหัวคอลัมน์
+  if (sortConfigToday.column) {
+    filtered.sort((a, b) => 
+      sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction)
+    );
+  }
+
+  return filtered;
+}
+
+// อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
+function updateTableToday() {
+  const filteredData = filterDataToday(allDataToday);
+  currentFilteredDataToday = filteredData;
+
+  const startIndex = (currentPageToday - 1) * itemsPerPageToday;
+  const endIndex = startIndex + itemsPerPageToday;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  renderTableToday(paginatedData);
+  renderPaginationToday(filteredData.length);
+}
       function renderTableToday(data) {
         tableBodyToday.innerHTML = "";
         data.forEach((row) => {
@@ -2833,6 +2882,9 @@ function sortByColumn(a, b, column, direction) {
       searchInputToday.addEventListener("input", () => {
         currentPageToday = 1; // Reset page on search
         updateTableToday();
+        showOnlyPending = true;
+toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>รอเบิก</span>';
+toggleAllDataBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
       });
       async function loadTodayData() {
         document.getElementById("loading").style.display = "flex";
