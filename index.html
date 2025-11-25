@@ -3608,16 +3608,6 @@ document.getElementById('install-btn').addEventListener('click', async () => {
     deferredPrompt = null;
   }
 });
-// ตรวจสอบถ้าติดตั้งแล้ว (ไม่แสดง prompt ซ้ำ) - แก้ไขให้เช็ค localStorage ชัดเจน
-window.addEventListener('appinstalled', () => {
-  console.log('PartsGo ติดตั้งแล้ว!');
-  // Set localStorage เพื่อ persist (fallback ถ้า prompt accepted ไม่ set)
-  localStorage.setItem('partgo-installed', 'true');
-  // ซ่อนปุ่มถ้ามี
-  const installBtn = document.getElementById('install-btn');
-  if (installBtn) installBtn.style.display = 'none';
-  deferredPrompt = null;
-});
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
@@ -3646,7 +3636,21 @@ function openAnnouncementEditor() {
       });
     }
   });
-}
+}    // 2. วางโค้ดซ่อนปุ่มติดตั้ง เป็นอันสุดท้ายเลย (หลังสุดใน <script>)
+  window.addEventListener('appinstalled', () => {
+    console.log('ติดตั้งสำเร็จแล้ว!');
+    localStorage.setItem('partgo-installed', 'true');
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.style.display = 'none';
+    deferredPrompt = null;
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('partgo-installed') === 'true') {
+      const btn = document.getElementById('install-btn');
+      if (btn) btn.style.display = 'none';
+    }
+  });
     </script>
   </body>
 </html>
