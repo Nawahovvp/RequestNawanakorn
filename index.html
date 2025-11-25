@@ -3570,14 +3570,15 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  // ถ้าเคยติดตั้งแล้ว ไม่ต้องทำอะไร
+  // ถ้าเคยติดตั้งแล้ว → ไม่ต้องแสดงปุ่มเลย
   if (localStorage.getItem('partgo-installed') === 'true') {
     return;
   }
 
+  // ถ้ายังไม่ติดตั้ง → แสดงปุ่มหลัง 2 วินาที
   setTimeout(() => {
     const installBtn = document.getElementById('install-btn');
-    if (installBtn && !localStorage.getItem('partgo-installed')) {
+    if (installBtn && localStorage.getItem('partgo-installed') !== 'true') {
       installBtn.style.display = 'flex';
       installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo';
     }
