@@ -3564,28 +3564,27 @@ function openAnnouncementEditor() {
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
-let deferredPrompt; // เก็บ event prompt
-// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
+let deferredPrompt;
+
+// 1. ดักเหตุการณ์พร้อมติดตั้ง
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  // ถ้าเคยติดตั้งแล้ว → ไม่ต้องแสดงปุ่มเลย
+  // ถ้าเคยติดตั้งแล้ว → ลบปุ่มทิ้งเลย
   if (localStorage.getItem('partgo-installed') === 'true') {
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.remove();
     return;
   }
 
-  // ถ้ายังไม่ติดตั้ง → แสดงปุ่มหลัง 2 วินาที
-  setTimeout(() => {
-    const installBtn = document.getElementById('install-btn');
-    if (installBtn && localStorage.getItem('partgo-installed') !== 'true') {
-      installBtn.style.display = 'flex';
-      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo';
-    }
-  }, 2000);
+  // ถ้ายังไม่ติดตั้ง → แสดงปุ่ม (ข้อความใน HTML อยู่แล้ว)
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'flex';
 });
-// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
-document.getElementById('install-btn').addEventListener('click', async () => {
+
+// 2. กดปุ่ม → ติดตั้ง + ลบปุ่มทันที
+document.getElementById('install-btn')?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
 
   deferredPrompt.prompt();
@@ -3593,12 +3592,8 @@ document.getElementById('install-btn').addEventListener('click', async () => {
 
   if (outcome === 'accepted') {
     localStorage.setItem('partgo-installed', 'true');
-
-    // ลบปุ่มออกจากหน้าเว็บทันที + ถาวร
-    const installBtn = document.getElementById('install-btn');
-    if (installBtn) {
-      installBtn.remove();  // ลบออกจาก DOM เลย!
-    }
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.remove(); // ลบปุ่มทิ้งเลย
 
     Swal.fire({
       icon: 'success',
@@ -3609,6 +3604,14 @@ document.getElementById('install-btn').addEventListener('click', async () => {
     });
   }
   deferredPrompt = null;
+});
+
+// 3. เปิดใหม่ → ลบปุ่มทิ้งถ้าเคยติดตั้ง
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('partgo-installed') === 'true') {
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.remove();
+  }
 });
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
