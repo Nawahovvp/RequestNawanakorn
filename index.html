@@ -3585,31 +3585,29 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 // จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
 document.getElementById('install-btn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('ผู้ใช้เลือก:', outcome);
+  if (!deferredPrompt) return;
 
-    if (outcome === 'accepted') {
-      localStorage.setItem('partgo-installed', 'true');
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
 
-      // แก้ตรงนี้! ซ่อนปุ่มทันที + ป้องกันทุกกรณี
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) {
-        installBtn.style.display = 'none';  // ซ่อนทันที
-        installBtn.remove();                // ลบออกจาก DOM เลย (ดีที่สุด)
-      }
+  if (outcome === 'accepted') {
+    localStorage.setItem('partgo-installed', 'true');
 
-      Swal.fire({
-        icon: 'success',
-        title: 'ติดตั้งสำเร็จ!',
-        text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
-        timer: 2500,
-        showConfirmButton: false
-      });
+    // ลบปุ่มออกจากหน้าเว็บทันที + ถาวร
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.remove();  // ลบออกจาก DOM เลย!
     }
-    deferredPrompt = null;
+
+    Swal.fire({
+      icon: 'success',
+      title: 'ติดตั้งสำเร็จ!',
+      text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
+      timer: 2500,
+      showConfirmButton: false
+    });
   }
+  deferredPrompt = null;
 });
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
