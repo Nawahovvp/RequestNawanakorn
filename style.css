@@ -11,6 +11,9 @@ body.dark-mode {
   background-color: #121212;
   color: #e0e0e0;
 }
+#install-btn {
+  display: none;        /* ซ่อนปุ่มไว้ก่อน */
+}
 body.dark-mode .login-modal {background-color: rgba(0, 0, 0, 0.8);}
 body.dark-mode .login-content {background: linear-gradient(135deg, #2c3e50, #34495e);color: #ecf0f1;}
 body.dark-mode .login-content input {background-color: #34495e;border-color: #555;color: #ecf0f1;}
