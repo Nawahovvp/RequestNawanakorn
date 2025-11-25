@@ -3564,53 +3564,79 @@ function openAnnouncementEditor() {
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
-let deferredPrompt; // เก็บ event prompt
-// ดัก event beforeinstallprompt (เบราว์เซอร์ยิงเมื่อ PWA ตรงเกณฑ์)
+// === PWA Install Logic – แก้ให้หายขาด 100% ===
+let deferredPrompt = null;
+let isInstalled = false;
+
+// 1. เช็คทันทีว่าเคยติดตั้งแล้วหรือยัง
+function checkInstalledStatus() {
+  const installed = localStorage.getItem('partgo-installed') === 'true';
+  const btn = document.getElementById('install-btn');
+  if (installed && btn) {
+    btn.remove(); // ลบออกจาก DOM เลย ไม่มีวันกลับมา
+    isInstalled = true;
+  }
+}
+
+// 2. ดัก beforeinstallprompt
 window.addEventListener('beforeinstallprompt', (e) => {
+  if (isInstalled || localStorage.getItem('partgo-installed') === 'true') {
+    e.preventDefault();
+    return; // ไม่ต้องเก็บ prompt ถ้าติดตั้งแล้ว
+  }
+
   e.preventDefault();
   deferredPrompt = e;
 
-  // แก้ตรงนี้! เช็คว่าเคยติดตั้งแล้วไหม ก่อนแสดงปุ่ม
-  if (localStorage.getItem('partgo-installed') === 'true') {
-    return; // ไม่ต้องแสดงปุ่มเลย
-  }
-
-  setTimeout(() => {
-    const installBtn = document.getElementById('install-btn');
-    if (installBtn && !localStorage.getItem('partgo-installed')) {
-      installBtn.style.display = 'flex';
-      installBtn.innerHTML = '<i class="fas fa-download"></i> ติดตั้ง PartsGo';
-    }
-  }, 2000);
-});
-// จัดการคลิกปุ่ม install - แก้ไขให้ set localStorage หลัง accepted
-document.getElementById('install-btn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('ผู้ใช้เลือก:', outcome);
-
-    if (outcome === 'accepted') {
-      localStorage.setItem('partgo-installed', 'true');
-
-      // แก้ตรงนี้! ซ่อนปุ่มทันที + ป้องกันทุกกรณี
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) {
-        installBtn.style.display = 'none';  // ซ่อนทันที
-        installBtn.remove();                // ลบออกจาก DOM เลย (ดีที่สุด)
-      }
-
-      Swal.fire({
-        icon: 'success',
-        title: 'ติดตั้งสำเร็จ!',
-        text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
-        timer: 2500,
-        showConfirmButton: false
-      });
-    }
-    deferredPrompt = null;
+  const btn = document.getElementById('install-btn');
+  if (btn) {
+    btn.style.display = 'flex';
   }
 });
+
+// 3. เมื่อกดปุ่มติดตั้ง
+document.getElementById('install-btn')?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+
+  if (outcome === 'accepted') {
+    localStorage.setItem('partgo-installed', 'true');
+    isInstalled = true;
+
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.remove(); // ลบออกทันที
+
+    Swal.fire({
+      icon: 'success',
+      title: 'ติดตั้งสำเร็จ!',
+      text: 'PartsGo ถูกเพิ่มในหน้าจอหลักแล้ว',
+      timer: 3000,
+      showConfirmButton: false
+    });
+  }
+
+  deferredPrompt = null;
+});
+
+// 4. ดักเหตุการณ์เมื่อติดตั้งจริง ๆ (เบราว์เซอร์ยิง)
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('partgo-installed', 'true');
+  isInstalled = true;
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.remove();
+  console.log('PWA ติดตั้งสำเร็จโดยสมบูรณ์');
+});
+
+// 5. เรียกเช็คตอนโหลดหน้า (สำคัญมาก!)
+document.addEventListener('DOMContentLoaded', () => {
+  checkInstalledStatus();
+});
+
+// 6. เพิ่มป้องกันกรณีรีเฟรชเร็ว ๆ
+setTimeout(checkInstalledStatus, 100);
+setTimeout(checkInstalledStatus, 1000);
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
