@@ -1,8 +1,8 @@
 // sw.js — เวอร์ชันสุดท้าย สำหรับระบบขอเบิกอะไหล่ (PartsGo)
 // ปรับปรุงล่าสุด: 25 พ.ย. 2568
-// รองรับ: อัปเดตทันที + แจ้งเตือนผู้ใช้ + ออฟไลน์เต็มรูปแบบ
+// รองรับ: อัปเดตทันที + แจ้งเตือนผู้ใช้ + แสดงเวอร์ชันในเมนู + ออฟไลน์เต็มรูปแบบ
 
-const VERSION = 'v10';                    // เปลี่ยนตรงนี้ทุกครั้งที่อัปเดตแอป !!
+const VERSION = 'v10';                        // เปลี่ยนตรงนี้ทุกครั้งที่อัปเดตแอป !!
 const SHELL_CACHE = `partgo-shell-${VERSION}`;
 const DATA_CACHE  = `partgo-data-${VERSION}`;
 
@@ -13,7 +13,7 @@ const APP_SHELL = [
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  '/offline.html',                    // หน้าออฟไลน์ (ถ้ายังไม่มี ให้สร้างไฟล์ง่าย ๆ)
+  '/offline.html',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
@@ -33,7 +33,7 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(SHELL_CACHE)
       .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())   // สำคัญ: บังคับให้ SW ใหม่ active ทันที
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -49,7 +49,7 @@ self.addEventListener('activate', e => {
         }
       })
     ))
-    .then(() => self.clients.claim())       // ควบคุมหน้าทั้งหมดทันที
+    .then(() => self.clients.claim())
   );
 });
 
@@ -58,7 +58,7 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
 
-  // ข้าม POST, chrome-extension, googleusercontent (Drive preview)
+  // ข้าม POST, chrome-extension, googleusercontent (Drive preview), script.google.com
   if (req.method !== 'GET' ||
       url.protocol === 'chrome-extension:' ||
       url.hostname.includes('googleusercontent.com') ||
@@ -76,7 +76,6 @@ self.addEventListener('fetch', e => {
             return res;
           })
           .catch(() => cached || caches.match('/offline.html'));
-
         return cached || networked;
       })
     );
@@ -92,7 +91,6 @@ self.addEventListener('fetch', e => {
             if (fresh.ok) cache.put(req, fresh.clone());
             return fresh;
           });
-
           return cached || fetchPromise;
         });
       })
@@ -104,12 +102,21 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(req)
       .then(res => res)
-      .catch(() => caches.match('/offline.html') || new Response('ออฟไลน์', { status: 503 }))
+      .catch(() => caches.match('/offline.html') || new Response('คุณอยู่ในโหมดออฟไลน์', {status: 503}))
   );
 });
 
-// ============= ส่งสัญญาณไปบอกหน้าเว็บว่ามีอัปเดตใหม่ =============
+// ============= รับคำสั่งจากหน้าเว็บ + ส่งเวอร์ชันกลับ =============
 self.addEventListener('message', event => {
+  // ส่งเวอร์ชันกลับเมื่อหน้าเว็บถาม
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.source.postMessage({
+      type: 'VERSION',
+      version: VERSION
+    });
+  }
+
+  // รองรับการอัปเดตทันทีเมื่อผู้ใช้กด "รีเฟรชเลย"
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
