@@ -1,5 +1,5 @@
 // sw.js — PartsGo v10.5 (25 พ.ย. 2568) — แก้แล้วสมบูรณ์ 100%
-const VERSION = 'v11.0';                    // เปลี่ยนแค่บรรทัดนี้ทุกครั้งที่อัปเดต
+const VERSION = 'v11.1';                    // เปลี่ยนแค่บรรทัดนี้ทุกครั้งที่อัปเดต
 const CACHE = `partgo-${VERSION}`;
 
 const SHELL = [
