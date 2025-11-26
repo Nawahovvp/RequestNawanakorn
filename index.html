@@ -1710,38 +1710,39 @@ document.addEventListener('keydown', (e) => {
           (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
           (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
         ) {
-          errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
-          callNumberInput.classList.add('invalid-input');
-          isValid = false;
+            errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
+            callNumberInput.classList.add('invalid-input');
+            isValid = false;
+          }
+          if (!selectedCallType) { // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
+            errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
+            isValid = false;
+          }
         }
-        if (!selectedCallType) { // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
-          errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
-          isValid = false;
+        if (isValid) {
+          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+          saveToLocalStorage('employeeCode', employeeCode);
+          saveToLocalStorage('contact', contactInput.value);
+          if (callNumberInput.value) {
+            saveToLocalStorage('callNumber', callNumberInput.value);
+          }
+          if (selectedCallType) {
+            saveToLocalStorage('callType', selectedCallType);
+          }
+          console.log('Final Call Type:', selectedCallType); // Debug: ดูว่าส่งไปถูกไหม
+          return {
+            quantity: quantityInput.value,
+            employeeCode: employeeCode,
+            employeeName: employee ? employee.Name : '',
+            team: employee ? (employee.หน่วยงาน || '') : '',
+            contact: contactInput.value,
+            callNumber: callNumberInput.value,
+            callType: selectedCallType,
+            remark: remarkInput.value
+          };
         }
+        return false;
       }
-      if (isValid) {
-        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-        saveToLocalStorage('employeeCode', employeeCode);
-        saveToLocalStorage('contact', contactInput.value);
-        if (callNumberInput.value) {
-          saveToLocalStorage('callNumber', callNumberInput.value);
-        }
-        if (selectedCallType) {
-          saveToLocalStorage('callType', selectedCallType);
-        }
-        console.log('Final Call Type:', selectedCallType); // Debug: ดูว่าส่งไปถูกไหม
-        return {
-          quantity: quantityInput.value,
-          employeeCode: employeeCode,
-          employeeName: employee ? employee.Name : '',
-          team: employee ? (employee.หน่วยงาน || '') : '',
-          contact: contactInput.value,
-          callNumber: callNumberInput.value,
-          callType: selectedCallType,
-          remark: remarkInput.value
-        };
-      }
-      return false;
     }
   }).then(async (result) => {
     if (result.isConfirmed) {
@@ -1857,7 +1858,7 @@ document.addEventListener('keydown', (e) => {
             font-size: 17px !important;
             font-weight: bold !important;
             box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
-          `;
+            `;
         }
       });
       if (summaryResult.isConfirmed) {
@@ -1957,7 +1958,7 @@ document.addEventListener('keydown', (e) => {
                 if (imageModal && imageModal.style.display === 'block') {
                   imageModal.style.display = 'none';
                 }
-                if (imageModalImages && imageModalImages.style.display === 'block') {
+                if (imageModalImages && imageModalImages.style.display = 'block') {
                   imageModalImages.style.display = 'none';
                 }
                 Swal.fire({
