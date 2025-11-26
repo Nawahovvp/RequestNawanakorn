@@ -3302,68 +3302,70 @@ async function showSettings() {
   document.getElementById('themeSelect').onchange = (e) => setTheme(e.target.value);
 }
 /// —— เปลี่ยนตรงนี้เป็น Sheet ID ของคุณ ——
-// ✅ ชีตที่ใช้ “อ่านประกาศ” ผ่าน opensheet
-// (ใช้ ID เดิมของพี่ได้เลย)
-const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o";
-const ANNOUNCEMENT_URL      = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
-
-// ✅ URL ของ Google Apps Script ที่ “เขียนประกาศลงชีตเดียวกัน”
-// (สำคัญมาก: ตัวนี้ต้องเป็น deployment ที่มี doPost เขียนลงชีต announcement)
-const ANNOUNCEMENT_GAS_URL  = "https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec";
-
-// แปลงรูปแบบ "18/11/2025, 21:58:07" → Date()
+const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o"; // ใส่ ID ของคุณตรงนี้
+const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
 function parseDdMmYyyyWithTime(dateTimeStr) {
   if (!dateTimeStr) return null;
+  // รูปแบบ: "18/11/2025, 21:58:07"
   const [datePart, timePart] = dateTimeStr.split(',');
   if (!datePart) return null;
-
   const [dayStr, monthStr, yearStr] = datePart.trim().split('/');
-  const day   = parseInt(dayStr, 10);
+  const day = parseInt(dayStr, 10);
   const month = parseInt(monthStr, 10);
-  const year  = parseInt(yearStr, 10);
-
+  const year = parseInt(yearStr, 10);
   let hours = 0, minutes = 0, seconds = 0;
   if (timePart) {
     const [hStr, mStr, sStr] = timePart.trim().split(':');
-    hours   = parseInt(hStr || '0', 10);
+    hours = parseInt(hStr || '0', 10);
     minutes = parseInt(mStr || '0', 10);
     seconds = parseInt(sStr || '0', 10);
   }
+  // ตรวจสอบความถูกต้องของตัวเลข
   if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+  // month - 1 เพราะ JS ใช้เดือน 0-11
   return new Date(year, month - 1, day, hours, minutes, seconds);
 }
-
-// ====== ดึงประกาศจาก Google Sheet และแสดงให้ user ======
-async function showSystemAnnouncement() {
+// ดึงประกาศจาก Google Sheets
+async function loadSystemAnnouncement() {
   try {
     const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
     const data = await response.json();
-
-    // ไม่มีประกาศ / ไม่มี message
-    if (!data || data.length === 0 || !data[0].message) return;
-
-    const message   = (data[0].message   || '').trim();
-    const updatedAt = (data[0].updatedAt || '').trim();
-    if (message === "" || updatedAt === "") return;
-
-    // ตรวจสอบอายุประกาศ (เกิน 2 วันไม่ต้องโชว์)
-    const today      = new Date();
-    const updated    = parseDdMmYyyyWithTime(updatedAt);
-    if (!updated || isNaN(updated.getTime())) return;
-
-    const diffDays = Math.floor((today - updated) / (1000 * 60 * 60 * 24));
-    if (diffDays > 2) {
-      console.log("⏹ ประกาศเกิน 2 วัน ไม่แสดง");
+    // ถ้าไม่มีประกาศ → ไม่ต้องทำอะไร
+    if (!data || data.length === 0 || !data[0].message) {
       return;
     }
-
-    // แปลง \n ให้ขึ้นบรรทัด / ย่อหน้า
+    const message = data[0].message.trim();
+    const updatedAt = data[0].updatedAt || "";
+    if (message === "" || updatedAt === "") return;
+    // --------------------------------------------
+    // ✅ แปลงวันที่ด้วยฟังก์ชัน parseDdMmYyyyWithTime
+    // --------------------------------------------
+    const today = new Date();
+    const updatedTime = parseDdMmYyyyWithTime(updatedAt);
+    if (!updatedTime || isNaN(updatedTime.getTime())) {
+      console.log("⏹ ฟอร์แมตวันที่อ่านไม่ได้:", updatedAt);
+      return;
+    }
+    const diffDays = Math.floor((today - updatedTime) / (1000 * 60 * 60 * 24));
+    console.log("ตรวจสอบประกาศ:", { today, updatedTime, updatedAt, diffDays });
+    // --------------------------------------------
+    // 🔥 ถ้าเกิน 2 วัน ไม่ต้องแสดงประกาศ
+    // --------------------------------------------
+    if (diffDays > 2) {
+      console.log("⏹ ประกาศเก่าเกิน 2 วัน – ไม่แสดง");
+      return;
+    }
+    // --------------------------------------------
+    // จัดรูปแบบข้อความให้รองรับ \n และย่อหน้า
+    // --------------------------------------------
     const messageHtml = message
       .replace(/\n\n+/g, '</p><p style="margin:16px 0;">')
       .replace(/\n/g, '<br>')
       .replace(/^/, '<p style="margin:0; line-height:1.8;">')
       .replace(/$/, '</p>');
-
+    // --------------------------------------------
+    // 🔔 แสดง Swal
+    // --------------------------------------------
     Swal.fire({
       html: `
         <div style="
@@ -3419,19 +3421,12 @@ async function showSystemAnnouncement() {
     console.log("โหลดประกาศไม่ได้:", error);
   }
 }
-
-// ✅ ตรง handleLogin ของพี่มีการเรียก showSystemAnnouncement() แล้ว
-// setTimeout(() => { showSystemAnnouncement(); }, 800);
-
-// ====== ปุ่มตั้งค่าประกาศ (เฉพาะ 7512411) ======
+// บันทึกประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   Swal.fire({
     title: 'ตั้งค่าประกาศถึงพนักงาน',
     html: `
-      <textarea id="announcementText"
-        class="swal2-textarea"
-        style="height:200px;"
-        placeholder="พิมพ์ข้อความประกาศที่นี่ (รองรับการขึ้นบรรทัดใหม่ด้วย \\n)"></textarea>
+      <textarea id="announcementText" class="swal2-textarea" style="height:200px;" placeholder="พิมพ์ข้อความประกาศที่นี่... (รองรับ \n ขึ้นบรรทัดใหม่)"></textarea>
       <div style="font-size: 12px; color: #666; margin-top: 8px; text-align: center;">
         <i class="fas fa-info-circle"></i> ข้อความจะแสดงทันทีให้ทุกคนที่ล็อกอิน
       </div>
@@ -3446,30 +3441,26 @@ function openAnnouncementEditor() {
         Swal.showValidationMessage('กรุณากรอกข้อความประกาศ');
         return false;
       }
-
       const params = new URLSearchParams();
       params.append('action', 'updateAnnouncement');
       params.append('message', text);
       params.append('timestamp', new Date().toLocaleString('th-TH', {
-        year:   'numeric',
-        month:  '2-digit',
-        day:    '2-digit',
-        hour:   '2-digit',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       }));
-
       try {
-        const response = await fetch(ANNOUNCEMENT_GAS_URL, {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
           method: 'POST',
           body: params,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         });
-
-        // 👇 ต้องให้ Apps Script ตอบเป็น JSON แบบ {status:"success"} กลับมา
-        const result = await response.json();
+        const result = await response.json(); // สมมติว่า GAS ส่ง JSON กลับมา {status: 'success'} หรือ {status: 'error', message: '...'}
         if (result.status === 'success') {
           Swal.fire({
             icon: 'success',
@@ -3482,9 +3473,7 @@ function openAnnouncementEditor() {
             `,
             confirmButtonText: 'เสร็จสิ้น'
           });
-          setTimeout(() => {
-            showSystemAnnouncement();
-          }, 1500);
+          setTimeout(() => loadSystemAnnouncement(), 1500); // รีโหลดประกาศใหม่ทันที
           return true;
         } else {
           throw new Error(result.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
@@ -3494,7 +3483,7 @@ function openAnnouncementEditor() {
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถบันทึกได้: ' + err.message
+          text: 'ไม่สามารถบันทึกได้: ' + err.message + '. กรุณาตรวจสอบ console สำหรับรายละเอียด หรือตรวจสอบว่า GAS ของคุณรองรับ CORS และส่ง JSON กลับมาให้ถูกต้อง'
         });
         return false;
       }
