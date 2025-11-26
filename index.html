@@ -1957,7 +1957,7 @@ document.addEventListener('keydown', (e) => {
                 if (imageModal && imageModal.style.display === 'block') {
                   imageModal.style.display = 'none';
                 }
-                if (imageModalImages && imageModalImages.style.display = 'block') {
+                if (imageModalImages && imageModalImages.style.display === 'block') {
                   imageModalImages.style.display = 'none';
                 }
                 Swal.fire({
@@ -3456,7 +3456,7 @@ function openAnnouncementEditor() {
         return false;
       }
       // บันทึกลง Google Sheets ผ่าน GAS (แทนที่ URL ด้วย deployment ของคุณ)
-      fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', { // <--- แก้ URL นี้เป็นของคุณ
+      fetch('https://script.google.com/macros/s/[YOUR_DEPLOYMENT_ID]/exec', { // <--- แก้ URL นี้เป็นของคุณ
         method: 'POST',
         body: JSON.stringify({ action: 'updateAnnouncement', message: text })
       }).then(response => response.json())
