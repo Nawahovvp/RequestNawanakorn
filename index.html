@@ -113,7 +113,7 @@
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
               <span class="image-close" id="closeImageModal">×</span>
-           
+          
               <div id="imageModalContent"></div>
             </div>
           </div>
@@ -156,7 +156,7 @@
           <div id="imageModalImages" class="image-modal-images">
             <div class="image-modal-content-images">
               <span class="image-close-images" id="closeImageModalImages">×</span>
-          
+         
               <div id="imageModalContentImages"></div>
             </div>
           </div>
@@ -599,7 +599,7 @@ toggleAllDataBtn.addEventListener("click", () => {
   currentPageToday = 1;
   updateTableToday();
 });
-   
+  
       // Pagination elements for today tab
       const paginationToday = document.getElementById("paginationToday");
       const pageNumbersToday = document.getElementById("pageNumbersToday");
@@ -940,7 +940,7 @@ function hideLoading() {
           }
         });
       }
-  
+ 
 // === แทนที่ฟังก์ชัน showDetailModal ทั้งหมด ===
 // === showDetailModal เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showDetailModal(row, modalId, contentId) {
@@ -1023,7 +1023,7 @@ else {
 }
 }
 // === ฟังก์ชัน Swipe (ต้องมีด้วย) ===
-// ตัวแปรเก็บ index ปัจจุบันของแต่ละ Modal
+ // ตัวแปรเก็บ index ปัจจุบันของแต่ละ Modal
 let currentSwiperIndex = {};
 // เริ่มระบบ Swipe เมื่อมีหลายรูป
 function initSwiper(modal, totalSlides) {
@@ -1223,7 +1223,7 @@ document.addEventListener('keydown', (e) => {
             const td = document.createElement("td");
             let value = row[col] || "";
             if (col === "วิภาวดี" || col === "Unrestricted") {
-              if (value && !isNaN(value)) {
+              if (value && !isNaN(value) ) {
                 value = Number(value).toLocaleString("en-US", {
                   maximumFractionDigits: 0,
                 });
@@ -1268,7 +1268,6 @@ document.addEventListener('keydown', (e) => {
     contact: getFromLocalStorage('contact'),
     callNumber: getFromLocalStorage('callNumber'),
     callType: getFromLocalStorage('callType'),
- 
   };
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const hasStockVibha = vibhavadiValue > 0;
@@ -1748,7 +1747,7 @@ document.addEventListener('keydown', (e) => {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-  
+ 
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
             // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
@@ -2041,7 +2040,7 @@ document.addEventListener('keydown', (e) => {
           Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
+            text: `ไม่สามารถบันทึกข้อมูลได้ได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
             confirmButtonText: 'ตกลง'
           });
         }
@@ -2123,7 +2122,7 @@ document.addEventListener('keydown', (e) => {
       });
       searchInput2.addEventListener("input", (e) => {
         globalSearch2 = e.target.value;
-        document.getElementById("searchInput2").value = globalSearch2;
+        document.getElementById("searchInputImages2").value = globalSearch2;
         applyFilters();
       });
                // ปุ่มแว่นตาใกล้ searchInput2 -> เคลียร์เฉพาะช่องของแท็บอะไหล่
@@ -2467,7 +2466,7 @@ async function loadImageDatabase() {
     let count = 0;
     data.forEach(row => {
       const material = (row.Material || "").toString().trim();
-   
+  
       // รองรับทุกการสะกดของ idchack
       const fileId = (
         row.idchack ||
@@ -2507,13 +2506,10 @@ function sortByColumn(a, b, column, direction) {
       }
       // For Timestamp (assume input is MM/DD/YYYY HH:MM:SS)
       const [datePart, timePart] = value.split(' ');
-      const parts = datePart.split('/'); // ['MM', 'DD', 'YYYY']
-      const month = parseInt(parts[0]) - 1; // 0-based
-      const day = parseInt(parts[1]);
-      const year = parseInt(parts[2]);
-      if (!timePart) return new Date(year, month, day).getTime();
+      const [month, day, year] = datePart.split('/'); // Fixed: [month, day, year]
+      if (!timePart) return new Date(year, month - 1, day).getTime();
       const [hour, minute, second] = timePart.split(':').map(Number);
-      return new Date(year, month, day, hour || 0, minute || 0, second || 0).getTime();
+      return new Date(year, month - 1, day, hour || 0, minute || 0, second || 0).getTime();
     };
     const numA = parseDateOrId(valueA);
     const numB = parseDateOrId(valueB);
@@ -2934,7 +2930,7 @@ toggleAllDataBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
           tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
         }
       }
-      // Pending-calls tab functions (now after variables)
+      // Pending-calls tab functions (moved up)
       closeModalPending.onclick = () => modalPending.style.display = "none";
       window.onclick = event => {
         if (event.target == modalPending) modalPending.style.display = "none";
@@ -3445,51 +3441,49 @@ function openAnnouncementEditor() {
         Swal.showValidationMessage('กรุณากรอกข้อความประกาศ');
         return false;
       }
-
-      // ✅ แก้ไข - ใช้ URLSearchParams สำหรับ form-urlencoded
       const params = new URLSearchParams();
       params.append('action', 'updateAnnouncement');
       params.append('message', text);
-      params.append('timestamp', new Date().toLocaleString('th-TH', { 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
+      params.append('timestamp', new Date().toLocaleString('th-TH', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
       }));
-
       try {
         const response = await fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
           method: 'POST',
+          body: params,
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: params.toString(),
-          mode: 'no-cors',  // ✅ เพิ่มถ้าจำเป็นสำหรับ CORS ใน browser
-          redirect: 'follow'
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         });
-
-        // เนื่องจาก mode: 'no-cors' ทำให้ response.text() ไม่ทำงาน แต่ถ้าส่งสำเร็จ จะไม่มี error
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกสำเร็จ!',
-          html: `
-            <div style="text-align: center;">
-              <i class="fas fa-check-circle" style="font-size: 60px; color: #27ae60;"></i>
-              <p style="margin: 10px 0;">ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที</p>
-            </div>
-          `,
-          confirmButtonText: 'เสร็จสิ้น'
-        });
-        setTimeout(() => loadSystemAnnouncement(), 1500);  // รีโหลดประกาศใหม่ทันที
-        return true;
+        const result = await response.json(); // สมมติว่า GAS ส่ง JSON กลับมา {status: 'success'} หรือ {status: 'error', message: '...'}
+        if (result.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            html: `
+              <div style="text-align: center;">
+                <i class="fas fa-check-circle" style="font-size: 60px; color: #27ae60;"></i>
+                <p style="margin: 10px 0;">ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที</p>
+              </div>
+            `,
+            confirmButtonText: 'เสร็จสิ้น'
+          });
+          setTimeout(() => loadSystemAnnouncement(), 1500); // รีโหลดประกาศใหม่ทันที
+          return true;
+        } else {
+          throw new Error(result.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
+        }
       } catch (err) {
         console.error('บันทึกประกาศไม่ได้:', err);
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถบันทึกได้: ' + err.message + '. กรุณาตรวจสอบ console สำหรับรายละเอียด'
+          text: 'ไม่สามารถบันทึกได้: ' + err.message + '. กรุณาตรวจสอบ console สำหรับรายละเอียด หรือตรวจสอบว่า GAS ของคุณรองรับ CORS และส่ง JSON กลับมาให้ถูกต้อง'
         });
         return false;
       }
@@ -3579,7 +3573,7 @@ function openAnnouncementEditor() {
     confirmButtonText: 'บันทึกประกาศ',
     cancelButtonText: 'ยกเลิก',
     width: '600px',
-    preConfirm: () => {
+    preConfirm: async () => {
       const text = document.getElementById('announcementText').value.trim();
       localStorage.setItem('systemAnnouncement', text);
       Swal.fire({
