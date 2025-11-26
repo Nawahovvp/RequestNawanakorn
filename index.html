@@ -3430,32 +3430,67 @@ function openAnnouncementEditor() {
   Swal.fire({
     title: 'ตั้งค่าประกาศถึงพนักงาน',
     html: `
-      <textarea id="announcementText" class="swal2-textarea" style="height:200px;"></textarea>
+      <textarea id="announcementText" class="swal2-textarea" style="height:200px;" placeholder="พิมพ์ข้อความประกาศที่นี่... (รองรับ \n ขึ้นบรรทัดใหม่)"></textarea>
+      <div style="font-size: 12px; color: #666; margin-top: 8px; text-align: center;">
+        <i class="fas fa-info-circle"></i> ข้อความจะแสดงทันทีให้ทุกคนที่ล็อกอิน
+      </div>
     `,
     showCancelButton: true,
     confirmButtonText: 'บันทึกประกาศ',
-    preConfirm: () => {
+    cancelButtonText: 'ยกเลิก',
+    width: '600px',
+    preConfirm: async () => {
       const text = document.getElementById('announcementText').value.trim();
       if (!text) {
         Swal.showValidationMessage('กรุณากรอกข้อความประกาศ');
         return false;
       }
-      // บันทึกลง Google Sheets ผ่าน GAS (แทนที่ URL ด้วย deployment ของคุณ)
-      fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', { // <--- แก้ URL นี้เป็นของคุณ
-        method: 'POST',
-        body: JSON.stringify({ action: 'updateAnnouncement', message: text })
-      }).then(response => response.json())
-      .then(data => {
+
+      // ✅ แก้ไขแล้ว - ใช้ form-urlencoded เหมือนส่วนอื่นๆ ของระบบ
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `action=updateAnnouncement&message=${encodeURIComponent(text)}&timestamp=${encodeURIComponent(new Date().toLocaleString('th-TH', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          }))}`  // เพิ่ม timestamp อัตโนมัติ
+        });
+
+        const data = await response.json();
+
         if (data.status === 'success') {
-          Swal.fire('สำเร็จ!', 'ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที', 'success');
-          setTimeout(() => loadSystemAnnouncement(), 2000);
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            html: `
+              <div style="text-align: center;">
+                <i class="fas fa-check-circle" style="font-size: 60px; color: #27ae60;"></i>
+                <p style="margin: 10px 0;">ประกาศใหม่จะแสดงให้ทุกคนเห็นทันที</p>
+              </div>
+            `,
+            confirmButtonText: 'เสร็จสิ้น'
+          });
+          setTimeout(() => loadSystemAnnouncement(), 1500);  // รีโหลดประกาศใหม่ทันที
+          return true;
         } else {
-          throw new Error(data.message || 'เกิดข้อผิดพลาด');
+          throw new Error(data.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
         }
-      }).catch(err => {
+      } catch (err) {
         console.error('บันทึกประกาศไม่ได้:', err);
-        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกประกาศได้: ' + err.message, 'error');
-      });
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถบันทึกได้: ' + err.message
+        });
+        return false;
+      }
     }
   });
 }
