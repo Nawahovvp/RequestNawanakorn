@@ -1,21 +1,28 @@
-// sw.js — PartsGo v10.5 (25 พ.ย. 2568) — แก้แล้วสมบูรณ์ 100%
-const VERSION = 'v12.6';                    // เปลี่ยนแค่บรรทัดนี้ทุกครั้งที่อัปเดต
-const CACHE = `partgo-${VERSION}`;
+// sw.js — PartsGo v12.7 (26 พ.ย. 2568) — เวอร์ชันแก้บั๊ก clone แล้ว
 
+const VERSION = 'v12.7';                     // เปลี่ยนเลขเวอร์ชันทุกครั้งที่อัปเดตไฟล์นี้
+const CACHE   = `partgo-${VERSION}`;
+
+// ไฟล์หลักของแอป (ภายในโดเมนเราเอง)
 const SHELL = [
-  '/', 
+  '/',
   '/index.html',
-  '/style.css',                           // สำคัญมาก! เพิ่มเข้ามา
+  '/style.css',
   '/manifest.json',
-  '/icon-192.png', 
+  '/icon-192.png',
   '/icon-512.png',
-  '/offline.html',                        // ถ้ายังไม่มี ให้สร้างไฟล์นี้ด้วย
+  '/offline.html'
+];
+
+// ไฟล์ภายนอก (CDN, ฟอนต์, ไลบรารี)
+const SHELL_EXTERNAL = [
   'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Itim&family=Poppins:wght@300;400;600&family=Kanit:wght@300;400;600&display=swap'
 ];
 
+// URL ข้อมูลจาก Google Sheet (ผ่าน opensheet)
 const DATA_URLS = [
   'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap',
   'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request',
@@ -24,81 +31,121 @@ const DATA_URLS = [
   'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage'
 ];
 
-// ติดตั้ง + ข้ามรอทันที
-self.addEventListener('install', e => {
-  e.waitUntil(
+// ติดตั้ง + cache shell ทั้งหมด แล้ว skipWaiting ทันที
+self.addEventListener('install', event => {
+  event.waitUntil(
     caches.open(CACHE)
-      .then(cache => cache.addAll(SHELL))
+      .then(cache => cache.addAll([...SHELL, ...SHELL_EXTERNAL]))
       .then(() => self.skipWaiting())
   );
 });
 
-// เปิดใช้งาน → ลบแคชเก่า + ควบคุมทันที
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
-    )).then(() => self.clients.claim())
+// เปิดใช้งาน → ลบ cache เก่า + claim clients
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(k => k !== CACHE)
+          .map(k => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
 // ดักทุก request
-self.addEventListener('fetch', e => {
-  const url = e.request.url;
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = request.url;
 
-  // ข้าม POST, chrome-extension, และ GAS
-  if (e.request.method !== 'GET' || 
-      url.includes('chrome-extension') || 
-      url.includes('script.google.com')) {
+  // ข้าม POST, chrome-extension, และ script.google.com
+  if (
+    request.method !== 'GET' ||
+    url.includes('chrome-extension') ||
+    url.includes('script.google.com')
+  ) {
     return;
   }
 
-  // 1. App Shell + style.css + ฟอนต์ → Cache First (เร็วสุด)
-  if (SHELL.some(shellUrl => url.includes(shellUrl)) || url.startsWith(location.origin)) {
-    e.respondWith(
-      caches.match(e.request).then(cached => {
+  const requestUrl = new URL(url);
+
+  // เช็คว่าเป็น resource ภายในโดเมนเราไหม
+  const isSameOrigin = requestUrl.origin === location.origin;
+
+  // 1) App Shell (ไฟล์ของเราเอง + CDN ที่กำหนด) → Cache First
+  const isShellLocal = isSameOrigin && SHELL.includes(requestUrl.pathname);
+  const isShellExternal = SHELL_EXTERNAL.includes(url);
+
+  if (isShellLocal || isShellExternal) {
+    event.respondWith(
+      caches.match(request).then(cached => {
         if (cached) return cached;
-        return fetch(e.request).then(res => {
+
+        // ถ้าไม่มีใน cache → ดึงจากเน็ตแล้วเก็บ cache (clone ก่อนใช้)
+        return fetch(request).then(res => {
           if (res && res.status === 200) {
-            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+            const resClone = res.clone();          // 🔹 clone ก่อน
+            caches.open(CACHE).then(cache => {
+              cache.put(request, resClone);
+            });
           }
           return res;
-        }).catch(() => caches.match('/offline.html') || new Response('Offline', {status: 503}));
+        }).catch(() => {
+          // ถ้าโหลดไม่ได้เลย → ใช้ offline.html สำหรับของเราเอง
+          if (isSameOrigin) {
+            return caches.match('/offline.html') ||
+                   new Response('Offline', { status: 503 });
+          }
+          return new Response('Offline', { status: 503 });
+        });
       })
     );
     return;
   }
 
-  // 2. ข้อมูลจาก opensheet → Stale-While-Revalidate (ข้อมูลใหม่ทันที + เร็ว)
+  // 2) ข้อมูลจาก opensheet → Stale-While-Revalidate
   const isDataUrl = DATA_URLS.some(base => url.startsWith(base.split('?')[0]));
+
   if (isDataUrl) {
-    e.respondWith(
-      fetch(e.request).then(networkRes => {
+    event.respondWith(
+      fetch(request).then(networkRes => {
         if (networkRes && networkRes.status === 200) {
-          caches.open(CACHE).then(cache => cache.put(e.request, networkRes.clone()));
+          const clone = networkRes.clone();        // 🔹 clone ก่อน
+          caches.open(CACHE).then(cache => {
+            cache.put(request, clone);
+          });
         }
         return networkRes;
       }).catch(() => {
-        // ถ้าเน็ตหลุด ให้ใช้ข้อมูลเก่าที่ cache ไว้
-        return caches.match(e.request) || 
-               new Response(JSON.stringify({error: "offline"}), {headers: {'Content-Type': 'application/json'}});
+        // ถ้าเน็ตหลุด → ใช้ข้อมูลเก่าที่ cache ไว้
+        return caches.match(request) ||
+               new Response(
+                 JSON.stringify({ error: 'offline' }),
+                 { headers: { 'Content-Type': 'application/json' } }
+               );
       })
     );
     return;
   }
 
-  // 3. อื่น ๆ → Network First + fallback offline
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match('/offline.html'))
+  // 3) อย่างอื่น → Network First + fallback เป็น offline.html
+  event.respondWith(
+    fetch(request).catch(() => {
+      if (isSameOrigin) {
+        return caches.match('/offline.html') ||
+               new Response('Offline', { status: 503 });
+      }
+      return new Response('Offline', { status: 503 });
+    })
   );
 });
 
-// รับคำสั่งจากหน้าเว็บ
-self.addEventListener('message', e => {
-  if (e.data?.type === 'GET_VERSION') {
-    e.source.postMessage({ type: 'VERSION', version: VERSION });
+// รับ message จากหน้าเว็บ (เช็คเวอร์ชัน / skipWaiting)
+self.addEventListener('message', event => {
+  if (event.data?.type === 'GET_VERSION') {
+    event.source.postMessage({ type: 'VERSION', version: VERSION });
   }
-  if (e.data?.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
