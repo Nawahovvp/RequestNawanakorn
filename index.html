@@ -113,7 +113,7 @@
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
               <span class="image-close" id="closeImageModal">×</span>
-            
+           
               <div id="imageModalContent"></div>
             </div>
           </div>
@@ -156,7 +156,7 @@
           <div id="imageModalImages" class="image-modal-images">
             <div class="image-modal-content-images">
               <span class="image-close-images" id="closeImageModalImages">×</span>
-           
+          
               <div id="imageModalContentImages"></div>
             </div>
           </div>
@@ -599,7 +599,7 @@ toggleAllDataBtn.addEventListener("click", () => {
   currentPageToday = 1;
   updateTableToday();
 });
-    
+   
       // Pagination elements for today tab
       const paginationToday = document.getElementById("paginationToday");
       const pageNumbersToday = document.getElementById("pageNumbersToday");
@@ -811,7 +811,7 @@ toggleAllDataBtn.addEventListener("click", () => {
     console.log("ฐานข้อมูลรูปภาพพร้อมใช้งานแล้ว");
     // โหลดข้อมูลหลักหลังจากโหลดรูปเรียบร้อย
     showTab('parts'); // หรือ loadData();
-  }); โหล
+  });
     // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
     // Auto-load default tab if needed
     if (document.querySelector('.nav-btn.active')) {
@@ -940,7 +940,7 @@ function hideLoading() {
           }
         });
       }
-   
+  
 // === แทนที่ฟังก์ชัน showDetailModal ทั้งหมด ===
 // === showDetailModal เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showDetailModal(row, modalId, contentId) {
@@ -1268,7 +1268,7 @@ document.addEventListener('keydown', (e) => {
     contact: getFromLocalStorage('contact'),
     callNumber: getFromLocalStorage('callNumber'),
     callType: getFromLocalStorage('callType'),
-  
+ 
   };
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const hasStockVibha = vibhavadiValue > 0;
@@ -1748,7 +1748,7 @@ document.addEventListener('keydown', (e) => {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-   
+  
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
             // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
@@ -2467,7 +2467,7 @@ async function loadImageDatabase() {
     let count = 0;
     data.forEach(row => {
       const material = (row.Material || "").toString().trim();
-    
+   
       // รองรับทุกการสะกดของ idchack
       const fileId = (
         row.idchack ||
@@ -2575,19 +2575,6 @@ function sortByColumn(a, b, column, direction) {
           container.classList.remove("fade-out");
         }, 200);
       }
-     function filterByStatus(data) {
-  let filtered = data;
-  if (currentFilter === 'pending') {
-    filtered = data.filter(row => row["status"] === "รอเบิก");
-  } else if (currentFilter === 'history') {
-    filtered = data;
-  }
-  // Apply sort based on config
-  if (sortConfigToday.column) {
-    filtered.sort((a, b) => sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction));
-  }
-  return filtered;
-}
      // ฟังก์ชันกรองข้อมูลตามโหมด + คำค้นหา + การเรียงลำดับ
 function filterDataToday(data) {
   let filtered = data;
@@ -3289,7 +3276,6 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
- 
 // แก้ไข showSettings() เพื่อแสดงปุ่มเฉพาะ 7512411
 async function showSettings() {
   const currentTheme = localStorage.getItem('theme') || 'light';
@@ -3441,11 +3427,10 @@ async function loadSystemAnnouncement() {
 }
 // บันทึกประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
-  const currentMsg = ''; // ไม่ต้องดึงจาก localStorage อีกแล้ว
   Swal.fire({
     title: 'ตั้งค่าประกาศถึงพนักงาน',
     html: `
-      <textarea id="announcementText" class="swal2-textarea" style="height:200px;">${currentMsg}</textarea>
+      <textarea id="announcementText" class="swal2-textarea" style="height:200px;"></textarea>
     `,
     showCancelButton: true,
     confirmButtonText: 'บันทึกประกาศ',
@@ -3544,7 +3529,7 @@ setTimeout(() => {
 }, 500);
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
-  const currentMsg = localStorage.getItem('systemAnnouncement') || '';
+  const currentMsg = ''; // ไม่ต้องดึงจาก localStorage อีกแล้ว
   Swal.fire({
     title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
     html: `
