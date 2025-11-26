@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="ระบบขอสั่งอะไหล่คลังสินค้านวนคร">
   <link rel="apple-touch-icon" href="/icon-192.png">
-  <link rel="stylesheet" href="style.css">  
+  <link rel="stylesheet" href="style.css">
   <!-- Enhanced Content Security Policy to reduce phishing risks -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob: https://drive.google.com https://lh3.googleusercontent.com; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
   <!-- Additional security headers via meta -->
@@ -21,7 +21,7 @@
   <!-- Verification meta to help with Safe Browsing (add your site verification if available) -->
   <meta name="google-site-verification" content="your-verification-token-if-any">
   <!-- Clear description to indicate legitimacy -->
-  <meta name="description" content="ระบบภายในสำหรับขอสั่งอะไหล่คลังสินค้านวนคร - เครื่องมือสำหรับพนักงานเท่านั้น ไม่ใช่เว็บไซต์ภายนอก"> 
+  <meta name="description" content="ระบบภายในสำหรับขอสั่งอะไหล่คลังสินค้านวนคร - เครื่องมือสำหรับพนักงานเท่านั้น ไม่ใช่เว็บไซต์ภายนอก">
   <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet" />
@@ -113,7 +113,7 @@
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
               <span class="image-close" id="closeImageModal">×</span>
-              
+            
               <div id="imageModalContent"></div>
             </div>
           </div>
@@ -156,7 +156,7 @@
           <div id="imageModalImages" class="image-modal-images">
             <div class="image-modal-content-images">
               <span class="image-close-images" id="closeImageModalImages">×</span>
-             
+           
               <div id="imageModalContentImages"></div>
             </div>
           </div>
@@ -366,7 +366,6 @@
   <div class="settings-modal-content">
     <span class="close-settings" id="closeSettings">&times;</span>
     <h2>การตั้งค่า</h2>
-
     <!-- ข้อมูลผู้ใช้ -->
     <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24,118,242,0.15);">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
@@ -385,14 +384,12 @@
         </div>
       </div>
     </div>
-
     <!-- ปุ่มประกาศ (เฉพาะ 7512411) -->
     <div id="adminAnnouncementSection" style="display: none; margin: 20px 0;">
       <button onclick="openAnnouncementEditor()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 16px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(231,76,60,0.4);">
         <i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน
       </button>
     </div>
-
     <!-- เลือกธีม -->
     <div style="margin: 20px 0;">
       <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
@@ -403,7 +400,6 @@
         <option value="dark">โหมดมืด (Dark)</option>
       </select>
     </div>
-
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button class="modal-qr-btn" onclick="showQRCode()" style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
         <i class="fas fa-qrcode"></i> QR Code
@@ -412,7 +408,6 @@
         <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
       </button>
     </div>
-
     <div style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 16px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
   <p style="margin: 6px 0; font-weight: bold; font-size: 13px;">PartsGo เวอร์ชัน <span id="appVersion">v10</span></p>
   <p style="margin: 4px 0; opacity: 0.9;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
@@ -433,11 +428,9 @@
       // === ระบบอัปเดตแอปทันที + แจ้งเตือนผู้ใช้ ===
   let newWorker;
   let isUpdateShown = false;
-
   function showUpdateToast() {
     if (isUpdateShown) return;
     isUpdateShown = true;
-
     Swal.fire({
       title: 'มีอัปเดตใหม่!',
       html: 'แอปได้รับการปรับปรุงแล้ว<br><small>กดรีเฟรชเพื่อใช้งานเวอร์ชันล่าสุด</small>',
@@ -460,19 +453,15 @@
       }
     });
   }
-
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then(reg => {
         console.log('SW registered');
-
         // บังคับเช็คอัปเดตทุกครั้งที่เปิดแอป
         reg.update();
-
         reg.addEventListener('updatefound', () => {
           newWorker = reg.installing;
           if (!newWorker) return;
-
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               showUpdateToast();
@@ -481,7 +470,6 @@
         });
       })
       .catch(err => console.log('SW registration failed:', err));
-
     // รีโหลดอัตโนมัติเมื่อ SW เปลี่ยน
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
@@ -493,14 +481,12 @@ function updateAppVersionDisplay() {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
   }
-
   // สำรอง: ถ้ายังไม่โหลด SW → ดึงจาก cache หรือแสดง v??
   const versionElement = document.getElementById('appVersion');
   if (versionElement) {
     versionElement.textContent = 'v??';
   }
 }
-
 // รับเวอร์ชันจาก sw.js
 navigator.serviceWorker.addEventListener('message', event => {
   if (event.data && event.data.type === 'VERSION') {
@@ -512,31 +498,8 @@ navigator.serviceWorker.addEventListener('message', event => {
     }
   }
 });
-
-// === แสดงเวอร์ชันแอปในเมนูตั้งค่า (อัตโนมัติจาก sw.js) ===
-function updateAppVersionDisplay() {
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
-  }
-  const el = document.getElementById('appVersion');
-  if (el) el.textContent = 'v??';
-}
-
-// รับเวอร์ชันจาก sw.js
-navigator.serviceWorker.addEventListener('message', event => {
-  if (event.data && event.data.type === 'VERSION') {
-    const el = document.getElementById('appVersion');
-    if (el) {
-      el.textContent = event.data.version;
-      el.style.fontWeight = 'bold';
-      el.style.color = '#00ff88';
-    }
-  }
-});
-
 // เรียกอัปเดตเวอร์ชันทุกครั้งที่เปิดหน้า
 document.addEventListener('DOMContentLoaded', updateAppVersionDisplay);
-
 // แก้ไข showSettings() เดิมของคุณ ให้เรียกอัปเดตเวอร์ชันด้วย
 const originalShowSettings = window.showSettings; // เก็บฟังก์ชันเดิมไว้
 window.showSettings = function() {
@@ -544,7 +507,6 @@ window.showSettings = function() {
   if (typeof originalShowSettings === 'function') {
     originalShowSettings();
   }
-
   // แล้วค่อยอัปเดตเวอร์ชัน
   updateAppVersionDisplay();
 };
@@ -555,7 +517,7 @@ window.showSettings = function() {
       let globalSearch1 = '';
       let globalSearch2 = '';
       // Global for today tab: toggle pending only
-      let showOnlyPending = true;        // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
+      let showOnlyPending = true; // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
       // Sort config for today tab
       let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
       // Pagination config for today tab
@@ -620,7 +582,6 @@ window.showSettings = function() {
       // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
 toggleAllDataBtn.addEventListener("click", () => {
   showOnlyPending = !showOnlyPending;
-
   if (showOnlyPending) {
     // โหมด: แสดงเฉพาะรอเบิก
     toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ประวัติเบิก</span>';
@@ -634,12 +595,11 @@ toggleAllDataBtn.addEventListener("click", () => {
     toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
     toggleAllDataBtn.style.color = "white";
   }
-
   // รีเซ็ตหน้าแรก + อัปเดตตารางทันที
   currentPageToday = 1;
   updateTableToday();
 });
-      
+    
       // Pagination elements for today tab
       const paginationToday = document.getElementById("paginationToday");
       const pageNumbersToday = document.getElementById("pageNumbersToday");
@@ -717,13 +677,11 @@ toggleAllDataBtn.addEventListener("click", () => {
   const currentTheme = localStorage.getItem('theme') || 'light';
   const savedUsername = localStorage.getItem('username');
   const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
-
   // แสดงข้อมูลพื้นฐาน
   document.getElementById('modalUserName').textContent = savedUserName;
   document.getElementById('modalUserID').textContent = savedUsername || '-';
   document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
   document.getElementById('themeSelect').value = currentTheme;
-
   // ดึงหน่วยงาน
   try {
     if (employeeData.length === 0) {
@@ -736,10 +694,8 @@ toggleAllDataBtn.addEventListener("click", () => {
     document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
     document.getElementById('modalUserTeam').style.color = '#e74c3c';
   }
-
   // เปิด Modal
   document.getElementById('settingsModal').style.display = 'block';
-
   // ← สำคัญมาก: ผูก event ทุกครั้งที่เปิด Settings (เพราะบางที DOM อาจถูกสร้างใหม่)
   document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
   document.getElementById('themeSelect').addEventListener('change', function(e) {
@@ -850,7 +806,6 @@ toggleAllDataBtn.addEventListener("click", () => {
   if (isLoggedIn && savedUsername) {
   loginModal.classList.remove('active');
   appContent.classList.add('logged-in');
-  
   // โหลดฐานข้อมูลรูปภาพใหม่ทันทีที่ล็อกอินสำเร็จ
   loadImageDatabase().then(() => {
     console.log("ฐานข้อมูลรูปภาพพร้อมใช้งานแล้ว");
@@ -902,7 +857,6 @@ function showTab(tabId) {
   // 1. ซ่อนทุก tab-content ก่อน
   const contents = document.querySelectorAll(".tab-content");
   contents.forEach(tab => tab.classList.remove("active"));
-
   // 2. แสดง tab ที่เลือก
   const targetTab = document.getElementById(tabId);
   if (targetTab) {
@@ -911,25 +865,21 @@ function showTab(tabId) {
     console.error("ไม่พบ tab:", tabId);
     return;
   }
-
   // 3. อัปเดต Bottom Navigation (ปุ่มล่าง)
   const navButtons = document.querySelectorAll(".nav-btn");
   navButtons.forEach(btn => btn.classList.remove("active"));
   const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
   if (activeNav) activeNav.classList.add("active");
-
   // 4. แสดง Loading (ยกเว้น pending-calls ที่มี loading ภายใน)
   if (tabId !== "pending-calls") {
     document.getElementById("loading").style.display = "flex";
   }
-
   // 5. โหลดข้อมูลตามแท็บ
   switch (tabId) {
     case "parts":
       // คืนค่าค้นหาเดิม (sync กับ tab images)
       document.getElementById('searchInput1').value = globalSearch1;
       document.getElementById('searchInput2').value = globalSearch2;
-
       // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง (สำคัญมาก!)
       loadImageDatabase().then(() => {
         console.log("โหลดฐานข้อมูลรูปภาพเรียบร้อยสำหรับแท็บ Parts");
@@ -939,12 +889,10 @@ function showTab(tabId) {
         loadData(); // ยังโหลดข้อมูลหลักต่อไปได้
       });
       break;
-
     case "images":
       // คืนค่าค้นหาเดิม
       document.getElementById('searchInputImages1').value = globalSearch1;
       document.getElementById('searchInputImages2').value = globalSearch2;
-
       // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง
       loadImageDatabase().then(() => {
         console.log("โหลดฐานข้อมูลรูปภาพเรียบร้อยสำหรับแท็บ Images");
@@ -954,28 +902,22 @@ function showTab(tabId) {
         loadImagesData();
       });
       break;
-
     case "today":
       loadTodayData();
       break;
-
     case "all":
       loadAllData();
       break;
-
     case "pending-calls":
       loadPendingCallsData();
       break;
-
     default:
       console.warn("ไม่รู้จัก tabId:", tabId);
       hideLoading();
   }
-
   // 6. เลื่อนขึ้นบนสุดทุกครั้งที่เปลี่ยนแท็บ (UX ดี)
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 // ฟังก์ชันปิด Loading (ใช้ร่วมกับ showTab)
 function hideLoading() {
   document.getElementById("loading").style.display = "none";
@@ -998,17 +940,14 @@ function hideLoading() {
           }
         });
       }
-     
-
+   
 // === แทนที่ฟังก์ชัน showDetailModal ทั้งหมด ===
 // === showDetailModal เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showDetailModal(row, modalId, contentId) {
   const material = (row.Material || "").toString().trim();
   console.log("เปิด Modal รายละเอียด → Material:", material);
-
   let galleryHtml = '';
   let imageIds = [];
-
   // 1. ลำดับความสำคัญ: ดึงจากฐานใหม่ MainSapimage ก่อน
   if (imageDbLoaded && imageDatabase[material] && imageDatabase[material].length > 0) {
     imageIds = imageDatabase[material];
@@ -1024,7 +963,6 @@ function showDetailModal(row, modalId, contentId) {
       console.log("ใช้รูปจาก UrlWeb เดิม (fallback):", imageIds[0]);
     }
   }
-
   // สร้าง Gallery ตามจำนวนรูป
   if (imageIds.length === 0) {
   galleryHtml = `
@@ -1045,17 +983,14 @@ else {
           </div>
         `).join('')}
       </div>
-
       <!-- ปุ่มลูกศร (แสดงเฉพาะตอนมีหลายรูป) -->
       ${imageIds.length > 1 ? `
         <button class="swiper-btn swiper-prev">‹</button>
         <button class="swiper-btn swiper-next">›</button>
         <div class="swiper-counter">1 / ${imageIds.length}</div>
       ` : ''}
-
     </div>`;
 }
-
   // ส่วนข้อมูลด้านล่าง
   const infoHtml = `
     <div class="detail-info">
@@ -1065,19 +1000,16 @@ else {
           เบิกเลย
         </button>
       </div>
-
       <div class="detail-row"><span class="label">Material</span><span class="value">${material}</span></div>
       <div class="detail-row"><span class="label">Description</span><span class="value">${row.Description || '-'}</span></div>
       <div class="detail-row"><span class="label">วิภาวดี</span><span class="value">${row["วิภาวดี"] ? Number(row["วิภาวดี"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
       <div class="detail-row"><span class="label">นวนคร</span><span class="value">${row["Unrestricted"] ? Number(row["Unrestricted"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
-
       ${row["Rebuilt"] ? `<div class="detail-row"><span class="label">Rebuilt</span><span class="value rebuilt-text">${row["Rebuilt"]}</span></div>` : ''}
       ${row["Product"] ? `<div class="detail-row"><span class="label">Product</span><span class="value">${row["Product"]}</span></div>` : ''}
       ${row["OCRTAXT"] ? `<div class="detail-row"><span class="label">Spec</span><span class="value spec-text">${row["OCRTAXT"]}</span></div>` : ''}
       ${row["หมายเหตุ"] ? `<div class="detail-row"><span class="label" style="color:#e74c3c;font-weight:bold;">หมายเหตุ</span><span class="value" style="color:#e74c3c;font-weight:bold;">${row["หมายเหตุ"]}</span></div>` : ''}
     </div>
   `;
-
   // แสดง Modal
   const modal = document.getElementById(modalId);
   const content = document.getElementById(contentId);
@@ -1085,22 +1017,18 @@ else {
   modal.style.display = 'block';
   modal.scrollTop = 0;
   document.body.style.overflow = 'hidden';
-
   // ถ้ามีหลายรูป → เริ่ม Swipe
  if (imageIds.length > 1) {
   setTimeout(() => initSwiper(modal, imageIds.length), 150); // เพิ่ม delay นิดนึงให้ DOM สร้างเสร็จ
 }
 }
-
 // === ฟังก์ชัน Swipe (ต้องมีด้วย) ===
 // ตัวแปรเก็บ index ปัจจุบันของแต่ละ Modal
 let currentSwiperIndex = {};
-
 // เริ่มระบบ Swipe เมื่อมีหลายรูป
 function initSwiper(modal, totalSlides) {
   const container = modal.querySelector('.image-swiper-container');
   if (!container) return;
-
   const wrapper = container.querySelector('.image-swiper-wrapper');
   const prevBtn = container.querySelector('.swiper-prev');
   const nextBtn = container.querySelector('.swiper-next');
@@ -1111,80 +1039,66 @@ function initSwiper(modal, totalSlides) {
 }
   // เริ่มที่รูปแรก
   currentSwiperIndex[modalId] = currentSwiperIndex[modalId] || 0;
-
   const update = () => {
     const idx = currentSwiperIndex[modalId];
     wrapper.style.transform = `translateX(-${idx * 100}%)`;
     counter.textContent = `${idx + 1} / ${totalSlides}`;
   };
-
   prevBtn.onclick = () => {
-    currentSwiperIndex[modalId] = currentSwiperIndex[modalId] > 0 
-      ? currentSwiperIndex[modalId] - 1 
+    currentSwiperIndex[modalId] = currentSwiperIndex[modalId] > 0
+      ? currentSwiperIndex[modalId] - 1
       : totalSlides - 1;
     update();
   };
-
   nextBtn.onclick = () => {
     currentSwiperIndex[modalId] = (currentSwiperIndex[modalId] + 1) % totalSlides;
     update();
   };
-
   // รองรับการปัดนิ้วบนมือถือ
   let startX = 0;
   container.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
   }, { passive: true });
-
   container.addEventListener('touchend', e => {
     const endX = e.changedTouches[0].clientX;
     const diff = startX - endX;
     if (Math.abs(diff) > 50) {
-      if (diff > 0) nextBtn.click();   // ปัดซ้าย → ถัดไป
-      else prevBtn.click();            // ปัดขวา → ย้อนกลับ
+      if (diff > 0) nextBtn.click(); // ปัดซ้าย → ถัดไป
+      else prevBtn.click(); // ปัดขวา → ย้อนกลับ
     }
   }, { passive: true });
-
   update(); // แสดงรูปแรก
 }
-
 function initSwiper(modal) {
   const container = modal.querySelector('.image-swiper-container');
   if (!container) return;
-  
   const wrapper = container.querySelector('.image-swiper-wrapper');
   const prevBtn = container.querySelector('.swiper-prev');
   const nextBtn = container.querySelector('.swiper-next');
   const counter = container.querySelector('.swiper-counter');
   const modalId = modal.id;
-  
   currentSwiperIndex[modalId] = 0;
   const totalSlides = wrapper.children.length;
-  
   const updateSlide = () => {
     const idx = currentSwiperIndex[modalId];
     wrapper.style.transform = `translateX(-${idx * 100}%)`;
     counter.textContent = `${idx + 1} / ${totalSlides}`;
   };
-  
   const goPrev = () => {
     let idx = currentSwiperIndex[modalId];
     idx = idx > 0 ? idx - 1 : totalSlides - 1;
     currentSwiperIndex[modalId] = idx;
     updateSlide();
   };
-  
   const goNext = () => {
     let idx = currentSwiperIndex[modalId];
     idx = idx < totalSlides - 1 ? idx + 1 : 0;
     currentSwiperIndex[modalId] = idx;
     updateSlide();
   };
-  
   // ลูกศร
   if (prevBtn) prevBtn.onclick = goPrev;
   if (nextBtn) nextBtn.onclick = goNext;
-  
   // Touch Swipe
   let startX = 0;
   container.addEventListener('touchstart', e => startX = e.touches[0].clientX);
@@ -1193,17 +1107,14 @@ function initSwiper(modal) {
     if (startX - endX > 50) goNext(); // Swipe left
     if (endX - startX > 50) goPrev(); // Swipe right
   });
-  
   // Keyboard (arrow keys)
   document.addEventListener('keydown', e => {
     if (modal.style.display !== 'block') return;
     if (e.key === 'ArrowLeft') goPrev();
     if (e.key === 'ArrowRight') goNext();
   });
-  
   updateSlide();
 }
-
 // Global handlers สำหรับปุ่มลูกศร (ถ้าต้องการเรียกจาก onclick)
 window.handleSwiperPrev = function(btn) {
   const container = btn.closest('.image-swiper-container');
@@ -1212,7 +1123,6 @@ window.handleSwiperPrev = function(btn) {
   currentSwiperIndex[modalId] = prevIdx < 0 ? container.querySelector('.image-swiper-wrapper').children.length - 1 : prevIdx;
   initSwiper(document.getElementById(modalId)); // Re-init to update
 };
-
 window.handleSwiperNext = function(btn) {
   const container = btn.closest('.image-swiper-container');
   const modalId = container.closest('.image-modal, .image-modal-images').id;
@@ -1229,21 +1139,18 @@ function closeAllImageModals() {
   document.body.style.overflow = 'auto'; // ปลดล็อกพื้นหลัง
   currentSwiperIndex = {};
 }
-
 // ปุ่ม X
 document.querySelectorAll('.image-close, .image-close-images').forEach(btn => {
   btn.onclick = () => {
     closeAllImageModals();
   };
 });
-
 // คลิกพื้นหลัง
 window.addEventListener('click', (e) => {
   if (e.target.id === 'imageModal' || e.target.id === 'imageModalImages') {
     closeAllImageModals();
   }
 });
-
 // เพิ่มปุ่ม ESC บนคีย์บอร์ดด้วย (สะดวกมาก)
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -1361,7 +1268,7 @@ document.addEventListener('keydown', (e) => {
     contact: getFromLocalStorage('contact'),
     callNumber: getFromLocalStorage('callNumber'),
     callType: getFromLocalStorage('callType'),
-    
+  
   };
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const hasStockVibha = vibhavadiValue > 0;
@@ -1380,7 +1287,6 @@ document.addEventListener('keydown', (e) => {
           cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
           reverseButtons: true,
           buttonsStyling: false,
-
           html: `
             <div style="text-align:center; margin:20px 0;">
               <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
@@ -1394,16 +1300,14 @@ document.addEventListener('keydown', (e) => {
                 กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
               </div>
               <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-                <i class="fas fa-info-circle"></i> 
+                <i class="fas fa-info-circle"></i>
                 หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
               </div>
             </div>
           `,
-
           didOpen: () => {
             const confirmBtn = document.querySelector('.swal2-confirm');
-            const cancelBtn   = document.querySelector('.swal2-cancel');
-
+            const cancelBtn = document.querySelector('.swal2-cancel');
             confirmBtn.style.cssText = `
               background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
               color: white !important;
@@ -1413,7 +1317,6 @@ document.addEventListener('keydown', (e) => {
               font-weight: bold !important;
               box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
             `;
-
             cancelBtn.style.cssText = `
               background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
               color: white !important;
@@ -1425,20 +1328,17 @@ document.addEventListener('keydown', (e) => {
             `;
           }
         });
-
         // ถ้ากดยกเลิก → ออกเลย
         if (warningResult.isDismissed) {
   Swal.close(); // ปิดหน้าต่างเบิกทั้งหมด (จริง ๆ ไม่ใส่ก็ได้ แต่ไม่เป็นไร)
-
   // ✅ รีเซ็ตสภาพหน้าจอให้กลับมาดู tab ค้นหาได้ปกติ
-  document.body.style.overflow = 'auto';    // เผื่อ SweetAlert ล็อก scroll ไว้
+  document.body.style.overflow = 'auto'; // เผื่อ SweetAlert ล็อก scroll ไว้
   window.scrollTo({
     top: 0,
     left: 0,
     behavior: 'instant' // หรือ 'smooth' ถ้าอยากให้เลื่อนนิ่ม ๆ
   });
-
-  return;       // หยุดทุกอย่าง
+  return; // หยุดทุกอย่าง
 }
       }
   if (employeeData.length === 0) {
@@ -1848,29 +1748,27 @@ document.addEventListener('keydown', (e) => {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-     
+   
             // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
       // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
             // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
       let imageHtml = '';
       let imageIds = [];
-
       if (row.UrlWeb && row.UrlWeb.trim()) {
         // รองรับทุกแบบของ Google Drive link
-        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) || 
+        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
           imageIds = [match[1]];
         }
       }
-
       if (imageIds.length > 0) {
         const fileId = imageIds[0];
         imageHtml = `
-          <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500" 
-               alt="รูปอะไหล่" 
-               style="width:120px; height:120px; object-fit:cover; border-radius:20px; 
+          <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500"
+               alt="รูปอะไหล่"
+               style="width:120px; height:120px; object-fit:cover; border-radius:20px;
                       border:5px solid #1877f2; box-shadow:0 10px 30px rgba(24,118,242,0.5);
                       margin-bottom:18px;"
                onerror="this.style.display='none'; this.nextSibling.style.display='block';">
@@ -1879,8 +1777,8 @@ document.addEventListener('keydown', (e) => {
       } else {
         // ถ้าไม่มีรูปเลย → ไอคอนสวย ๆ
         imageHtml = `
-          <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb); 
-                      border-radius:20px; display:flex; align-items:center; justify-content:center; 
+          <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+                      border-radius:20px; display:flex; align-items:center; justify-content:center;
                       margin:0 auto 18px; box-shadow:0 8px 25px rgba(24,118,242,0.3);">
             <i class="fas fa-box-open" style="font-size:50px; color:#1877f2;"></i>
           </div>
@@ -1899,12 +1797,10 @@ document.addEventListener('keydown', (e) => {
         cancelButtonText: '<i class="fas fa-edit"></i> แก้ไขข้อมูล',
         reverseButtons: true,
         buttonsStyling: false,
-
         html: `
           <div style="text-align:center;">
             ${imageHtml}
           </div>
-
           <div style="background:${document.body.classList.contains('dark-mode')?'#2d2d2d':'#f8fbff'}; border-radius:18px; padding:20px; margin:10px 0; box-shadow:0 6px 20px rgba(0,0,0,0.12);">
             <table style="width:100%; border-collapse:separate; border-spacing:0 14px; font-size:15.5px; line-height:1.5;">
               <tr><td style="color:#555; font-weight:600; width:40%;">Material</td>
@@ -1927,26 +1823,23 @@ document.addEventListener('keydown', (e) => {
                   <td style="text-align:right;">${formValues.callNumber || '<span style="color:#999;">ไม่มี</span>'}</td></tr>
               <tr><td style="color:#555; font-weight:600;">Call Type</td>
                   <td style="text-align:right;">
-                    ${formValues.callType 
+                    ${formValues.callType
                       ? `<span style="background:#667eea;color:white;padding:6px 18px;border-radius:30px;font-weight:bold;font-size:15px;">${formValues.callType}</span>`
                       : '<span style="color:#999;">ไม่มี</span>'}
                   </td></tr>
-              ${formValues.remark ? 
+              ${formValues.remark ?
                 `<tr><td style="color:#555; font-weight:600; vertical-align:top; padding-top:10px;">หมายเหตุ</td>
                  <td style="color:#e74c3c; font-weight:bold; text-align:right; padding-top:10px;">${formValues.remark}</td></tr>` : ''}
             </table>
           </div>
-
           <div style="margin-top:20px; padding:15px; background:#fff3cd; border-left:6px solid #f39c12; border-radius:12px; font-size:14.5px; color:#856404; text-align:center;">
             <i class="fas fa-exclamation-triangle" style="margin-right:8px; font-size:18px;"></i>
             กรุณาตรวจสอบข้อมูลให้ครบถ้วนก่อนกดยืนยัน
           </div>
         `,
-
         didOpen: () => {
           const confirmBtn = document.querySelector('.swal2-confirm');
           const cancelBtn = document.querySelector('.swal2-cancel');
-
           confirmBtn.style.cssText = `
             background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
             color: white !important;
@@ -1956,7 +1849,6 @@ document.addEventListener('keydown', (e) => {
             font-weight: bold !important;
             box-shadow: 0 6px 20px rgba(39,174,96,0.5) !important;
           `;
-
           cancelBtn.style.cssText = `
             background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
             color: white !important;
@@ -1972,7 +1864,6 @@ document.addEventListener('keydown', (e) => {
         // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
         const detailModal = document.getElementById('imageModal');
         if (detailModal) detailModal.style.display = 'none';
-
         const imageModalImages = document.getElementById('imageModalImages');
         if (imageModalImages) imageModalImages.style.display = 'none';
         // สร้าง JSON payload
@@ -2284,55 +2175,109 @@ document.addEventListener('keydown', (e) => {
         renderTableData();
         renderPagination(currentFilteredData.length);
       });
+      // ====== Caching Logic for Parts and Images ======
+      const CACHE_EXPIRY = 3600000; // 1 hour in milliseconds
+
+      function getCachedData(key) {
+        const cached = localStorage.getItem(key);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_EXPIRY) {
+            return data;
+          }
+        }
+        return null;
+      }
+
+      function setCachedData(key, data) {
+        localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+      }
+
+      async function fetchAndUpdateCache(key, fetchUrl, processFn) {
+        try {
+          const response = await fetch(fetchUrl + `?_=${Date.now()}`); // Cache busting
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const rawData = await response.json();
+          const processedData = processFn ? processFn(rawData) : rawData;
+          setCachedData(key, processedData);
+          return processedData;
+        } catch (error) {
+          console.error(`Error fetching data for ${key}:`, error);
+          throw error;
+        }
+      }
+
+      // Process function for parts data (filter or transform if needed)
+      function processPartsData(data) {
+        return data; // No additional processing, return as is
+      }
+
+      // Process function for images data
+      function processImagesData(data) {
+        return data.filter(row => row.id); // Filter rows with 'id'
+      }
+
       async function loadData() {
         document.getElementById("loading").style.display = "flex";
         errorContainer.style.display = "none";
-        console.log("Starting data load from:", url);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(url, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allData = data;
-          tempFilteredData = [...data];
-          currentFilteredData = [...data];
+        const cached = getCachedData('partsData');
+        if (cached) {
+          allData = cached;
+          tempFilteredData = [...cached];
+          currentFilteredData = [...cached];
           applyFilters();
           document.getElementById("loading").style.display = "none";
-        } catch (error) {
-          console.error("Error loading data:", error);
-          document.getElementById("loading").style.display = "none";
-          errorContainer.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
+          // Fetch new data in background to update cache
+          fetchAndUpdateCache('partsData', url, processPartsData).then(updatedData => {
+            allData = updatedData;
+            tempFilteredData = [...updatedData];
+            currentFilteredData = [...updatedData];
+            applyFilters(); // Re-apply filters with new data if changed
+          }).catch(() => {}); // Silent fail for background update
+        } else {
+          try {
+            allData = await fetchAndUpdateCache('partsData', url, processPartsData);
+            tempFilteredData = [...allData];
+            currentFilteredData = [...allData];
+            applyFilters();
+            document.getElementById("loading").style.display = "none";
+          } catch (error) {
+            errorContainer.style.display = "block";
+            document.getElementById("loading").style.display = "none";
+            Swal.fire({ icon: "error", title: "Error", text: "Failed to load parts data." });
           }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
+        }
+      }
+
+      async function loadImagesData() {
+        document.getElementById("loading").style.display = "flex";
+        errorContainerImages.style.display = "none";
+        const cached = getCachedData('imagesData');
+        if (cached) {
+          allDataImages = cached;
+          tempFilteredDataImages = [...cached];
+          currentFilteredDataImages = [...cached];
+          applyFiltersImages();
+          document.getElementById("loading").style.display = "none";
+          // Fetch new data in background to update cache
+          fetchAndUpdateCache('imagesData', url, processImagesData).then(updatedData => {
+            allDataImages = updatedData;
+            tempFilteredDataImages = [...updatedData];
+            currentFilteredDataImages = [...updatedData];
+            applyFiltersImages(); // Re-apply filters with new data if changed
+          }).catch(() => {}); // Silent fail for background update
+        } else {
+          try {
+            allDataImages = await fetchAndUpdateCache('imagesData', url, processImagesData);
+            tempFilteredDataImages = [...allDataImages];
+            currentFilteredDataImages = [...allDataImages];
+            applyFiltersImages();
+            document.getElementById("loading").style.display = "none";
+          } catch (error) {
+            errorContainerImages.style.display = "block";
+            document.getElementById("loading").style.display = "none";
+            Swal.fire({ icon: "error", title: "Error", text: "Failed to load images data." });
+          }
         }
       }
       // Images tab functions (now after variables)
@@ -2507,57 +2452,6 @@ searchButtonImages.addEventListener("click", () => {
         renderTableDataImages();
         renderPaginationImages(currentFilteredDataImages.length);
       });
-      async function loadImagesData() {
-        document.getElementById("loading").style.display = "flex";
-        errorContainerImages.style.display = "none";
-        console.log("Starting data load for images from:", url);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          const response = await fetch(url, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Images data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allDataImages = data.filter(row => row.id); // Filter only rows with 'id' data
-          tempFilteredDataImages = [...allDataImages];
-          currentFilteredDataImages = [...allDataImages];
-          applyFiltersImages();
-          document.getElementById("loading").style.display = "none";
-        } catch (error) {
-          console.error("Error loading images data:", error);
-          document.getElementById("loading").style.display = "none";
-          errorContainerImages.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message-images").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message-images").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message-images").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message-images").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
-      }
       // โหลดข้อมูลรูปจาก Sheet ใหม่: MainSapimage
 // === แทนที่ฟังก์ชัน loadImageDatabase ด้วยเวอร์ชันนี้ ===
 async function loadImageDatabase() {
@@ -2565,32 +2459,27 @@ async function loadImageDatabase() {
     console.log("รูปภาพโหลดแล้ว (ใช้ cache)");
     return;
   }
-
   const imageSheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
   const imageSheetName = "MainSapimage";
   const imageUrl = `https://opensheet.elk.sh/${imageSheetID}/${imageSheetName}?_=${Date.now()}`;
-
   try {
     console.log("กำลังดึงรูปจาก MainSapimage...");
     const response = await fetch(imageUrl);
     const data = await response.json();
-
     imageDatabase = {};
     let count = 0;
-
     data.forEach(row => {
       const material = (row.Material || "").toString().trim();
-      
+    
       // รองรับทุกการสะกดของ idchack
       const fileId = (
-        row.idchack || 
-        row.Idchack || 
-        row.IDchack || 
-        row.idChack || 
-        row.IdChack || 
+        row.idchack ||
+        row.Idchack ||
+        row.IDchack ||
+        row.idChack ||
+        row.IdChack ||
         ""
       ).toString().trim();
-
       if (material && fileId && fileId.length > 20) { // File ID ต้องยาวพอ
         if (!imageDatabase[material]) imageDatabase[material] = [];
         if (!imageDatabase[material].includes(fileId)) {
@@ -2599,11 +2488,9 @@ async function loadImageDatabase() {
         }
       }
     });
-
     console.log("โหลดรูปภาพสำเร็จ!", Object.keys(imageDatabase).length + " Material มีรูป");
     console.log("ตัวอย่าง Material ที่มีรูป:", Object.keys(imageDatabase).slice(0, 5));
     imageDbLoaded = true;
-
   } catch (err) {
     console.error("โหลด MainSapimage ไม่ได้:", err);
     imageDbLoaded = false;
@@ -2707,15 +2594,13 @@ function sortByColumn(a, b, column, direction) {
      // ฟังก์ชันกรองข้อมูลตามโหมด + คำค้นหา + การเรียงลำดับ
 function filterDataToday(data) {
   let filtered = data;
-
   // 1. กรองตามโหมดปุ่ม (รอเบิก หรือ ทั้งหมด)
   if (showOnlyPending) {
-    filtered = data.filter(row => 
+    filtered = data.filter(row =>
       row["status"] && row["status"].trim() === "รอเบิก"
     );
   }
   // ถ้าเป็น false → แสดงทั้งหมด (ไม่กรอง)
-
   // 2. กรองตามคำค้นหา
   const keyword = searchInputToday.value.trim().toLowerCase();
   if (keyword) {
@@ -2731,26 +2616,21 @@ function filterDataToday(data) {
       );
     });
   }
-
   // 3. เรียงลำดับตามที่ผู้ใช้กดหัวคอลัมน์
   if (sortConfigToday.column) {
-    filtered.sort((a, b) => 
+    filtered.sort((a, b) =>
       sortByColumn(a, b, sortConfigToday.column, sortConfigToday.direction)
     );
   }
-
   return filtered;
 }
-
 // อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
 function updateTableToday() {
   const filteredData = filterDataToday(allDataToday);
   currentFilteredDataToday = filteredData;
-
   const startIndex = (currentPageToday - 1) * itemsPerPageToday;
   const endIndex = startIndex + itemsPerPageToday;
   const paginatedData = filteredData.slice(startIndex, endIndex);
-
   renderTableToday(paginatedData);
   renderPaginationToday(filteredData.length);
 }
@@ -3412,19 +3292,15 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-   
-
+ 
 // แก้ไข showSettings() เพื่อแสดงปุ่มเฉพาะ 7512411
 async function showSettings() {
   const currentTheme = localStorage.getItem('theme') || 'light';
   const savedUsername = localStorage.getItem('username');
   const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
-
   document.getElementById('modalUserName').textContent = savedUserName;
   document.getElementById('modalUserID').textContent = savedUsername || '-';
   document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
-  document.getElementById('themeSelect').value = currentTheme;
-
   // ดึงหน่วยงาน
   try {
     if (employeeData.length === 0) employeeData = await loadEmployeeData();
@@ -3442,28 +3318,22 @@ async function showSettings() {
   } else {
     adminSection.style.display = 'none';
   }
-
   document.getElementById('settingsModal').style.display = 'block';
-
   // ผูก event เปลี่ยนธีม
   document.getElementById('themeSelect').onchange = (e) => setTheme(e.target.value);
 }
-
 /// —— เปลี่ยนตรงนี้เป็น Sheet ID ของคุณ ——
 const ANNOUNCEMENT_SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o"; // ใส่ ID ของคุณตรงนี้
 const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/information`;
 function parseDdMmYyyyWithTime(dateTimeStr) {
   if (!dateTimeStr) return null;
-
   // รูปแบบ: "18/11/2025, 21:58:07"
   const [datePart, timePart] = dateTimeStr.split(',');
   if (!datePart) return null;
-
   const [dayStr, monthStr, yearStr] = datePart.trim().split('/');
   const day = parseInt(dayStr, 10);
   const month = parseInt(monthStr, 10);
   const year = parseInt(yearStr, 10);
-
   let hours = 0, minutes = 0, seconds = 0;
   if (timePart) {
     const [hStr, mStr, sStr] = timePart.trim().split(':');
@@ -3471,10 +3341,8 @@ function parseDdMmYyyyWithTime(dateTimeStr) {
     minutes = parseInt(mStr || '0', 10);
     seconds = parseInt(sStr || '0', 10);
   }
-
   // ตรวจสอบความถูกต้องของตัวเลข
   if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-
   // month - 1 เพราะ JS ใช้เดือน 0-11
   return new Date(year, month - 1, day, hours, minutes, seconds);
 }
@@ -3483,32 +3351,24 @@ async function loadSystemAnnouncement() {
   try {
     const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
     const data = await response.json();
-
     // ถ้าไม่มีประกาศ → ไม่ต้องทำอะไร
     if (!data || data.length === 0 || !data[0].message) {
       return;
     }
-
     const message = data[0].message.trim();
     const updatedAt = data[0].updatedAt || "";
-
     if (message === "" || updatedAt === "") return;
-
     // --------------------------------------------
     // ✅ แปลงวันที่ด้วยฟังก์ชัน parseDdMmYyyyWithTime
     // --------------------------------------------
     const today = new Date();
     const updatedTime = parseDdMmYyyyWithTime(updatedAt);
-
     if (!updatedTime || isNaN(updatedTime.getTime())) {
       console.log("⏹ ฟอร์แมตวันที่อ่านไม่ได้:", updatedAt);
       return;
     }
-
     const diffDays = Math.floor((today - updatedTime) / (1000 * 60 * 60 * 24));
-
     console.log("ตรวจสอบประกาศ:", { today, updatedTime, updatedAt, diffDays });
-
     // --------------------------------------------
     // 🔥 ถ้าเกิน 2 วัน ไม่ต้องแสดงประกาศ
     // --------------------------------------------
@@ -3516,7 +3376,6 @@ async function loadSystemAnnouncement() {
       console.log("⏹ ประกาศเก่าเกิน 2 วัน – ไม่แสดง");
       return;
     }
-
     // --------------------------------------------
     // จัดรูปแบบข้อความให้รองรับ \n และย่อหน้า
     // --------------------------------------------
@@ -3525,28 +3384,25 @@ async function loadSystemAnnouncement() {
       .replace(/\n/g, '<br>')
       .replace(/^/, '<p style="margin:0; line-height:1.8;">')
       .replace(/$/, '</p>');
-
     // --------------------------------------------
     // 🔔 แสดง Swal
     // --------------------------------------------
     Swal.fire({
       html: `
         <div style="
-          font-size: 28px; 
-          font-weight: 700; 
-          color: #0066cc !important; 
+          font-size: 28px;
+          font-weight: 700;
+          color: #0066cc !important;
           margin-bottom: 12px;
           text-align: center;
           text-shadow: 0 1px 3px rgba(0,102,204,0.3);
         ">
           ประกาศจากคลังวิภาวดี 62
         </div>
-
         <div style="text-align: center; line-height: 1.6; font-size: 18px; color: #2d3436;">
           <div style="margin: 12px 0;">
             <strong>วันที่ :</strong> ${updatedAt}
           </div>
-
           <div style="
             margin: 10px 0;
             padding: 18px 22px;
@@ -3582,7 +3438,6 @@ async function loadSystemAnnouncement() {
         `;
       }
     });
-
   } catch (error) {
     console.log("โหลดประกาศไม่ได้:", error);
   }
@@ -3592,7 +3447,9 @@ function openAnnouncementEditor() {
   const currentMsg = ''; // ไม่ต้องดึงจาก localStorage อีกแล้ว
   Swal.fire({
     title: 'ตั้งค่าประกาศถึงพนักงาน',
-    html: `<textarea id="announcementText" class="swal2-textarea" style="height:200px;">${currentMsg}</textarea>`,
+    html: `
+      <textarea id="announcementText" class="swal2-textarea" style="height:200px;">${currentMsg}</textarea>
+    `,
     showCancelButton: true,
     confirmButtonText: 'บันทึกประกาศ',
     preConfirm: () => {
@@ -3612,14 +3469,11 @@ function openAnnouncementEditor() {
     }
   });
 }
-
 // เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
 setTimeout(() => loadSystemAnnouncement(), 1000);
          // PWA Install Prompt Logic - แก้ไขให้ persist state
 // === PWA Install Logic – แก้ให้หายขาด 100% ===
-// ===== PWA ติดตั้ง – เวอร์ชันแก้หายขาด 100% (2025) =====
 let deferredPrompt = null;
-
 // ฟังก์ชันเช็ค + ลบปุ่มทิ้งถาวร
 function permanentlyHideInstallButton() {
   const btn = document.getElementById('install-btn');
@@ -3628,12 +3482,10 @@ function permanentlyHideInstallButton() {
     console.log('ปุ่มติดตั้งถูกลบถาวร');
   }
 }
-
 // 1. เช็คทันทีตอนโหลดหน้า
 if (localStorage.getItem('partgo-installed') === 'true') {
   permanentlyHideInstallButton();
 }
-
 // 2. ดัก beforeinstallprompt – ป้องกันไม่ให้โผล่ถ้าติดตั้งแล้ว
 window.addEventListener('beforeinstallprompt', (e) => {
   // ถ้าเคยติดตั้งแล้ว → บล็อกเหตุการณ์นี้ทันที
@@ -3641,28 +3493,22 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     return;
   }
-
   e.preventDefault();
   deferredPrompt = e;
-
   // แสดงปุ่ม (เฉพาะครั้งแรก)
   const btn = document.getElementById('install-btn');
   if (btn) {
     btn.style.display = 'flex';
   }
 });
-
 // 3. เมื่อผู้ใช้กดปุ่มติดตั้ง
 document.getElementById('install-btn')?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
-
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-
   if (outcome === 'accepted') {
     localStorage.setItem('partgo-installed', 'true');
     permanentlyHideInstallButton();
-
     Swal.fire({
       icon: 'success',
       title: 'ติดตั้งสำเร็จ!',
@@ -3671,24 +3517,20 @@ document.getElementById('install-btn')?.addEventListener('click', async () => {
       showConfirmButton: false
     });
   }
-
   deferredPrompt = null;
 });
-
 // 4. ดักเหตุการณ์เมื่อติดตั้งจริง ๆ (Chrome ยิง event นี้)
 window.addEventListener('appinstalled', () => {
   localStorage.setItem('partgo-installed', 'true');
   permanentlyHideInstallButton();
   console.log('PWA ติดตั้งสำเร็จโดยสมบูรณ์');
 });
-
 // 5. ป้องกันกรณีรีเฟรชเร็ว / เปิดแท็บใหม่
 document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('partgo-installed') === 'true') {
     permanentlyHideInstallButton();
   }
 });
-
 // สำรองเผื่อ Chrome โหลดช้า
 setTimeout(() => {
   if (localStorage.getItem('partgo-installed') === 'true') {
@@ -3698,7 +3540,6 @@ setTimeout(() => {
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   const currentMsg = localStorage.getItem('systemAnnouncement') || '';
-  
   Swal.fire({
     title: '<i class="fas fa-bullhorn"></i> ตั้งค่าประกาศถึงพนักงาน',
     html: `
@@ -3723,7 +3564,7 @@ function openAnnouncementEditor() {
       });
     }
   });
-}  
+}
  // ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
 window.addEventListener('appinstalled', () => {
   localStorage.setItem('partgo-installed', 'true');
@@ -3733,7 +3574,6 @@ window.addEventListener('appinstalled', () => {
   }
   deferredPrompt = null;
 });
-
 // ป้องกันรีเฟรชแล้วปุ่มกลับมา
 document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('partgo-installed') === 'true') {
