@@ -3455,112 +3455,115 @@ const ANNOUNCEMENT_URL = `https://opensheet.elk.sh/${ANNOUNCEMENT_SHEET_ID}/info
 function parseDdMmYyyyWithTime(dateTimeStr) {
   if (!dateTimeStr) return null;
 
-  // รูปแบบ: "18/11/2025, 21:58:07"
   const [datePart, timePart] = dateTimeStr.split(',');
   if (!datePart) return null;
 
-  const [dayStr, monthStr, yearStr] = datePart.trim().split('/');
+  const [dayStr, monthStr, yearStr] = datePart.trim().split('/').map(s => s.trim());
+  let year = parseInt(yearStr, 10);
   const day = parseInt(dayStr, 10);
-  const month = parseInt(monthStr, 10);
-  const year = parseInt(yearStr, 10);
+  const month = parseInt(monthStr, 10) - 1; // JS เดือน 0-11
+
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+  // ถ้าปี > 2400 → เป็น พ.ศ. ให้แปลงเป็น ค.ศ.
+  if (year > 2400) {
+    year = year - 543;
+  }
 
   let hours = 0, minutes = 0, seconds = 0;
   if (timePart) {
-    const [hStr, mStr, sStr] = timePart.trim().split(':');
-    hours = parseInt(hStr || '0', 10);
-    minutes = parseInt(mStr || '0', 10);
-    seconds = parseInt(sStr || '0', 10);
+    const [h, m, s] = timePart.trim().split(':').map(Number);
+    hours = h || 0;
+    minutes = m || 0;
+    seconds = s || 0;
   }
 
-  // ตรวจสอบความถูกต้องของตัวเลข
-  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-
-  // month - 1 เพราะ JS ใช้เดือน 0-11
-  return new Date(year, month - 1, day, hours, minutes, seconds);
+  const date = new Date(year, month, day, hours, minutes, seconds);
+  return isNaN(date.getTime()) ? null : date;
 }
 // ดึงประกาศจาก Google Sheets
+// วางแทนที่ฟังก์ชันเดิมทั้งหมด
 async function loadSystemAnnouncement() {
+  const SHEET_ID = "1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o";
+  const SHEET_NAME = "information"; // ต้องตรงกับชื่อ Sheet
+  const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}?_=${Date.now()}`;
+
   try {
-    const response = await fetch(ANNOUNCEMENT_URL + '?_=' + Date.now());
-    const data = await response.json();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("ไม่สามารถเชื่อมต่อ opensheet");
+    const data = await res.json();
 
-    if (!data || data.length === 0) return;
-
-    // เรียงข้อมูลจากใหม่ → เก่า (ตามวันที่)
-    const sortedData = data
-      .map(row => ({
-        message: (row.message || "").toString().trim(),
-        updatedAt: row.updatedAt || "",
-        updatedBy: row.updatedBy || "Admin"
-      }))
-      .filter(row => row.message && row.updatedAt)
-      .sort((a, b) => {
-        const dateA = parseDdMmYyyyWithTime(a.updatedAt);
-        const dateB = parseDdMmYyyyWithTime(b.updatedAt);
-        return dateB - dateA; // ใหม่สุดอยู่บน
-      });
-
-    // ดึงเฉพาะอันล่าสุด
-    const latest = sortedData[0];
-    if (!latest) return;
-
-    const latestDate = parseDdMmYyyyWithTime(latest.updatedAt);
-    if (!latestDate) return;
-
-    const today = new Date();
-    const diffDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
-
-    // เกิน 2 วัน → ไม่แสดง
-    if (diffDays > 2) {
-      console.log("ประกาศล่าสุดเก่าเกิน 2 วัน → ไม่แสดง");
+    if (!data || data.length === 0) {
+      console.log("ไม่มีข้อมูลประกาศ");
       return;
     }
 
-    // แปลง \n ให้เป็น <br>
-    const messageHtml = latest.message
-      .replace(/\n\n+/g, '</p><p style="margin:16px 0;">')
+    // ดึงเฉพาะที่มีข้อความและวันที่
+    const valid = data
+      .filter(row => row.message && row.updatedAt)
+      .map(row => ({
+        message: String(row.message || "").trim(),
+        updatedAt: String(row.updatedAt || "").trim(),
+        updatedBy: String(row.updatedBy || "Admin").trim()
+      }));
+
+    if (valid.length === 0) return;
+
+    // เรียงจากใหม่ → เก่า
+    valid.sort((a, b) => {
+      const da = parseDdMmYyyyWithTime(a.updatedAt);
+      const db = parseDdMmYyyyWithTime(b.updatedAt);
+      return (db || 0) - (da || 0);
+    });
+
+    const latest = valid[0];
+    const latestDate = parseDdMmYyyyWithTime(latest.updatedAt);
+    if (!latestDate) return;
+
+    const diffDays = Math.floor((new Date() - latestDate) / (86400000));
+    if (diffDays > 2) {
+      console.log("ประกาศเก่าเกิน 2 วัน → ไม่แสดง");
+      return;
+    }
+
+    const html = latest.message
+      .replace(/\n\n+/g, '</p><p style="margin:18px 0;">')
       .replace(/\n/g, '<br>')
       .replace(/^/, '<p style="margin:0; line-height:1.8;">')
       .replace(/$/, '</p>');
 
     Swal.fire({
+      width: 600,
       html: `
-        <div style="font-size:28px;font-weight:700;color:#0066cc;margin-bottom:12px;text-align:center;text-shadow:0 1px 3px rgba(0,102,204,0.3);">
+        <div style="font-size:28px;font-weight:700;color:#0066cc;margin-bottom:16px;text-align:center;">
           ประกาศจากคลังวิภาวดี 62
         </div>
-        <div style="text-align:center;line-height:1.6;font-size:18px;color:#2d3436;">
-          <div style="margin:12px 0;">
-            <strong>วันที่ประกาศ:</strong> ${latest.updatedAt}
-          </div>
-          <div style="padding:20px 24px;background:#f8f9fa;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.1);line-height:1.8;font-size:17.5px;">
-            ${messageHtml}
-          </div>
-          <div style="margin-top:15px;font-size:14px;color:#7f8c8d;">
-            <i class="fas fa-history"></i> ระบบเก็บประวัติประกาศทั้งหมดใน Google Sheets
-          </div>
+        <div style="text-align:center;font-size:17px;color:#333;margin-bottom:12px;">
+          <strong>วันที่:</strong> ${latest.updatedAt}
+        </div>
+        <div style="background:#f8f9fa;padding:24px;border-radius:18px;line-height:1.9;font-size:17.5px;">
+          ${html}
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:#777;">
+          <i class="fas fa-history"></i> เก็บประวัติครบทุกข้อความ
         </div>
       `,
       confirmButtonText: 'รับทราบ',
       allowOutsideClick: false,
       allowEscapeKey: false,
-      width: '580px',
-      padding: '40px 30px',
-      background: '#ffffff',
+      background: '#fff',
+      backdrop: 'rgba(0,0,0,0.8)',
       didOpen: () => {
         Swal.getConfirmButton().style.cssText = `
-          background: linear-gradient(135deg, #667eea, #764ba2) !important;
-          color: white !important;
-          padding: 16px 60px !important;
-          border-radius: 50px !important;
-          font-size: 19px !important;
-          font-weight: 700 !important;
-          box-shadow: 0 12px 35px rgba(102,126,234,0.45) !important;
+          background: linear-gradient(135deg,#667eea,#764ba2)!important;
+          color:white;padding:16px 70px;border-radius:50px;font-size:19px;font-weight:700;
+          box-shadow:0 12px 35px rgba(102,126,234,0.45);
         `;
       }
     });
 
-  } catch (error) {
-    console.log("โหลดประกาศไม่ได้:", error);
+  } catch (err) {
+    console.error("โหลดประกาศล้มเหลว:", err);
   }
 }
 // บันทึกประกาศ (เฉพาะ 7512411)
