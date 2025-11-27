@@ -824,14 +824,6 @@ toggleAllDataBtn.addEventListener("click", () => {
               localStorage.removeItem('rememberMe');
             }
             checkLoginStatus();
-            // Focus on search input after login
-            // เพิ่ม 2 บรรทัดนี้ เพื่อแสดงประกาศทันทีหลังล็อกอินสำเร็จ
-            setTimeout(() => {
-              showSystemAnnouncement();
-              }, 800);
-             setTimeout(() => {
-              loadSystemAnnouncement();
-              }, 2000); 
             setTimeout(() => {
               const searchInput = document.getElementById('searchInput1');
               if (searchInput) searchInput.focus();
@@ -3553,8 +3545,6 @@ function openAnnouncementEditor() {
           title: 'บันทึกประกาศสำเร็จ!',
           html: `<p style="font-size:18px;"><strong>${subject}</strong><br>ทุกคนจะเห็นทันทีที่เปิดแอป</p>`,
           confirmButtonText: 'ตกลง'
-        }).then(() => {
-          loadSystemAnnouncement(); // รีโหลดประกาศใหม่ทันที
         });
       })
       .catch(err => {
@@ -3569,11 +3559,6 @@ function openAnnouncementEditor() {
     }
   });
 }
-
-// เรียกตอนล็อกอินสำเร็จ (แทนที่ setTimeout เดิม)
-setTimeout(() => loadSystemAnnouncement(), 1000);
-         // PWA Install Prompt Logic - แก้ไขให้ persist state
-// === PWA Install Logic – แก้ให้หายขาด 100% ===
 // ===== PWA ติดตั้ง – เวอร์ชันแก้หายขาด 100% (2025) =====
 let deferredPrompt = null;
 
@@ -3757,8 +3742,6 @@ function openAnnouncementEditor() {
           confirmButtonText: 'เสร็จสิ้น',
           timer: 4000,
           timerProgressBar: true
-        }).then(() => {
-          loadSystemAnnouncement(); // รีโหลดประกาศใหม่ทันที
         });
       })
       .catch(err => {
