@@ -678,33 +678,42 @@ toggleAllDataBtn.addEventListener("click", () => {
         }
       }
       async function showSettings() {
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  const savedUsername = localStorage.getItem('username');
-  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
-  // แสดงข้อมูลพื้นฐาน
-  document.getElementById('modalUserName').textContent = savedUserName;
-  document.getElementById('modalUserID').textContent = savedUsername || '-';
-  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
-  document.getElementById('themeSelect').value = currentTheme;
-  // ดึงหน่วยงาน
-  try {
-    if (employeeData.length === 0) {
-      employeeData = await loadEmployeeData();
-    }
-    const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
-    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
-    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
-  } catch (err) {
-    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
-    document.getElementById('modalUserTeam').style.color = '#e74c3c';
-  }
-  // เปิด Modal
-  document.getElementById('settingsModal').style.display = 'block';
-  // ← สำคัญมาก: ผูก event ทุกครั้งที่เปิด Settings (เพราะบางที DOM อาจถูกสร้างใหม่)
-  document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
-  document.getElementById('themeSelect').addEventListener('change', function(e) {
-    setTheme(e.target.value);
-  });
+const currentTheme = localStorage.getItem('theme') || 'light';
+const savedUsername = localStorage.getItem('username');
+const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+// แสดงข้อมูลพื้นฐาน
+document.getElementById('modalUserName').textContent = savedUserName;
+document.getElementById('modalUserID').textContent = savedUsername || '-';
+document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+document.getElementById('themeSelect').value = currentTheme;
+// ดึงหน่วยงาน
+try {
+if (employeeData.length === 0) {
+employeeData = await loadEmployeeData();
+}
+const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+} catch (err) {
+document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+document.getElementById('modalUserTeam').style.color = '#e74c3c';
+}
+// แสดงปุ่มประกาศสำหรับ admin (7512411)
+const adminSection = document.getElementById('adminAnnouncementSection');
+if (savedUsername === '7512411' && adminSection) {
+adminSection.style.display = 'block';
+} else if (adminSection) {
+adminSection.style.display = 'none';
+}
+// เปิด Modal
+document.getElementById('settingsModal').style.display = 'block';
+// ผูก event ทุกครั้งที่เปิด Settings
+document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
+document.getElementById('themeSelect').addEventListener('change', function(e) {
+setTheme(e.target.value);
+});
+// เรียกอัปเดตเวอร์ชันแอป (ถ้ามี)
+updateAppVersionDisplay();
 }
       // Close settings modal
       document.getElementById('closeSettings').onclick = () => {
