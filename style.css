@@ -3465,15 +3465,35 @@ body.dark-mode #searchButtonImages:hover {
 .header-setting-btn {
   margin: 0 !important;
 }
+/* โลโก้มุมซ้ายบน */
 .app-logo {
   width: 32px;
   height: 32px;
   margin-right: 8px;
   border-radius: 6px;
   object-fit: cover;
+
+  /* ให้เล่นแอนิเมชันตอนโหลด */
+  animation: logoPopIn 0.6s ease-out;
 }
 
 /* Dark Mode */
 body.dark-mode .app-logo {
   filter: brightness(0.9) contrast(1.1);
+}
+
+/* Keyframes สำหรับแอนิเมชันโลโก้เด้งเข้ามา */
+@keyframes logoPopIn {
+  0% {
+    transform: scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
