@@ -3307,49 +3307,51 @@ body.dark-mode .swiper-btn:hover {
 /* ปรับปุ่มตั้งค่า (เมนู (ฟันเฟือง) ให้ใหญ่ + สูงเท่ากับปุ่มกระดิ่ง 100% */
 .header-setting-btn,
 .header-notification-btn {
-  width: 50px !important;      /* กว้างเท่ากัน */
-  height: 50px !important;     /* สูงเท่ากัน */
+  width: 50px !important;
+  height: 50px !important;
   min-width: 50px !important;
   min-height: 50px !important;
-  border-radius: 50% !important;   /* วงกลมสมบูรณ์ */
+  border-radius: 12px !important;        /* มุมโค้งนิดหน่อย ดูทันสมัย */
+  background: transparent !important;    /* ใช้สีพื้น Header เดิม */
+  border: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 !important;
   margin: 0 6px !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 0 !important;
   transition: all 0.25s ease;
+  position: relative;
 }
 
+/* ไอคอนใหญ่เท่ากัน 24px */
 .header-setting-btn i,
 .header-notification-btn i {
-  font-size: 24px !important;   /* ไอคอนใหญ่เท่ากัน */
+  font-size: 24px !important;
   color: white !important;
 }
 
-/* Hover ทั้งคู่ */
+/* Hover: สว่างขึ้นเล็กน้อย เหมือนปุ่มใน Facebook */
 .header-setting-btn:hover,
 .header-notification-btn:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* กดแล้วยุบเล็กน้อย */
+/* กดแล้วยุบ */
 .header-setting-btn:active,
 .header-notification-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Dark mode – ให้ปุ่มยังคงเด่น */
-body.dark-mode .header-setting-btn,
-body.dark-mode .header-notification-btn {
+/* Dark Mode – ให้ยังคงดูดี */
+body.dark-mode .header-setting-btn:hover,
+body.dark-mode .header-notification-btn:hover {
   background: rgba(255, 255, 255, 0.12) !important;
 }
 
-body.dark-mode .header-setting-btn:hover,
-body.dark-mode .header-notification-btn:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
+body.dark-mode .header-setting-btn:active,
+body.dark-mode .header-notification-btn:active {
+  background: rgba(255, 255, 255, 0.2) !important;
 }
