@@ -3465,3 +3465,15 @@ body.dark-mode #searchButtonImages:hover {
 .header-setting-btn {
   margin: 0 !important;
 }
+.app-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Dark Mode */
+body.dark-mode .app-logo {
+  filter: brightness(0.9) contrast(1.1);
+}
