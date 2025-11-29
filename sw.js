@@ -1,6 +1,6 @@
 // sw.js — PartsGo v12.9.1 (29 พ.ย. 2568) — เวอร์ชันสุดท้ายที่ถูกต้อง 100%
 
-const VERSION = 'v12.9.1';
+const VERSION = 'v12.9.3';
 const CACHE   = `partgo-${VERSION}`;
 
 const SHELL = [
