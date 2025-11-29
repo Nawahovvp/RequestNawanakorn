@@ -3304,3 +3304,52 @@ body.dark-mode .swiper-btn:hover {
   font-size: 22px !important; /* ไอคอนใหญ่เท่ากระดิ่ง */
   margin-bottom: 2px;
 }
+/* ปรับปุ่มตั้งค่า (เมนู (ฟันเฟือง) ให้ใหญ่ + สูงเท่ากับปุ่มกระดิ่ง 100% */
+.header-setting-btn,
+.header-notification-btn {
+  width: 50px !important;      /* กว้างเท่ากัน */
+  height: 50px !important;     /* สูงเท่ากัน */
+  min-width: 50px !important;
+  min-height: 50px !important;
+  border-radius: 50% !important;   /* วงกลมสมบูรณ์ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  margin: 0 6px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.25s ease;
+}
+
+.header-setting-btn i,
+.header-notification-btn i {
+  font-size: 24px !important;   /* ไอคอนใหญ่เท่ากัน */
+  color: white !important;
+}
+
+/* Hover ทั้งคู่ */
+.header-setting-btn:hover,
+.header-notification-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* กดแล้วยุบเล็กน้อย */
+.header-setting-btn:active,
+.header-notification-btn:active {
+  transform: scale(0.95);
+}
+
+/* Dark mode – ให้ปุ่มยังคงเด่น */
+body.dark-mode .header-setting-btn,
+body.dark-mode .header-notification-btn {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.dark-mode .header-setting-btn:hover,
+body.dark-mode .header-notification-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
