@@ -3461,3 +3461,7 @@ body.dark-mode #searchButtonImages:hover {
     box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
   }
 }
+.header-notification-btn,
+.header-setting-btn {
+  margin: 0 !important;
+}
