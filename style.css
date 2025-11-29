@@ -514,34 +514,45 @@ body.dark-mode .swiper-btn:hover {background: rgba(255,255,255,0.3);}
   padding: 8px;
   margin-left: 10px;
 }
+/* ทำให้กระดิ่งเป็นสีขาว และมีเอฟเฟกต์ตอน hover */
 .header-notification-btn i {
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   color: white !important;
+  font-size: 24px;           /* เพิ่มขนาดให้ชัดขึ้นนิดนึง */
 }
+
+/* Hover แล้วเปลี่ยนเป็นแดง + ขยาย */
 .header-notification-btn:hover i {
-  color: #e74c3c;
-  transform: scale(1.2);
+  color: #e74c3c !important;
+  transform: scale(1.25);
 }
+
+/* ป้ายแจ้งเตือน (จุดแดง + ข้อความ !) */
 .notification-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 2px;                  /* ปรับให้จุดแดงอยู่มุมบนขวาสวย ๆ */
+  right: 2px;
   background: #e74c3c;
   color: white;
   font-size: 10px;
+  font-weight: bold;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
   animation: pulse 2s infinite;
+  pointer-events: none;      /* ไม่ให้บังการคลิกกระดิ่ง */
+  z-index: 1;
 }
+
+/* เอฟเฟกต์เต้นตุบ ๆ ของจุดแดง (สวยมาก) */
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1);    box-shadow: 0 0 8px rgba(231,76,60,0.8); }
+  50%  { transform: scale(1.15); box-shadow: 0 0 16px rgba(231,76,60,1); }
+  100% { transform: scale(1);    box-shadow: 0 0 8px rgba(231,76,60,0.8); }
 }
 
 /* Deck Style */
