@@ -3391,20 +3391,20 @@ body.dark-mode #toggleAllDataBtn.active {
 }
 #searchButton,
 #searchButtonImages {
-  min-width: 110px !important;
+  min-width: 80px !important;
+  width: 80px !important;         /* ล็อกความกว้างตายตัว */
   height: 40px !important;                  /* ปรับจาก 46px → 40px */
-  padding: 0 20px !important;                /* ลด padding เล็กน้อยให้สมดุล */
+  padding: 0 !important;                /* ลด padding เล็กน้อยให้สมดุล */
   border-radius: 24px !important;            /* ลด border-radius ตามสัดส่วน (จาก 30px) */
-  font-size: 16px !important;                /* ลด font นิดหน่อย */
-  font-weight: 600 !important;
+  font-size: 0 !important;                /* ลด font นิดหน่อย */
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   color: white !important;
   border: none !important;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4) !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0;
   cursor: pointer;
   transition: all 0.3s ease !important;
   margin-left: 8px;
@@ -3413,7 +3413,8 @@ body.dark-mode #toggleAllDataBtn.active {
 /* ไอคอนเล็กลงนิดให้พอดีกับปุ่ม 40px */
 #searchButton i,
 #searchButtonImages i {
-  font-size: 19px !important;   /* จาก 19px → 18px */
+  font-size: 19px !important; 
+  margin: 0 !important;/* จาก 19px → 18px */
 }
 
 /* Hover */
