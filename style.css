@@ -516,6 +516,7 @@ body.dark-mode .swiper-btn:hover {background: rgba(255,255,255,0.3);}
 }
 .header-notification-btn i {
   transition: all 0.3s;
+  color: white !important;
 }
 .header-notification-btn:hover i {
   color: #e74c3c;
