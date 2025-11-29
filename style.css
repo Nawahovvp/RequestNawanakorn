@@ -1502,19 +1502,17 @@ body.dark-mode .swal2-spinner {
 }
 
 .summary-image {
-  width: 50px !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-fit: cover !important;
-  max-width: 100% !important;
-  object-fit: cover !important;
-  max-width: 100% !important;
-  border-radius: 8px;
-  margin-bottom: 8px !important;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  width: 50px !important;          /* กำหนดความกว้างของรูปให้คงที่ที่ 50 พิกเซล */
+  height: auto !important;         /* ให้ความสูงปรับอัตโนมัติตามสัดส่วนของรูป */
+  max-width: 100% !important;      /* ป้องกันไม่ให้รูปใหญ่เกินพื้นที่ของ container */
+  object-fit: cover !important;    /* ตัดขอบรูปให้พอดีกับกรอบโดยไม่บิดเบี้ยว */
+  border-radius: 8px;              /* มุมรูปโค้งมน */
+  margin-bottom: 8px !important;   /* เพิ่มระยะห่างด้านล่างของรูป */
+  display: block;                  /* ทำให้รูปเป็น block element */
+  margin-left: auto;               /* จัดรูปให้อยู่ตรงกลางแนวนอน */
+  margin-right: auto;              /* จัดรูปให้อยู่ตรงกลางแนวนอน */
 }
+
 
 .dark-blue-title {
   color: #00008b !important;
