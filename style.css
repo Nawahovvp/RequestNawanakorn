@@ -3342,7 +3342,7 @@ body.dark-mode .header-notification-btn:active {
 /* ปุ่ม "รอเบิก" และ "ทั้งหมด" ในแท็บ Today ให้ใหญ่ขึ้น ชัดขึ้น */
 #toggleAllDataBtn {
   min-width: 110px !important;     /* กว้างขึ้น */
-  height: 46px !important;         /* สูงขึ้น */
+  height: 42px !important;         /* สูงขึ้น */
   padding: 0 20px !important;      /* ระยะห่างข้างในเยอะขึ้น */
   border-radius: 30px !important;  /* มุมโค้งสวยแบบปุ่ม Canva */
   font-size: 16px !important;      /* ตัวหนังสือใหญ่ขึ้น */
