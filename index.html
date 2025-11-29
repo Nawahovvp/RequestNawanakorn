@@ -841,6 +841,7 @@ updateAppVersionDisplay();
         }
       }
             // ==================== โหลดข้อมูลหลัก (ใช้ cache) ====================
+            // ==================== โหลดข้อมูลหลัก (ใช้ cache) + อัพเดททั้งสองแท็บ ====================
       async function loadData() {
         document.getElementById("loading").style.display = "flex";
         try {
@@ -852,19 +853,28 @@ updateAppVersionDisplay();
             return json;
           });
 
-          // สำหรับแท็บ images ใช้ข้อมูลเดียวกัน
-          allDataImages = allData.filter(row => row.id || (row.UrlWeb && row.UrlWeb.includes('drive.google.com')));
+          // อัพเดทข้อมูลทั้งสองแท็บทันที
           currentFilteredData = [...allData];
+
+          // กรองเฉพาะที่มีรูป (สำหรับแท็บ images)
+          allDataImages = allData.filter(row => 
+            row.id || 
+            (row.UrlWeb && /drive\.google\.com/.test(row.UrlWeb))
+          );
           currentFilteredDataImages = [...allDataImages];
 
-          applyFilters();
-          if (document.getElementById('images').classList.contains('active')) {
+          // แสดงผลตามแท็บที่กำลังเปิดอยู่
+          if (document.getElementById('parts').classList.contains('active')) {
+            applyFilters();
+          } else if (document.getElementById('images').classList.contains('active')) {
             applyFiltersImages();
           }
+
         } catch (err) {
           console.error("โหลดข้อมูลหลักล้มเหลว:", err);
           errorContainer.style.display = "block";
-          Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลอะไหล่ได้ กรุณาลองใหม่", "error");
+          errorContainerImages.style.display = "block";
+          Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่", "error");
         } finally {
           document.getElementById("loading").style.display = "none";
         }
@@ -906,41 +916,44 @@ updateAppVersionDisplay();
      }
       // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    const targetTab = document.getElementById(tabId);
-    if (targetTab) targetTab.classList.add("active");
+  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) targetTab.classList.add("active");
 
-    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-    const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
-    if (activeNav) activeNav.classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
+  if (activeNav) activeNav.classList.add("active");
 
-    if (tabId !== "pending-calls") {
-      document.getElementById("loading").style.display = "flex";
-    }
-
-    switch (tabId) {
-      case "parts":
-        document.getElementById('searchInput1').value = globalSearch1;
-        document.getElementById('searchInput2').value = globalSearch2;
-        loadData(); // ใช้ cache แล้ว
-        break;
-      case "images":
-        document.getElementById('searchInputImages1').value = globalSearch1;
-        document.getElementById('searchInputImages2').value = globalSearch2;
-        loadData(); // ใช้ข้อมูลเดียวกัน
-        applyFiltersImages();
-        break;
-      case "today":
-        loadTodayData();
-        break;
-      case "pending-calls":
-        loadPendingCallsData();
-        break;
-    }
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => document.getElementById("loading").style.display = "none", 300);
+  if (tabId !== "pending-calls") {
+    document.getElementById("loading").style.display = "flex";
   }
+
+  switch (tabId) {
+    case "parts":
+      document.getElementById('searchInput1').value = globalSearch1;
+      document.getElementById('searchInput2').value = globalSearch2;
+      loadData().then(() => applyFilters()); // ต้องมี .then()
+      break;
+    case "images":
+      document.getElementById('searchInputImages1').value = globalSearch1;
+      document.getElementById('searchInputImages2').value = globalSearch2;
+      loadData().then(() => {
+        applyFiltersImages(); // ต้องเรียกตรงนี้!
+        document.getElementById("loading").style.display = "none";
+      });
+      break;
+    case "today":
+      // ปิด spinner ใหญ่ทันทีที่เข้าตัวแท็บ today (ไม่ต้องโชว์)
+      document.getElementById("loading").style.display = "none";
+      loadTodayData();
+      break;
+    case "pending-calls":
+      loadPendingCallsData();
+      break;
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 // ฟังก์ชันปิด Loading (ใช้ร่วมกับ showTab)
 function hideLoading() {
   document.getElementById("loading").style.display = "none";
@@ -2278,22 +2291,41 @@ document.addEventListener('keydown', (e) => {
         renderPagination(currentFilteredData.length);
       });
       async function loadData() {
-    document.getElementById("loading").style.display = "flex";
-    try {
-      allData = await getCachedData(CACHE_KEY_MAIN, async () => {
-        const res = await fetch(url + '?_=' + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return await res.json();
-      });
-      currentFilteredData = [...allData];
+  document.getElementById("loading").style.display = "flex";
+  try {
+    allData = await getCachedData(CACHE_KEY_MAIN, async () => {
+      const res = await fetch(url + '?_=' + Date.now());
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      if (!Array.isArray(json)) throw new Error("ข้อมูลไม่ใช่ array");
+      return json;
+    });
+
+    currentFilteredData = [...allData];
+
+    // กรองเฉพาะที่มีรูป (สำหรับแท็บ images)
+    allDataImages = allData.filter(row =>
+      row.id ||
+      (row.UrlWeb && /drive\.google\.com/.test(row.UrlWeb))
+    );
+    currentFilteredDataImages = [...allDataImages];
+
+    // แสดงผลตามแท็บที่กำลังเปิดอยู่
+    if (document.getElementById('parts').classList.contains('active')) {
       applyFilters();
-    } catch (err) {
-      console.error("โหลดข้อมูลหลักล้มเหลว:", err);
-      Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลอะไหล่ได้", "error");
-    } finally {
-      document.getElementById("loading").style.display = "none";
+    } else if (document.getElementById('images').classList.contains('active')) {
+      applyFiltersImages();
     }
+
+  } catch (err) {
+    console.error("โหลดข้อมูลหลักล้มเหลว:", err);
+    errorContainer.style.display = "block";
+    errorContainerImages.style.display = "block";
+    Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่", "error");
+  } finally {
+    document.getElementById("loading").style.display = "none";
   }
+}
       // Images tab functions (now after variables)
       itemsPerPageSelectImages.addEventListener("change", () => {
         itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
@@ -2682,6 +2714,7 @@ function updateTableToday() {
   const paginatedData = filteredData.slice(startIndex, endIndex);
   renderTableToday(paginatedData);
   renderPaginationToday(filteredData.length);
+  document.querySelector("#today .table-container").classList.add("show");
 }
       function renderTableToday(data) {
         tableBodyToday.innerHTML = "";
@@ -2815,35 +2848,50 @@ function updateTableToday() {
 toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>รอเบิก</span>';
 toggleAllDataBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
       });
-     async function loadTodayData() {
-    document.getElementById("loadingToday").style.display = "block";
-    try {
-      allDataToday = await getCachedData(CACHE_KEY_TODAY, async () => {
-        const res = await fetch(requestSheetUrl + '?_=' + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return await res.json();
-      });
-      updateTableToday();
-    } catch (err) {
-      console.error("โหลด Today ล้มเหลว:", err);
-    } finally {
-      document.getElementById("loadingToday").style.display = "none";
-    }
-  }async function loadTodayData() {
-    document.getElementById("loadingToday").style.display = "block";
-    try {
-      allDataToday = await getCachedData(CACHE_KEY_TODAY, async () => {
-        const res = await fetch(requestSheetUrl + '?_=' + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return await res.json();
-      });
-      updateTableToday();
-    } catch (err) {
-      console.error("โหลด Today ล้มเหลว:", err);
-    } finally {
-      document.getElementById("loadingToday").style.display = "none";
-    }
-  }
+           // ==================== โหลดข้อมูลแท็บ เบิกวันนี้ (ใช้ cache + แสดงผลทันที) ====================
+            // ==================== โหลดข้อมูลแท็บ "เบิกวันนี้" (แก้ค้าง spinner 100%) ====================
+            // ==================== โหลดข้อมูลแท็บ "เบิกวันนี้" ตรงจาก Opensheet (เร็ว + ไม่ค้าง spinner) ====================
+           // ==================== โหลดข้อมูลแท็บ "เบิกวันนี้" โดยตรงจาก opensheet (เร็ว + แคช 5 นาที) ====================
+            // ==================== โหลดข้อมูลแท็บ "เบิกวันนี้" (ไม่ค้าง spinner 100%) ====================
+      async function loadTodayData() {
+        const loadingEl = document.getElementById("loadingToday");
+        const tableContainer = document.querySelector("#today .table-container");
+        const errorEl = document.getElementById("error-container-today");
+
+        // แสดง spinner ก่อน
+        loadingEl.style.display = "block";
+        tableContainer.style.opacity = "0";  // ซ่อนตารางก่อน
+        errorEl.style.display = "none";
+
+        try {
+          allDataToday = await getCachedData(CACHE_KEY_TODAY, async () => {
+            const res = await fetch('https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request?_=' + Date.now());
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            if (!Array.isArray(data)) throw new Error("ข้อมูลไม่ใช่ array");
+            return data;
+          });
+
+          // รีเซ็ตสถานะ
+          currentPageToday = 1;
+          showOnlyPending = true;
+          toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>รอเบิก</span>';
+          toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
+
+          // แสดงข้อมูล
+          updateTableToday();
+
+          // ซ่อน spinner + แสดงตาราง
+          loadingEl.style.display = "none";
+          tableContainer.style.opacity = "1";
+
+        } catch (err) {
+          console.error("โหลดข้อมูลวันนี้ล้มเหลว:", err);
+          loadingEl.style.display = "none";
+          errorEl.style.display = "block";
+        }
+      }
+      // ========================================================================
       itemsPerPageSelectAll.addEventListener("change", (e) => {
         itemsPerPageAll = parseInt(e.target.value);
         currentPageAll = 1;
