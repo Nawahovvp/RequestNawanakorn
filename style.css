@@ -3474,7 +3474,7 @@ body.dark-mode #searchButtonImages:hover {
   object-fit: cover;
 
   /* ให้เล่นแอนิเมชันตอนโหลด */
-  animation: logoPopIn 0.6s ease-out;
+  animation: logoPopIn 0.6s ease-out, logoFloat 3s ease-in-out 0.6s infinite;
 }
 
 /* Dark Mode */
@@ -3496,4 +3496,9 @@ body.dark-mode .app-logo {
     transform: scale(1) rotate(0deg);
     opacity: 1;
   }
+}
+@keyframes logoFloat {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
 }
