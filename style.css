@@ -3389,14 +3389,13 @@ body.dark-mode #toggleAllDataBtn.active {
   background: linear-gradient(135deg, #1abc9c, #16a085) !important;
   box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4) !important;
 }
-/* ปุ่ม Clear ทั้งสองแท็บ ให้ใหญ่ + สวยเหมือนปุ่ม "รอเบิก / ทั้งหมด" 100% */
 #searchButton,
 #searchButtonImages {
   min-width: 110px !important;
-  height: 42px !important;
-  padding: 0 24px !important;
-  border-radius: 30px !important;
-  font-size: 16px !important;
+  height: 40px !important;                  /* ปรับจาก 46px → 40px */
+  padding: 0 20px !important;                /* ลด padding เล็กน้อยให้สมดุล */
+  border-radius: 24px !important;            /* ลด border-radius ตามสัดส่วน (จาก 30px) */
+  font-size: 16px !important;                /* ลด font นิดหน่อย */
   font-weight: 600 !important;
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   color: white !important;
@@ -3411,13 +3410,13 @@ body.dark-mode #toggleAllDataBtn.active {
   margin-left: 8px;
 }
 
-/* ไอคอนรีเซ็ตข้างในใหญ่ขึ้น */
+/* ไอคอนเล็กลงนิดให้พอดีกับปุ่ม 40px */
 #searchButton i,
 #searchButtonImages i {
-  font-size: 19px !important;
+  font-size: 19px !important;   /* จาก 19px → 18px */
 }
 
-/* Hover – ยกขึ้น + เงาแรงขึ้น */
+/* Hover */
 #searchButton:hover,
 #searchButtonImages:hover {
   background: linear-gradient(135deg, #c0392b, #a93226) !important;
@@ -3425,14 +3424,14 @@ body.dark-mode #toggleAllDataBtn.active {
   box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6) !important;
 }
 
-/* กดแล้วยุบลงนิดนึง */
+/* Active */
 #searchButton:active,
 #searchButtonImages:active {
   transform: translateY(0);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5) !important;
 }
 
-/* Dark Mode – ปุ่ม Clear ยังแดงเด่นชัด */
+/* Dark Mode */
 body.dark-mode #searchButton,
 body.dark-mode #searchButtonImages {
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
