@@ -3443,3 +3443,66 @@ body.dark-mode #searchButtonImages:hover {
   background: linear-gradient(135deg, #c0392b, #a93226) !important;
   box-shadow: 0 8px 25px rgba(231, 76, 60, 0.7) !important;
 }
+/* ทำให้ช่องค้นหาทั้ง 4 ช่อง (หลัก + ย่อย ในทั้งสองแท็บ) สูงเท่าปุ่ม Clear และสวยกลมกลืน */
+#searchInput1,
+#searchInput2,
+#searchInputImages1,
+#searchInputImages2 {
+  height: 46px !important;           /* สูงเท่าปุ่ม Clear */
+  padding: 0 16px !important;        /* ระยะห่างข้างในสวย */
+  font-size: 16px !important;       /* ตัวหนังสือใหญ่ขึ้น */
+  border-radius: 30px !important;    /* มุมโค้งแบบปุ่ม Canva */
+  border: 2px solid #ddd !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  transition: all 0.3s ease !important;
+  min-width: 140px !important;
+}
+
+/* Focus – ขอบสีน้ำเงินสวย + ยกขึ้นนิด */
+#searchInput1:focus,
+#searchInput2:focus,
+#searchInputImages1:focus,
+#searchInputImages2:focus {
+  border-color: #3498db !important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2), 0 0 6px 15px rgba(52, 152, 219, 0.3) !important;
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* Dark Mode – ช่องค้นหายังสวยเด่น */
+body.dark-mode #searchInput1,
+body.dark-mode #searchInput2,
+body.dark-mode #searchInputImages1,
+body.dark-mode #searchInputImages2 {
+  background-color: #2c3e50 !important;
+  border-color: #555 !important;
+  color: #ecf0f1 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+body.dark-mode #searchInput1:focus,
+body.dark-mode #searchInput2:focus,
+body.dark-mode #searchInputImages1:focus,
+body.dark-mode #searchInputImages2:focus {
+  border-color: #1abc9c !important;
+  box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3), 0 6px 15px rgba(26, 188, 156, 0.4) !important;
+}
+
+/* จัด layout ให้ปุ่ม Clear อยู่แนวเดียวกันกับช่องค้นหา (สวยเป๊ะ) */
+#searchContainer,
+#searchContainerImages {
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* มือถือ – ยังสวยไม่หัก */
+@media (max-width: 480px) {
+  #searchInput1,
+  #searchInput2,
+  #searchInputImages1,
+  #searchInputImages2 {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+}
