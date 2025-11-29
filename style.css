@@ -516,43 +516,43 @@ body.dark-mode .swiper-btn:hover {background: rgba(255,255,255,0.3);}
 }
 /* ทำให้กระดิ่งเป็นสีขาว และมีเอฟเฟกต์ตอน hover */
 .header-notification-btn i {
-  transition: all 0.3s ease;
   color: white !important;
-  font-size: 24px;           /* เพิ่มขนาดให้ชัดขึ้นนิดนึง */
+  font-size: 24px;
+  transition: transform 0.3s ease;
 }
 
-/* Hover แล้วเปลี่ยนเป็นแดง + ขยาย */
+/* เวลาแตะ/เมาส์แตะ → ขยายนิดนึง (แต่ยังเป็นสีขาว) */
 .header-notification-btn:hover i {
-  color: #e74c3c !important;
-  transform: scale(1.25);
+  transform: scale(1.2);
 }
 
-/* ป้ายแจ้งเตือน (จุดแดง + ข้อความ !) */
+/* จุดแดงเตือน (มีเฉพาะตอนมีประกาศใหม่) */
 .notification-badge {
   position: absolute;
-  top: 2px;                  /* ปรับให้จุดแดงอยู่มุมบนขวาสวย ๆ */
+  top: 2px;
   right: 2px;
+  width: 14px;
+  height: 14px;
   background: #e74c3c;
   color: white;
   font-size: 10px;
   font-weight: bold;
-  width: 16px;
-  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.8);
-  animation: pulse 2s infinite;
-  pointer-events: none;      /* ไม่ให้บังการคลิกกระดิ่ง */
-  z-index: 1;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.9);
+  animation: pulse-red 1.8s infinite;
+  pointer-events: none;
+  z-index: 10;
+  border: 2px solid white;   /* ขอบขาวนิดนึง ให้เด่นจากพื้นหลัง */
 }
 
-/* เอฟเฟกต์เต้นตุบ ๆ ของจุดแดง (สวยมาก) */
-@keyframes pulse {
-  0%   { transform: scale(1);    box-shadow: 0 0 8px rgba(231,76,60,0.8); }
-  50%  { transform: scale(1.15); box-shadow: 0 0 16px rgba(231,76,60,1); }
-  100% { transform: scale(1);    box-shadow: 0 0 8px rgba(231,76,60,0.8); }
+/* เอฟเฟกต์เต้นตุบ ๆ แรง ๆ ชัด ๆ */
+@keyframes pulse-red {
+  0%   { transform: scale(0.9);  box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.8); }
+  70%  { transform: scale(1.25); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+  100% { transform: scale(0.9);  box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
 }
 
 /* Deck Style */
