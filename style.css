@@ -3387,46 +3387,53 @@ body.dark-mode #toggleAllDataBtn.active {
   background: linear-gradient(135deg, #1abc9c, #16a085) !important;
   box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4) !important;
 }
+/* ทำปุ่ม Clear ให้เป็นวงกลม */
 #searchButton,
 #searchButtonImages {
-  min-width: 80px !important;
-  width: 80px !important;         /* ล็อกความกว้างตายตัว */
-  height: 40px !important;                  /* ปรับจาก 46px → 40px */
-  padding: 0 !important;                /* ลด padding เล็กน้อยให้สมดุล */
-  border-radius: 24px !important;            /* ลด border-radius ตามสัดส่วน (จาก 30px) */
-  font-size: 0 !important;                /* ลด font นิดหน่อย */
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   color: white !important;
   border: none !important;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.45) !important;
   display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
-  transition: all 0.3s ease !important;
+  transition: all 0.18s ease !important;
   margin-left: 8px;
+  line-height: 40px !important;   /* ทำให้ขนาดภายในนิ่ง */
+  z-index: 1;                     /* ป้องกันโดนกดทับ */
 }
 
-/* ไอคอนเล็กลงนิดให้พอดีกับปุ่ม 40px */
+/* ซ่อนข้อความ Clear */
+#searchButton span,
+#searchButtonImages span {
+  display: none !important;
+}
+
 #searchButton i,
 #searchButtonImages i {
-  font-size: 19px !important; 
-  margin: 0 !important;/* จาก 19px → 18px */
+  font-size: 18px !important;
+  margin: 0 !important;
 }
 
-/* Hover */
+/* Hover — เพิ่ม z-index ให้ปุ่มลอยขึ้นจริง ไม่ถูกบัง */
 #searchButton:hover,
 #searchButtonImages:hover {
   background: linear-gradient(135deg, #c0392b, #a93226) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6) !important;
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.8) !important;
+  animation: glowPulse 0.4s ease-out;
 }
+
 
 /* Active */
 #searchButton:active,
 #searchButtonImages:active {
-  transform: translateY(0);
+  transform: scale(1.0);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5) !important;
 }
 
@@ -3434,11 +3441,22 @@ body.dark-mode #toggleAllDataBtn.active {
 body.dark-mode #searchButton,
 body.dark-mode #searchButtonImages {
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5) !important;
 }
 
 body.dark-mode #searchButton:hover,
 body.dark-mode #searchButtonImages:hover {
   background: linear-gradient(135deg, #c0392b, #a93226) !important;
-  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.7) !important;
+  box-shadow: 0 0 22px rgba(231, 76, 60, 0.9) !important;
+  animation: glowPulse 0.4s ease-out;
+}
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(231, 76, 60, 0.9);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  }
 }
