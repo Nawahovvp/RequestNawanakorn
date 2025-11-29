@@ -808,10 +808,11 @@ iframe {
   flex: 1;
   min-width: 100px;
   max-width: 200px;
-  padding: 8px;
-  border-radius: 6px;
+  height: 20px !important;
+  padding: 8px !important;
+  border-radius: 7px;
   border: 1px solid #e0e0e0;
-  font-size: 14px;
+  font-size: 16px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   background-color: white;
 }
