@@ -800,23 +800,39 @@ updateAppVersionDisplay();
           throw error;
         }
       }
-      async function handleLogin() {
+            async function handleLogin() {
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
+
         loginError.style.display = 'none';
+
         if (!username || !password) {
-          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+          loginError.textContent = 'กรุณากรอกรหัสพนักงานและรหัสผ่าน';
           loginError.style.display = 'block';
           return;
         }
+
         try {
-          employeeData = await loadEmployeeData();
+          // โหลดข้อมูลพนักงาน (ถ้ายังไม่มี)
+          if (employeeData.length === 0) {
+            employeeData = await loadEmployeeData();
+          }
+
+          // รหัสผ่านคือ 4 ตัวท้ายของรหัสพนักงาน
           const expectedPassword = username.slice(-4);
-          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
+          const employee = employeeData.find(e =>
+            e.IDRec &&
+            e.IDRec.toString().trim() === username &&
+            expectedPassword === password
+          );
+
           if (employee && employee.Name) {
+            // บันทึกข้อมูลล็อกอิน
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('username', username);
             localStorage.setItem('userName', employee.Name);
+
+            // ถ้ากด "Remember me" → จำ username ถาวร
             if (rememberMeCheckbox.checked) {
               localStorage.setItem('savedUsername', username);
               localStorage.setItem('rememberMe', 'true');
@@ -824,23 +840,22 @@ updateAppVersionDisplay();
               localStorage.removeItem('savedUsername');
               localStorage.removeItem('rememberMe');
             }
-            checkLoginStatus();
-            setTimeout(() => {
-              const searchInput = document.getElementById('searchInput1');
-              if (searchInput) searchInput.focus();
-            }, 500);
+
+            // รีเฟรชหน้า 1 ครั้งเพื่อให้ checkLoginStatus() ทำงานเต็มที่
+            location.reload();
+
           } else {
             loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
             loginError.style.display = 'block';
-            passwordInput.value = ''; // Clear password on error
+            passwordInput.value = ''; // ล้างรหัสผ่าน
+            passwordInput.focus();
           }
         } catch (error) {
-          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
-          loginError.style.display = 'block';
           console.error('Login error:', error);
+          loginError.textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ';
+          loginError.style.display = 'block';
         }
       }
-            // ==================== โหลดข้อมูลหลัก (ใช้ cache) ====================
             // ==================== โหลดข้อมูลหลัก (ใช้ cache) + อัพเดททั้งสองแท็บ ====================
       async function loadData() {
         document.getElementById("loading").style.display = "flex";
@@ -880,40 +895,58 @@ updateAppVersionDisplay();
         }
       }
       // =====================================================================
-          function checkLoginStatus() {
-       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-       const savedUsername = localStorage.getItem('username');
+              function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const savedUsername = localStorage.getItem('savedUsername');
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
 
-       if (isLoggedIn && savedUsername) {
-         loginModal.classList.remove('active');
-         appContent.classList.add('logged-in');
+        // ถ้ามีการจำ user ไว้ หรือเพิ่ง login สำเร็จ
+        if ((isLoggedIn || rememberMe) && savedUsername) {
+          loginModal.classList.remove('active');
+          appContent.classList.add('logged-in');
 
-         // โหลดรูปภาพแค่ครั้งเดียว
-         loadImageDatabase().then(() => {
-           console.log("ฐานข้อมูลรูปภาพพร้อมใช้งานแล้ว (โหลดแค่ครั้งเดียว)");
-           loadData();        // โหลดข้อมูลหลัก (มี cache)
-           showTab('parts');  // เปิดแท็บเริ่มต้น
-         }).catch(err => {
-           console.error("โหลดรูปภาพล้มเหลว แต่ยังเข้าแอปได้:", err);
-           loadData();
-           showTab('parts');
-         });
+          // ใส่ username กลับในช่องกรอก (กรณีเปิดใหม่)
+          usernameInput.value = savedUsername;
 
-       } else {
-         loginModal.classList.add('active');
-         appContent.classList.remove('logged-in');
-         localStorage.removeItem('isLoggedIn');
-         localStorage.removeItem('username');
-         localStorage.removeItem('userName');
-       }
+          // โหลดข้อมูลพนักงานเพื่อแสดงชื่อจริง
+          loadEmployeeData().then(data => {
+            employeeData = data;
+            const user = data.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+            if (user) {
+              localStorage.setItem('userName', user.Name);
+              document.getElementById('userNameSmall').textContent = user.Name;
+            }
 
-       // Remember me
-       if (localStorage.getItem('rememberMe') === 'true') {
-         const saved = localStorage.getItem('savedUsername');
-         if (saved) usernameInput.value = saved;
-         rememberMeCheckbox.checked = true;
-       }
-     }
+            // โหลดแอปต่อ
+            loadImageDatabase()
+              .then(() => loadData())
+              .catch(() => loadData());
+
+            showTab('parts');
+          }).catch(() => {
+            // ถ้าโหลดพนักงานไม่ได้ แต่จำ username ได้ → ยังให้เข้าได้
+            document.getElementById('userNameSmall').textContent = savedUsername;
+            loadImageDatabase().then(() => loadData()).catch(() => loadData());
+            showTab('parts');
+          });
+
+        } else {
+          // ไม่จำอะไรเลย → แสดงหน้า login
+          loginModal.classList.add('active');
+          appContent.classList.remove('logged-in');
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('username');
+          localStorage.removeItem('userName');
+        }
+
+        // ติ๊ก Remember me อัตโนมัติถ้าเคยติ๊กไว้
+        if (rememberMe && savedUsername) {
+          rememberMeCheckbox.checked = true;
+        }
+      }
+
+      // เรียกใช้ทันทีที่หน้าโหลด
+      document.addEventListener('DOMContentLoaded', checkLoginStatus);
       // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
   document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
@@ -3595,6 +3628,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
+document.addEventListener('DOMContentLoaded', checkLoginStatus);
     </script>
   </body>
 </html>
