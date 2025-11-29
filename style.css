@@ -3393,7 +3393,7 @@ body.dark-mode #toggleAllDataBtn.active {
 #searchButton,
 #searchButtonImages {
   min-width: 110px !important;
-  height: 46px !important;
+  height: 42px !important;
   padding: 0 24px !important;
   border-radius: 30px !important;
   font-size: 16px !important;
