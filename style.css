@@ -3355,3 +3355,54 @@ body.dark-mode .header-setting-btn:active,
 body.dark-mode .header-notification-btn:active {
   background: rgba(255, 255, 255, 0.2) !important;
 }
+
+/* ปุ่ม "รอเบิก" และ "ทั้งหมด" ในแท็บ Today ให้ใหญ่ขึ้น ชัดขึ้น */
+#toggleAllDataBtn {
+  min-width: 110px !important;     /* กว้างขึ้น */
+  height: 46px !important;         /* สูงขึ้น */
+  padding: 0 20px !important;      /* ระยะห่างข้างในเยอะขึ้น */
+  border-radius: 30px !important;  /* มุมโค้งสวยแบบปุ่ม Canva */
+  font-size: 16px !important;      /* ตัวหนังสือใหญ่ขึ้น */
+  font-weight: 600 !important;     /* ตัวหนาขึ้นนิดนึง */
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* ไอคอนข้างในก็ใหญ่ตาม */
+#toggleAllDataBtn i {
+  font-size: 19px !important;
+}
+
+/* สถานะปกติ (รอเบิก) – สีเทาเข้มสวย */
+#toggleAllDataBtn:not(.active) {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+  color: white !important;
+}
+
+/* สถานะ active (ทั้งหมด) – สีน้ำเงินเด่น */
+#toggleAllDataBtn.active,
+#toggleAllDataBtn[aria-selected="true"] {
+  background: linear-gradient(135deg, #3498db, #2980b9) !important;
+  color: white !important;
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+}
+
+/* Hover ทั้งสองสถานะ */
+#toggleAllDataBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
+}
+
+/* Dark Mode – ยังสวยเหมือนเดิม */
+body.dark-mode #toggleAllDataBtn:not(.active) {
+  background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+}
+
+body.dark-mode #toggleAllDataBtn.active {
+  background: linear-gradient(135deg, #1abc9c, #16a085) !important;
+  box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4) !important;
+}
