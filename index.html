@@ -385,7 +385,7 @@
       <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <i class="fas fa-building" style="color: #1976d2;"></i>
-          <strong>หน่วยงาน:</strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
+          <strong></strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
         </div>
       </div>
     </div>
@@ -1340,7 +1340,7 @@ document.addEventListener('keydown', (e) => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       showCancelButton: true,
-      confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
+      confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
       cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
       reverseButtons: true,
       buttonsStyling: false,
@@ -1348,7 +1348,7 @@ document.addEventListener('keydown', (e) => {
         <div style="text-align:center; margin:20px 0;">
           <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
           <div style="font-size:18px; font-weight:600; color:#e67e22;">
-            Material: ${row.Material || ''}
+            ${row.Material || ''}
           </div>
           <div style="font-size:18px; font-weight:600; color:#e67e22; margin-top:10px;">
             ${row.Description || ''}
@@ -1405,7 +1405,7 @@ document.addEventListener('keydown', (e) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           showCancelButton: true,
-          confirmButtonText: '<i class="fas fa-check"></i> ยืนยันเบิกต่อ',
+          confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
           cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
           reverseButtons: true,
           buttonsStyling: false,
@@ -3551,7 +3551,7 @@ setTimeout(() => {
   // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   Swal.fire({
-    title: '<i class="fas fa-bullhorn"></i> ตั้งค่าข้อความแจ้งเตือน',
+    title: '<i class="fas fa-bullhorn"></i> บันทึกข้อความแจ้งเตือน',
     html: `
       <!-- ช่องกรอกหัวเรื่อง -->
       <div style="text-align:left; margin-bottom:8px;">
@@ -3588,7 +3588,7 @@ function openAnnouncementEditor() {
     width: '700px',
     padding: '20px',
     showCancelButton: true,
-    confirmButtonText: '<i class="fas fa-paper-plane"></i> บันทึกประกาศ',
+    confirmButtonText: '<i class="fas fa-paper-plane"></i> บันทึก',
     cancelButtonText: 'ยกเลิก',
     allowOutsideClick: false,
     allowEscapeKey: false,
