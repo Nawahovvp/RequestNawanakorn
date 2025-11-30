@@ -1,5 +1,5 @@
 // sw.js — PartsGo v15.8.8 (29 พ.ย. 2568) — แก้ comma + เพิ่มความเสถียร
-const VERSION = 'v16.1.0';
+const VERSION = 'v16.1.2';
 const CACHE = `partgo-${VERSION}`;
 
 const SHELL = [
