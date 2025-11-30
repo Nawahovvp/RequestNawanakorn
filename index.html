@@ -2693,15 +2693,36 @@ function filterDataToday(data) {
   return filtered;
 }
 // อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
+// อัปเดตตาราง (เรียกใช้ทุกครั้งที่มีการเปลี่ยนแปลง)
 function updateTableToday() {
   const filteredData = filterDataToday(allDataToday);
   currentFilteredDataToday = filteredData;
+
+  const todayEmptyMessage = document.getElementById("todayEmptyMessage");
+  const keyword = searchInputToday.value.trim();
+
+  // ถ้าอยู่โหมด "รอเบิก" และไม่มีคำค้นหา และไม่พบข้อมูลเลย → แสดงข้อความ "ทำเบิกหมดแล้ว"
+  if (filteredData.length === 0 && showOnlyPending && !keyword) {
+    tableBodyToday.innerHTML = "";
+    renderPaginationToday(0);          // ปิดปุ่ม pagination
+    if (todayEmptyMessage) {
+      todayEmptyMessage.style.display = "block";
+    }
+    return; // ไม่ต้อง render ตารางต่อ
+  } else {
+    // ถ้ามีข้อมูล หรือไม่ใช่โหมดรอเบิก → ซ่อนข้อความ
+    if (todayEmptyMessage) {
+      todayEmptyMessage.style.display = "none";
+    }
+  }
+
   const startIndex = (currentPageToday - 1) * itemsPerPageToday;
   const endIndex = startIndex + itemsPerPageToday;
   const paginatedData = filteredData.slice(startIndex, endIndex);
   renderTableToday(paginatedData);
   renderPaginationToday(filteredData.length);
 }
+
       function renderTableToday(data) {
         tableBodyToday.innerHTML = "";
         data.forEach((row) => {
