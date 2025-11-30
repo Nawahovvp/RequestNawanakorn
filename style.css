@@ -392,17 +392,36 @@ body.light-mode .header {
   justify-content: space-between;
   align-items: center;
   color: #ffffff;
-  padding: 5px 10px;
-  border-bottom: 1px solid #145dbf;
-  background: #1877f2;
+  padding: 8px 12px;
+  border-bottom: 1px solid #0d5fc7;
+  background: linear-gradient(135deg, #1877f2 0%, #1468d8 70%, #115ab8 100%);
   font-family: "Kanit", sans-serif;
   position: relative;
   margin: 0;
   max-width: none;
-  transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
   height: auto;
-  min-height: 50px;
-  font-weight: bold;
+  min-height: 56px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(24, 118, 242, 0.35);
+  overflow: hidden;
+  z-index: 10;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: skewX(-25deg);
+  animation: headerShine 4s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes headerShine {
+  0%   { left: -150%; }
+  100% { left: 150%; }
 }
 
 body.dark-mode .header {
@@ -1513,7 +1532,6 @@ body.dark-mode .swal2-spinner {
   margin-left: auto;               /* จัดรูปให้อยู่ตรงกลางแนวนอน */
   margin-right: auto;              /* จัดรูปให้อยู่ตรงกลางแนวนอน */
 }
-
 
 .dark-blue-title {
   color: #00008b !important;
@@ -3465,40 +3483,79 @@ body.dark-mode #searchButtonImages:hover {
 .header-setting-btn {
   margin: 0 !important;
 }
-/* โลโก้มุมซ้ายบน */
-.app-logo {
-  width: 32px;
-  height: 32px;
-  margin-right: 8px;
-  border-radius: 6px;
-  object-fit: cover;
-
-  /* ให้เล่นแอนิเมชันตอนโหลด */
-  animation: logoPopIn 0.6s ease-out, logoFloat 3s ease-in-out 0.6s infinite;
+.header-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  margin-right: 14px;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  animation: logoPop 1.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
 
-/* Dark Mode */
-body.dark-mode .app-logo {
-  filter: brightness(0.9) contrast(1.1);
+@keyframes logoPop {
+  0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+  70%  { transform: scale(1.12) rotate(8deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 
-/* Keyframes สำหรับแอนิเมชันโลโก้เด้งเข้ามา */
-@keyframes logoPopIn {
+/* ข้อความค่อย ๆ ขึ้น + มี glow เล็กน้อย */
+.header-title {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.header-title span {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  animation: textGlowSlide 1.1s ease-out 0.4s both;
+  display: inline-block;
+}
+
+@keyframes textGlowSlide {
   0% {
-    transform: scale(0) rotate(-15deg);
     opacity: 0;
+    transform: translateY(30px);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0);
   }
   60% {
-    transform: scale(1.1) rotate(0deg);
-    opacity: 1;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
   }
   100% {
-    transform: scale(1) rotate(0deg);
     opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   }
 }
-@keyframes logoFloat {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-3px); }
-  100% { transform: translateY(0); }
+
+/* ปุ่มแจ้งเตือนมี pulse เมื่อมีข้อความใหม่ */
+.header-notification-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulseBadge 2s infinite;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+}
+
+@keyframes pulseBadge {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+  70%  { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
 }
