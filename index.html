@@ -809,7 +809,7 @@ async function loadEmployeeData() {
   const employeeSheetName = "Employee";
   const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}?_=${Date.now()}`;
   try {
-    const response = await fetch(employeeUrl);
+    const response = await fetch(employeeUrl, { cache: 'no-cache' }); // เพิ่ม no-cache
     if (!response.ok) throw new Error("Load employee failed");
     employeeData = await response.json();
     employeeDataLoaded = true;
@@ -1333,6 +1333,19 @@ document.addEventListener('keydown', (e) => {
   let proceed = true;
 
   // ตรวจสอบเงื่อนไขใหม่: ถ้านวนคร = 0 และหมายเหตุไม่ว่าง
+  if (!employeeDataLoaded) {
+    try {
+      await loadEmployeeData();
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'โหลดข้อมูลพนักงานไม่สำเร็จ',
+        text: 'กรุณาลองใหม่หรือตรวจสอบการเชื่อมต่อ',
+        confirmButtonText: 'ตกลง'
+      });
+      return; // หยุดถ้าโหลดไม่ได้
+    }
+  }
   if (unrestrictedValue === 0 && remark.trim() !== '') {
     const replacementWarning = await Swal.fire({
       title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
