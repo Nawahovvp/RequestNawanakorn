@@ -1497,10 +1497,40 @@ document.addEventListener('keydown', (e) => {
     callType: getFromLocalStorage('callType'),
   };
 
-  Swal.fire({
-    title: '📋 เบิกอะไหล่นวนคร',
-    html: `
+Swal.fire({
+  title: '📋 เบิกอะไหล่นวนคร',
+  html: `
       <style>
+        /* ====== ปรับหน้าตา Popup ทั้งหมด ====== */
+        .custom-swal-popup {
+          border-radius: 18px !important;
+          padding: 18px 20px !important;
+        }
+
+        .swal2-title {
+          font-size: 20px !important;
+          margin-bottom: 8px !important;
+        }
+
+        /* แสดง Material + Description ตรงกลาง */
+        .material-header {
+          text-align: center;
+          padding: 10px 12px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #e0f2ff, #f3e5ff);
+          margin-bottom: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .material-code {
+          font-size: 18px;
+          font-weight: 700;
+        }
+        .material-desc {
+          margin-top: 4px;
+          font-size: 14px;
+        }
+
+        /* Autocomplete เดิม */
         .autocomplete-items {
           position: absolute;
           border: 1px solid #ccc;
@@ -1522,21 +1552,37 @@ document.addEventListener('keydown', (e) => {
         .autocomplete-item:hover {
           background-color: #f1f1f1;
         }
+
+        /* Label */
         .swal2-label {
           text-align: left !important;
           display: block !important;
-          margin: 8px 0 4px !important;
-          font-weight: bold !important;
+          margin: 6px 0 4px !important;
+          font-weight: 600 !important;
           width: 100% !important;
+          font-size: 13px !important;
         }
+
+        /* ช่องกรอกข้อมูล */
         .swal2-input, .swal2-select {
           width: 100% !important;
           margin: 4px 0 !important;
-          padding: 6px !important;
+          padding: 8px 10px !important;
           box-sizing: border-box !important;
           font-size: 14px !important;
-          height: 36px !important;
+          height: 38px !important;
+          border-radius: 8px !important;
+          border: 1px solid #ddd !important;
+          background-color: #fafafa !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
+        .swal2-input:focus, .swal2-select:focus {
+          border-color: #667eea !important;
+          box-shadow: 0 0 0 2px rgba(102,126,234,0.2) !important;
+          background-color: #ffffff !important;
+          outline: none !important;
+        }
+
         .error-message {
           color: red !important;
           font-size: 12px !important;
@@ -1548,6 +1594,7 @@ document.addEventListener('keydown', (e) => {
           border: 2px solid red !important;
           box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
         }
+
         #swal-employee-name-display, #swal-team-display {
           color: #4caf50 !important;
           font-weight: bold !important;
@@ -1557,6 +1604,7 @@ document.addEventListener('keydown', (e) => {
           border-radius: 4px !important;
           text-align: left !important;
         }
+
         /* Canva-like Call Type buttons */
         .call-type-container {
           display: flex;
@@ -1603,28 +1651,79 @@ document.addEventListener('keydown', (e) => {
           background: linear-gradient(135deg, #444, #555);
           transform: translateY(-1px);
         }
+
+        /* ปุ่มยืนยัน/ยกเลิก */
+        .swal2-actions {
+          margin-top: 16px !important;
+          gap: 8px !important;
+        }
+        .swal2-confirm-btn, .swal2-cancel-btn {
+          min-width: 110px;
+          padding: 8px 18px;
+          border-radius: 999px;
+          border: none;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .swal2-confirm-btn {
+          background: linear-gradient(135deg, #4caf50, #2e7d32);
+          color: #fff;
+          box-shadow: 0 3px 8px rgba(76, 175, 80, 0.4);
+        }
+        .swal2-confirm-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 5px 12px rgba(76, 175, 80, 0.6);
+        }
+        .swal2-cancel-btn {
+          background: #f5f5f5;
+          color: #666;
+          border: 1px solid #ddd;
+        }
+        .swal2-cancel-btn:hover {
+          background: #eeeeee;
+          transform: translateY(-1px);
+        }
       </style>
-      <div class="swal2-label">📦 Material: ${row.Material || ''}</div>
-      <div class="swal2-label">📝 Description: ${row.Description || ''}</div>
+
+      <!-- แสดง 30000279 Cofrimel Pump Boy Spray Rotors ตรงกลาง -->
+      <div class="material-header">
+        <div class="material-code">${row.Material || ''}</div>
+        <div class="material-desc">${row.Description || ''}</div>
+      </div>
+
       <label class="swal2-label">🔢 จำนวน</label>
       <input id="swal-quantity" class="swal2-input" type="number" value="1" min="1">
       <span id="swal-quantity-error" class="error-message"></span>
+
       <label class="swal2-label">🆔 รหัสพนักงาน</label>
-      <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
-      <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
+        <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-employee-code-error" class="error-message"></span>
+
       <label class="swal2-label">👤 ชื่อพนักงาน</label>
       <div id="swal-employee-name-display"></div>
+
       <label class="swal2-label">👥 ทีม</label>
       <div id="swal-team-display"></div>
+
       <label class="swal2-label">📞 เบอร์ติดต่อ</label>
-      <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
-      <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-contact" class="swal2-input" placeholder="เช่น 08xxxxxxxx">
+        <div id="contact-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-contact-error" class="error-message"></span>
+
       <label class="swal2-label">📄 เลขที่ Call</label>
-      <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
-      <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
+      <div style="position:relative;">
+        <input id="swal-call-number" class="swal2-input" placeholder="2... หรือ ...">
+        <div id="call-number-history" class="autocomplete-items" style="display:none;"></div>
+      </div>
       <span id="swal-call-number-error" class="error-message"></span>
+
       <label class="swal2-label">🗳️ Call Type</label>
       <div id="call-type-container" class="call-type-container">
         <button class="call-type-btn" data-value="I">I</button>
@@ -1633,10 +1732,26 @@ document.addEventListener('keydown', (e) => {
         <button class="call-type-btn" data-value="R">R</button>
       </div>
       <span id="swal-call-type-error" class="error-message"></span>
+
       <label class="swal2-label">🗒️ หมายเหตุ</label>
       <input id="swal-remark" class="swal2-input" placeholder="ไม่บังคับ">
       <span id="swal-remark-error" class="error-message"></span>
     `,
+  showCancelButton: true,
+  confirmButtonText: '✅ ยืนยันเบิก',
+  cancelButtonText: '❌ ยกเลิก',
+  buttonsStyling: false,
+  customClass: {
+    popup: 'custom-swal-popup',
+    confirmButton: 'swal2-confirm-btn',
+    cancelButton: 'swal2-cancel-btn'
+  },
+  // ใส่ preConfirm / didOpen เดิมของคุณต่อจากนี้
+  // preConfirm: () => { ... },
+  // didOpen: (popup) => { ... }
+
+
+
     focusConfirm: false,
     showCancelButton: true,
     showCloseButton: true,
@@ -1759,7 +1874,9 @@ document.addEventListener('keydown', (e) => {
           document.getElementById('swal-team-display').textContent = '';
           isValid = false;
         } else {
-          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+          const employee = employeeData.find(e =>
+          String(e?.IDRec).trim() === employeeCode
+        );
           if (!employee || !employee.Name) {
             errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
             employeeCodeInput.classList.add('invalid-input');
