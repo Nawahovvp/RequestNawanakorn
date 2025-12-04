@@ -2841,30 +2841,61 @@ function updateTableToday() {
         });
       }
       function renderPaginationToday(totalItems) {
-        const totalPages = Math.ceil(totalItems / itemsPerPageToday);
-        pageNumbersToday.innerHTML = "";
-        if (totalPages === 0) {
-          firstPageButtonToday.disabled = true;
-          prevPageButtonToday.disabled = true;
-          nextPageButtonToday.disabled = true;
-          lastPageButtonToday.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const button = document.createElement("button");
-        button.textContent = currentPageToday;
-        button.className = "active";
-        button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbersToday.appendChild(button);
-        firstPageButtonToday.disabled = currentPageToday === 1;
-        prevPageButtonToday.disabled = currentPageToday === 1;
-        nextPageButtonToday.disabled = currentPageToday === totalPages;
-        lastPageButtonToday.disabled = currentPageToday === totalPages;
-      }
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPageToday));
+
+  pageNumbersToday.innerHTML = "";
+
+  if (totalItems === 0) {
+    firstPageButtonToday.disabled = true;
+    prevPageButtonToday.disabled = true;
+    nextPageButtonToday.disabled = true;
+    lastPageButtonToday.disabled = true;
+    return;
+  }
+
+  const currentPageBtn = document.createElement("button");
+  currentPageBtn.textContent = currentPageToday;
+  currentPageBtn.className = "active";
+  currentPageBtn.disabled = true;
+  pageNumbersToday.appendChild(currentPageBtn);
+
+  const isFirst = currentPageToday === 1;
+  const isLast = currentPageToday >= totalPages;
+
+  firstPageButtonToday.disabled = isFirst;
+  prevPageButtonToday.disabled = isFirst;
+  nextPageButtonToday.disabled = isLast;
+  lastPageButtonToday.disabled = isLast;
+}
       searchInputToday.addEventListener("input", debounce(() => {
   currentPageToday = 1;
   updateTableToday();
 }));
+      firstPageButtonToday.onclick = () => {
+  currentPageToday = 1;
+  updateTableToday();
+};
+
+prevPageButtonToday.onclick = () => {
+  if (currentPageToday > 1) {
+    currentPageToday--;
+    updateTableToday();
+  }
+};
+
+nextPageButtonToday.onclick = () => {
+  const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday);
+  if (currentPageToday < totalPages) {
+    currentPageToday++;
+    updateTableToday();
+  }
+};
+
+lastPageButtonToday.onclick = () => {
+  const totalPages = Math.ceil(currentFilteredDataToday.length / itemsPerPageToday) || 1;
+  currentPageToday = totalPages;
+  updateTableToday();
+};
       async function loadTodayData() {
         document.getElementById("loading").style.display = "flex";
         document.getElementById("loadingToday").style.display = "block";
