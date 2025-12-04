@@ -117,11 +117,10 @@
           <!-- Image Modal for #parts -->
           <div id="imageModal" class="image-modal">
             <div class="image-modal-content">
-              <span class="image-close" id="closeImageModal">×</span>
-             
-              <div id="imageModalContent"></div>
-            </div>
-          </div>
+            <span class="image-close" id="closeImageModal">&times;</span>
+            <div id="imageModalContent"></div>
+               </div>
+              </div>
           <div id="pagination" class="pagination">
             <button id="firstPage">
               <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
@@ -692,6 +691,7 @@ toggleAllDataBtn.addEventListener("click", () => {
       let currentPagePending = 1;
       let itemsPerPagePending = 20;
       let sortConfigPending = { column: null, direction: 'asc' };
+      let employeeDataPromise = null; 
       // Image Modal Handling for #parts (moved up)
       const imageModal = document.getElementById('imageModal');
       const imageModalContent = document.getElementById('imageModalContent');
@@ -737,10 +737,7 @@ document.getElementById('modalUserTeam').textContent = 'กำลังโหล
 document.getElementById('themeSelect').value = currentTheme;
 // ดึงหน่วยงาน
 try {
-if (employeeData.length === 0) {
-employeeData = await loadEmployeeData();
-}
-const user = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === savedUsername);
+const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
 document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
 document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
 } catch (err) {
@@ -804,21 +801,28 @@ updateAppVersionDisplay();
       // แทนที่ฟังก์ชัน loadEmployeeData() เดิมทั้งหมดด้วยอันนี้
 async function loadEmployeeData() {
   if (employeeDataLoaded && employeeData.length > 0) {
-    return employeeData; // ใช้ข้อมูลเก่า ไม่ต้องโหลดใหม่
+    return employeeData;
+  }
+  // ถ้ามี promise ค้างอยู่ → ใช้ promise เดิม (ป้องกัน fetch ซ้ำ)
+  if (employeeDataPromise) {
+    return employeeDataPromise;
   }
   const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
   const employeeSheetName = "Employee";
   const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}?_=${Date.now()}`;
-  try {
-    const response = await fetch(employeeUrl, { cache: 'no-cache' }); // เพิ่ม no-cache
-    if (!response.ok) throw new Error("Load employee failed");
-    employeeData = await response.json();
-    employeeDataLoaded = true;
-    return employeeData;
-  } catch (error) {
-    console.error("Error loading employee data:", error);
-    throw error;
-  }
+  employeeDataPromise = fetch(employeeUrl)
+    .then(res => res.json())
+    .then(data => {
+      employeeData = data;
+      employeeDataLoaded = true;
+      employeeDataPromise = null; // รีเซ็ตหลังโหลดเสร็จ
+      return data;
+    })
+    .catch(err => {
+      employeeDataPromise = null;
+      throw err;
+    });
+  return employeeDataPromise;
 }
       async function handleLogin() {
         const username = usernameInput.value.trim();
@@ -1239,92 +1243,147 @@ document.addEventListener('keydown', (e) => {
         errorContainer.style.display = "none";
         loadData();
       });
-     function renderTable(data) {
-        if (!tableBody) {
-          console.error("Table body for #data-table not found");
-          Swal.fire({
-            icon: "error",
-            title: "ข้อผิดพลาด",
-            text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
-            confirmButtonText: "ตกลง",
-          });
-          return;
-        }
-        tableBody.innerHTML = "";
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const requisitionTd = document.createElement("td");
-          const btn = document.createElement("button");
-          btn.textContent = "เบิก";
-          btn.className = "requisition-button";
-          btn.onclick = () => showRequisitionDialog(row);
-          requisitionTd.appendChild(btn);
-          tr.appendChild(requisitionTd);
-          const columns = [
-            "UrlWeb",
-            "Material",
-            "Description",
-            "วิภาวดี",
-            "Unrestricted",
-            "Rebuilt",
-            "หมายเหตุ",
-            "Product",
-            "OCRTAXT"
-          ];
-          // Convert values to numbers for comparison
-          const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-          const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
-          // Determine styling based on conditions
-          let textColor = "";
-          let fontWeight = "";
-          if (vibhavadiValue > 0) {
-            textColor = "#4caf50"; // Green
-            fontWeight = "bold";
-          } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
-            textColor = "#2196f3"; // Blue
-            fontWeight = "bold";
-          }
-          columns.forEach((col) => {
-            const td = document.createElement("td");
-            let value = row[col] || "";
-            if (col === "วิภาวดี" || col === "Unrestricted") {
-              if (value && !isNaN(value)) {
-                value = Number(value).toLocaleString("en-US", {
-                  maximumFractionDigits: 0,
-                });
-              } else if (value === "0" || value === 0) {
-                value = "";
-              }
-            }
-            if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
-            // Apply conditional styling to Material, Description, วิภาวดี, and Unrestricted
-            if (
-              col === "Material" ||
-              col === "Description" ||
-              col === "วิภาวดี" ||
-              col === "Unrestricted"
-            ) {
-              if (textColor) td.style.color = textColor;
-              if (fontWeight) td.style.fontWeight = fontWeight;
-            }
-            if (col === "UrlWeb" && value) {
-              // Changed to button that opens modal instead of external link
-              const imageBtn = document.createElement("button");
-              imageBtn.innerHTML = '<i class="fas fa-image"></i>';
-              imageBtn.className = "image-button";
-              imageBtn.onclick = () => showDetailModal(row, 'imageModal', 'imageModalContent'); // Use unified function
-              td.appendChild(imageBtn);
-            } else {
-              td.textContent = value;
-            }
-            tr.appendChild(td);
-          });
-          tableBody.appendChild(tr);
-        });
+   function renderTable(data) {
+  const tableBody = document.querySelector("#data-table tbody");
+  if (!tableBody) {
+    console.error("Table body for #data-table not found");
+    Swal.fire({
+      icon: "error",
+      title: "ข้อผิดพลาด",
+      text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
+      confirmButtonText: "ตกลง",
+    });
+    return;
+  }
+
+  tableBody.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 10;
+    td.textContent = "ไม่พบข้อมูลอะไหล่";
+    td.style.textAlign = "center";
+    td.style.padding = "50px";
+    td.style.color = "#999";
+    td.style.fontSize = "18px";
+    tr.appendChild(td);
+    tableBody.appendChild(tr);
+    return;
+  }
+
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+
+    // ปุ่ม "เบิก"
+    const btnTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "เบิก";
+    btn.className = "requisition-button";
+    btn.onclick = () => showRequisitionDialog(row);
+    btnTd.appendChild(btn);
+    tr.appendChild(btnTd);
+
+    const columns = [
+      "UrlWeb",
+      "Material",
+      "Description",
+      "วิภาวดี",
+      "Unrestricted",
+      "Rebuilt",
+      "หมายเหตุ",
+      "Product",
+      "OCRTAXT"
+    ];
+
+    const vibha = parseFloat(row["วิภาวดี"]) || 0;
+    const unre = parseFloat(row["Unrestricted"]) || 0;
+    let textColor = "";
+    let fontWeight = "";
+
+    if (vibha > 0) {
+      textColor = "#4caf50";
+      fontWeight = "bold";
+    } else if (unre > 0) {
+      textColor = "#2196f3";
+      fontWeight = "bold";
+    }
+
+    columns.forEach((col) => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      // Format ตัวเลข
+      if (col === "วิภาวดี" || col === "Unrestricted") {
+        const num = parseFloat(value);
+        value = (!isNaN(num) && num > 0) ? num.toLocaleString() : "";
       }
+
+      // สีแดงสำหรับ Rebuilt / หมายเหตุ
+      if ((col === "Rebuilt" || col === "หมายเหตุ") && value) {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+
+      // สีสถานะคงคลัง
+      if (["Material", "Description", "วิภาวดี", "Unrestricted"].includes(col)) {
+        if (textColor) td.style.color = textColor;
+        if (fontWeight) td.style.fontWeight = fontWeight;
+      }
+
+      // คอลัมน์ UrlWeb → แสดงเป็นรูป thumbnail
+      if (col === "UrlWeb" && value) {
+        let fileId = "";
+        if (value.includes("/d/")) fileId = value.split("/d/")[1].split("/")[0];
+        else if (value.includes("id=")) fileId = value.split("id=")[1].split("&")[0];
+        else if (/^[a-zA-Z0-9-_]+$/.test(value.trim())) fileId = value.trim();
+
+        if (fileId) {
+          const container = document.createElement("div");
+          container.style.cursor = "pointer";
+          container.title = "คลิกเพื่อดูรายละเอียดและรูปภาพทั้งหมด";
+
+          const img = document.createElement("img");
+          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w120`;
+          img.alt = "รูปอะไหล่";
+          img.style.width = "64px";
+          img.style.height = "64px";
+          img.style.objectFit = "cover";
+          img.style.borderRadius = "10px";
+          img.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
+          img.style.transition = "all 0.25s ease";
+
+          img.onerror = () => {
+            img.src = 'https://via.placeholder.com/64/333/ccc?text=NO+IMG';
+          };
+
+          // Hover effect
+          container.onmouseover = () => img.style.transform = "scale(1.15)";
+          container.onmouseout = () => img.style.transform = "scale(1)";
+
+          // คลิก → เปิด showDetailModal (ใช้ modal หลัก)
+          container.onclick = (e) => {
+            e.stopPropagation();
+            showDetailModal(row, "imageModal", "imageModalContent"); // ใช้ฟังก์ชันจริง 100%
+          };
+
+          container.appendChild(img);
+          td.appendChild(container);
+        } else {
+          td.textContent = "ลิงก์ไม่ถูกต้อง";
+          td.style.color = "#999";
+          td.style.fontStyle = "italic";
+        }
+      } else {
+        td.textContent = value;
+      }
+
+      tr.appendChild(td);
+    });
+
+    tableBody.appendChild(tr);
+  });
+}
       async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
@@ -2234,6 +2293,7 @@ Swal.fire({
                 setTimeout(() => {
                   Swal.close();
                   showTab('today');
+                  loadTodayData();
                   setTimeout(() => {
                     document.body.style.overflow = 'auto';
                     const searchInputToday = document.getElementById('searchInputToday');
@@ -3693,6 +3753,55 @@ async function openAnnouncementDeck() {
       text: 'กรุณาลองใหม่ในภายหลัง',
       width: '380px'
     });
+  }
+}
+function showImageDetailModal(row) {
+  // 1. ดึง File ID จาก row.UrlWeb
+  let fileId = "";
+  const urlWeb = row.UrlWeb || "";
+  if (urlWeb.includes("/d/")) {
+    fileId = urlWeb.split("/d/")[1].split("/")[0];
+  } else if (urlWeb.includes("id=")) {
+    fileId = urlWeb.split("id=")[1].split("&")[0];
+  } else if (urlWeb.match(/^[a-zA-Z0-9-_]+$/)) {
+    fileId = urlWeb;
+  }
+
+  // 2. สร้าง HTML
+  const imageHtml = fileId ? `
+    <div style="text-align:center; margin-bottom:20px;">
+      <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500"
+           alt="รูปใหญ่"
+           style="max-width:100%; max-height:300px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.2);">
+    </div>
+  ` : '';
+
+  const detailHtml = `
+    ${imageHtml}
+    <div style="font-size:16px; line-height:1.6;">
+      <div><strong>Material:</strong> ${row.Material || '-'}</div>
+      <div><strong>Description:</strong> ${row.Description || '-'}</div>
+      <div><strong>วิภาวดี:</strong> ${(parseFloat(row.วิภาวดี) || 0).toLocaleString()} ชิ้น</div>
+      <div><strong>Unrestricted:</strong> ${(parseFloat(row.Unrestricted) || 0).toLocaleString()} ชิ้น</div>
+      <div><strong>Rebuilt:</strong> ${row.Rebuilt || '-'}</div>
+      <div><strong>หมายเหตุ:</strong> <span style="color:#d32f2f; font-weight:bold;">${row.หมายเหตุ || '-'}</span></div>
+      <div><strong>Product:</strong> ${row.Product || '-'}</div>
+      <div><strong>OCRTAXT:</strong> ${row.OCRTAXT || '-'}</div>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <button class="requisition-button" style="padding:8px 24px;" 
+              onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
+        เบิกเลย
+      </button>
+    </div>
+  `;
+
+  // 3. แสดง modal
+  const imageModal = document.getElementById("imageModal");
+  const imageModalContent = document.getElementById("imageModalContent");
+  if (imageModal && imageModalContent) {
+    imageModalContent.innerHTML = detailHtml;
+    imageModal.style.display = "block";
   }
 }
 // ===== PWA ติดตั้ง – เวอร์ชันแก้หายขาด 100% (2025) =====
