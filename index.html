@@ -1359,9 +1359,22 @@ document.addEventListener('keydown', (e) => {
           <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
             คลังนวนครไม่มีของเหลือแล้ว
           </div>
-          <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-            <i class="fas fa-info-circle"></i>
-            อาจมีอะไหล่ทดแทน: ${remark}
+          <div style="
+    margin-top:20px; 
+    padding:18px 20px; 
+    background:#f0fff4; 
+    border:2px solid #2ecc71; 
+    border-radius:14px; 
+    font-size:17px; 
+    color:#1e874b; 
+    font-weight:bold;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+">
+    <i class="fas fa-exclamation-circle" style="color:#2ecc71; margin-right:8px;"></i>
+    อาจมีอะไหล่ทดแทน: 
+    <span style="color:#0a0; font-size:18px;">${remark}</span>
+</div>
+
           </div>
         </div>
       `,
@@ -1424,10 +1437,23 @@ document.addEventListener('keydown', (e) => {
           <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
             กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
           </div>
-          <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-            <i class="fas fa-info-circle"></i>
-            หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
-          </div>
+          <div style="
+    margin-top:20px; 
+    padding:16px; 
+    background:#e8f5e8; 
+    border-left:6px solid #27ae60; 
+    border-radius:12px; 
+    font-size:16px; 
+    color:#1e874b;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    gap:10px;
+">
+    <i class="fas fa-info-circle" style="font-size:20px;"></i>
+    <span>หากยืนยัน ระบบจะดึงจากคลังนวนครแทน</span>
+</div>
+
         </div>
       `,
       didOpen: () => {
