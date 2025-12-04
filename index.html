@@ -60,7 +60,7 @@
   <i class="fas fa-bell"></i>
   <span id="notificationBadge" class="notification-badge" style="display:none;">!</span>
 </button>
-        <span id="userNameSmall" class="user-name-small"></span>
+        <span id="userNameSmall" class="user-name-small" style="display: none;"></span>
         <button class="header-setting-btn" onclick="showSettings()" title="ตั้งค่า"><i class="fas fa-bars"></i></button>
       </div>
       <div class="loading" id="loading">
@@ -860,40 +860,48 @@ async function loadEmployeeData() {
           console.error('Login error:', error);
         }
       }
-     function checkLoginStatus() {
+     async function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
+  
   if (isLoggedIn && savedUsername) {
-  loginModal.classList.remove('active');
-  appContent.classList.add('logged-in');
- 
-  // โหลดฐานข้อมูลรูปภาพใหม่ทันทีที่ล็อกอินสำเร็จ
-  loadImageDatabase().then(() => {
-    console.log("ฐานข้อมูลรูปภาพพร้อมใช้งานแล้ว");
-    // โหลดข้อมูลหลักหลังจากโหลดรูปเรียบร้อย
-    showTab('parts'); // หรือ loadData();
-  });
-    // userNameSmall.textContent = localStorage.getItem('userName') || ''; // Comment out or delete
-    // Auto-load default tab if needed
-    if (document.querySelector('.nav-btn.active')) {
+    // เริ่มโหลดข้อมูลทันที
+    loginModal.classList.remove('active');
+    appContent.classList.add('logged-in');
+    
+    try {
+      // ✅ รอให้โหลด employee data ให้เสร็จก่อน
+      await loadEmployeeData();
+      // โหลดฐานข้อมูลรูปภาพ
+      loadImageDatabase().catch(console.error);
+      
+      // แสดงชื่อผู้ใช้ (ถ้ามี)
+      const savedUserName = localStorage.getItem('userName') || savedUsername;
+      if (userNameSmall) userNameSmall.textContent = savedUserName;
+      
+      // โหลดแท็บเริ่มต้น
       showTab('parts');
+    } catch (err) {
+      console.error("โหลดข้อมูลเริ่มต้นล้มเหลว:", err);
+      // ถ้าโหลดไม่ได้ → ให้ล็อกเอาท์
+      handleLogout();
     }
-    // ซ่อน install ถ้าติดตั้งแล้ว (ใช้ localStorage เช็ค) – เช็คเฉพาะ hide เท่านั้
   } else {
     loginModal.classList.add('active');
     appContent.classList.remove('logged-in');
-    // userNameSmall.textContent = ''; // Comment out or delete
-    // Clear invalid session
+    // ล้าง session เท่านั้น
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     localStorage.removeItem('userName');
-    localStorage.removeItem('savedPassword'); // Clear saved password on invalid session
   }
-  // Load saved credentials if remember me was checked
+  
+  // โหลดการตั้งค่า "Remember me"
   if (localStorage.getItem('rememberMe') === 'true') {
     const savedUsername = localStorage.getItem('savedUsername');
-    if (savedUsername) usernameInput.value = savedUsername;
-    rememberMeCheckbox.checked = true;
+    if (savedUsername && usernameInput) {
+      usernameInput.value = savedUsername;
+      rememberMeCheckbox.checked = true;
+    }
   }
 }
      function handleLogout() {
@@ -1319,34 +1327,11 @@ document.addEventListener('keydown', (e) => {
       }
       async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
-  const history = {
-    employeeCode: getFromLocalStorage('employeeCode'),
-    team: getFromLocalStorage('team'),
-    contact: getFromLocalStorage('contact'),
-    callNumber: getFromLocalStorage('callNumber'),
-    callType: getFromLocalStorage('callType'),
-   
-  };
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
   const remark = row["หมายเหตุ"] || '';
   const hasStockVibha = vibhavadiValue > 0;
-  let proceed = true;
-
   // ตรวจสอบเงื่อนไขใหม่: ถ้านวนคร = 0 และหมายเหตุไม่ว่าง
-  if (!employeeDataLoaded) {
-    try {
-      await loadEmployeeData();
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'โหลดข้อมูลพนักงานไม่สำเร็จ',
-        text: 'กรุณาลองใหม่หรือตรวจสอบการเชื่อมต่อ',
-        confirmButtonText: 'ตกลง'
-      });
-      return; // หยุดถ้าโหลดไม่ได้
-    }
-  }
   if (unrestrictedValue === 0 && remark.trim() !== '') {
     const replacementWarning = await Swal.fire({
       title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
@@ -1413,76 +1398,79 @@ document.addEventListener('keydown', (e) => {
 
   // ตรวจสอบเงื่อนไขเดิม: คลังวิภาวดีมีของ
   if (hasStockVibha) {
-        const warningResult = await Swal.fire({
-          title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
-          iconColor: '#f39c12',
-          width: window.innerWidth <= 480 ? '90%' : '560px',
-          padding: '30px 20px',
-          background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
-          backdrop: 'rgba(0,0,0,0.85)',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          showCancelButton: true,
-          confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
-          cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
-          reverseButtons: true,
-          buttonsStyling: false,
-          html: `
-            <div style="text-align:center; margin:20px 0;">
-              <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
-              <div style="font-size:18px; font-weight:600; color:#e67e22;">
-                คลังวิภาวดีมีของอยู่
-              </div>
-              <div style="font-size:32px; font-weight:bold; color:#27ae60; margin:12px 0;">
-                ${vibhavadiValue.toLocaleString()} ชิ้น
-              </div>
-              <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
-                กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
-              </div>
-              <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
-                <i class="fas fa-info-circle"></i>
-                หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
-              </div>
-            </div>
-          `,
-          didOpen: () => {
-            const confirmBtn = document.querySelector('.swal2-confirm');
-            const cancelBtn = document.querySelector('.swal2-cancel');
-            confirmBtn.style.cssText = `
-              background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
-            `;
-            cancelBtn.style.cssText = `
-              background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
-              color: white !important;
-              padding: 14px 36px !important;
-              border-radius: 30px !important;
-              font-size: 17px !important;
-              font-weight: bold !important;
-              box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
-            `;
-          }
-        });
-        // ถ้ากดยกเลิก → ออกเลย
-        if (warningResult.isDismissed) {
-  Swal.close(); // ปิดหน้าต่างเบิกทั้งหมด (จริง ๆ ไม่ใส่ก็ได้ แต่ไม่เป็นไร)
-  // ✅ รีเซ็ตสภาพหน้าจอให้กลับมาดู tab ค้นหาได้ปกติ
-  document.body.style.overflow = 'auto'; // เผื่อ SweetAlert ล็อก scroll ไว้
-  window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: 'instant' // หรือ 'smooth' ถ้าอยากให้เลื่อนนิ่ม ๆ
-  });
-  return; // หยุดทุกอย่าง
-}
+    const warningResult = await Swal.fire({
+      title: '<strong style="font-size:24px; color:#f39c12;">คำเตือน!</strong>',
+      iconColor: '#f39c12',
+      width: window.innerWidth <= 480 ? '90%' : '560px',
+      padding: '30px 20px',
+      background: document.body.classList.contains('dark-mode') ? '#2d2d2d' : '#ffffff',
+      backdrop: 'rgba(0,0,0,0.85)',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-check"></i> ยืนยัน',
+      cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก',
+      reverseButtons: true,
+      buttonsStyling: false,
+      html: `
+        <div style="text-align:center; margin:20px 0;">
+          <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#f39c12; margin-bottom:15px; opacity:0.9;"></i>
+          <div style="font-size:18px; font-weight:600; color:#e67e22;">
+            คลังวิภาวดีมีของอยู่
+          </div>
+          <div style="font-size:32px; font-weight:bold; color:#27ae60; margin:12px 0;">
+            ${vibhavadiValue.toLocaleString()} ชิ้น
+          </div>
+          <div style="font-size:17px; color:#7f8c8d; margin:15px 0;">
+            กรุณาตรวจสอบว่าจำเป็นต้องเบิกจากนวนครจริงหรือไม่
+          </div>
+          <div style="margin-top:20px; padding:16px; background:#e8f5e8; border-left:6px solid #27ae60; border-radius:12px; font-size:15px; color:#27ae60;">
+            <i class="fas fa-info-circle"></i>
+            หากยืนยัน ระบบจะดึงจากคลังนวนครแทน
+          </div>
+        </div>
+      `,
+      didOpen: () => {
+        const confirmBtn = document.querySelector('.swal2-confirm');
+        const cancelBtn = document.querySelector('.swal2-cancel');
+        confirmBtn.style.cssText = `
+          background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+          color: white !important;
+          padding: 14px 36px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
+        `;
+        cancelBtn.style.cssText = `
+          background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+          color: white !important;
+          padding: 14px 36px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
+        `;
       }
-  // ตัวแปร selectedCallType ย้ายมาอยู่นอก didOpen เพื่อให้ preConfirm เข้าถึงได้
+    });
+    if (warningResult.isDismissed) {
+      Swal.close();
+      document.body.style.overflow = 'auto';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
+  }
+
+  // ========== ส่วนฟอร์มเบิก (ไม่เปลี่ยน) ==========
   let selectedCallType = '';
+  const history = {
+    employeeCode: getFromLocalStorage('employeeCode'),
+    team: getFromLocalStorage('team'),
+    contact: getFromLocalStorage('contact'),
+    callNumber: getFromLocalStorage('callNumber'),
+    callType: getFromLocalStorage('callType'),
+  };
+
   Swal.fire({
     title: '📋 เบิกอะไหล่นวนคร',
     html: `
@@ -1626,13 +1614,12 @@ document.addEventListener('keydown', (e) => {
     focusConfirm: false,
     showCancelButton: true,
     showCloseButton: true,
-    closeButtonHtml: '<i class="fas fa-times"></i>', // ไอคอน X สวย ๆ (ต้องมี Font Awesome)
+    closeButtonHtml: '<i class="fas fa-times"></i>',
     confirmButtonText: 'ยืนยัน',
     cancelButtonText: 'ยกเลิก',
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: () => {
-      // Force high z-index and ensure backdrop covers full screen
       const swalContainer = document.querySelector('.swal2-container');
       if (swalContainer) {
         swalContainer.style.zIndex = '99998';
@@ -1678,17 +1665,17 @@ document.addEventListener('keydown', (e) => {
       const remarkInput = document.getElementById('swal-remark');
       const confirmButton = document.querySelector('.swal2-confirm');
       confirmButton.disabled = true;
-      // Handle Call Type button selection (Canva-like) - ใช้ selectedCallType จาก outer scope
+
       const callTypeButtons = document.querySelectorAll('.call-type-btn');
       callTypeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
           callTypeButtons.forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
-          selectedCallType = btn.dataset.value; // อัพเดทตัวแปรจาก outer scope
-          console.log('Selected Call Type:', selectedCallType); // Debug: ดูใน console
+          selectedCallType = btn.dataset.value;
           validateInputs();
         });
       });
+
       function setupAutocomplete(input, key, containerId) {
         input.addEventListener('input', () => {
           const container = document.getElementById(containerId);
@@ -1719,6 +1706,7 @@ document.addEventListener('keydown', (e) => {
       setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
       const lastContact = getFromLocalStorage('contact')[0];
       if (lastContact) contactInput.value = lastContact;
+
       const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput];
       function validateInputs() {
         const errors = {
@@ -1851,7 +1839,7 @@ document.addEventListener('keydown', (e) => {
           callNumberInput.classList.add('invalid-input');
           isValid = false;
         }
-        if (!selectedCallType) { // ตอนนี้เข้าถึง selectedCallType ได้แล้ว
+        if (!selectedCallType) {
           errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
           isValid = false;
         }
@@ -1866,7 +1854,6 @@ document.addEventListener('keydown', (e) => {
         if (selectedCallType) {
           saveToLocalStorage('callType', selectedCallType);
         }
-        console.log('Final Call Type:', selectedCallType); // Debug: ดูว่าส่งไปถูกไหม
         return {
           quantity: quantityInput.value,
           employeeCode: employeeCode,
@@ -1885,14 +1872,11 @@ document.addEventListener('keydown', (e) => {
       const formValues = result.value;
       const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
       const quantity = parseFloat(formValues.quantity) || 0;
-    
-            // Popup สรุปข้อมูลการเบิก – แก้ให้รูปแสดงแน่นอน 100%
-      // รูปแสดงแน่นอน 100% (สำหรับกรณี UrlWeb = File ID ล้วน ๆ)
-            // แสดงรูปในหน้าต่างสรุป – ใช้ thumbnail?id= แบบเดียวกับที่คุณใช้ใน modal (แสดงได้ 100%)
+
+      // ========== ส่วนสรุป + ส่งข้อมูล (ไม่เปลี่ยน) ==========
       let imageHtml = '';
       let imageIds = [];
       if (row.UrlWeb && row.UrlWeb.trim()) {
-        // รองรับทุกแบบของ Google Drive link
         const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
                       row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
@@ -1912,7 +1896,6 @@ document.addEventListener('keydown', (e) => {
           <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
         `;
       } else {
-        // ถ้าไม่มีรูปเลย → ไอคอนสวย ๆ
         imageHtml = `
           <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb);
                       border-radius:20px; display:flex; align-items:center; justify-content:center;
@@ -1921,6 +1904,7 @@ document.addEventListener('keydown', (e) => {
           </div>
         `;
       }
+
       const summaryResult = await Swal.fire({
         title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
         width: window.innerWidth <= 480 ? '95%' : '650px',
@@ -1997,13 +1981,13 @@ document.addEventListener('keydown', (e) => {
           `;
         }
       });
+
       if (summaryResult.isConfirmed) {
-        // ปิด modal รายละเอียดทุกรูปแบบที่อาจเปิดค้างอยู่
         const detailModal = document.getElementById('imageModal');
-        if (detailModal) detailModal.style.display = 'none';
         const imageModalImages = document.getElementById('imageModalImages');
+        if (detailModal) detailModal.style.display = 'none';
         if (imageModalImages) imageModalImages.style.display = 'none';
-        // สร้าง JSON payload
+
         const jsonPayload = {
           material: row.Material || '',
           description: row.Description || '',
@@ -2017,7 +2001,7 @@ document.addEventListener('keydown', (e) => {
           remark: formValues.remark || '',
           vibhavadi: vibhavadiValue.toString()
         };
-        // แสดง loading
+
         Swal.fire({
           title: 'กำลังบันทึกข้อมูล...',
           html: `
@@ -2030,7 +2014,6 @@ document.addEventListener('keydown', (e) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           didOpen: () => {
-            // Ensure full blur for loading popup
             const swalContainer = document.querySelector('.swal2-container');
             if (swalContainer) {
               swalContainer.style.zIndex = '99998';
@@ -2071,12 +2054,11 @@ document.addEventListener('keydown', (e) => {
             }
           }
         });
+
         try {
           const response = await fetch(gasUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
           });
           const gasResult = await response.json();
@@ -2088,15 +2070,11 @@ document.addEventListener('keydown', (e) => {
               confirmButtonText: 'OK'
             }).then((result) => {
               if (result.isConfirmed) {
-                // ปิด Modal รายละเอียดอะไหล่ (ทั้ง #parts และ #images) ถ้าเปิดอยู่
                 const imageModal = document.getElementById('imageModal');
                 const imageModalImages = document.getElementById('imageModalImages');
-                if (imageModal && imageModal.style.display === 'block') {
-                  imageModal.style.display = 'none';
-                }
-                if (imageModalImages && imageModalImages.style.display === 'block') {
-                  imageModalImages.style.display = 'none';
-                }
+                if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
+                if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
+
                 Swal.fire({
                   title: 'กำลังเปลี่ยนหน้า...',
                   html: `
@@ -2107,67 +2085,25 @@ document.addEventListener('keydown', (e) => {
                   `,
                   showConfirmButton: false,
                   allowOutsideClick: false,
-                  allowEscapeKey: false,
-                  didOpen: () => {
-                    // Ensure full blur for redirect popup
-                    const swalContainer = document.querySelector('.swal2-container');
-                    if (swalContainer) {
-                      swalContainer.style.zIndex = '99998';
-                      swalContainer.style.position = 'fixed';
-                      swalContainer.style.top = '0';
-                      swalContainer.style.left = '0';
-                      swalContainer.style.width = '100vw';
-                      swalContainer.style.height = '100vh';
-                      swalContainer.style.display = 'flex';
-                      swalContainer.style.justifyContent = 'center';
-                      swalContainer.style.alignItems = 'center';
-                    }
-                    const swalBackdrop = document.querySelector('.swal2-backdrop');
-                    if (swalBackdrop) {
-                      swalBackdrop.style.zIndex = '99997';
-                      swalBackdrop.style.position = 'fixed';
-                      swalBackdrop.style.top = '0';
-                      swalBackdrop.style.left = '0';
-                      swalBackdrop.style.width = '100vw';
-                      swalBackdrop.style.height = '100vh';
-                      swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                      swalBackdrop.style.backdropFilter = 'blur(8px)';
-                    }
-                    const swalPopup = document.querySelector('.swal2-popup');
-                    if (swalPopup) {
-                      swalPopup.style.zIndex = '99999';
-                      swalPopup.style.position = 'relative';
-                      swalPopup.style.margin = '0';
-                      swalPopup.style.transform = 'none';
-                      swalPopup.style.maxHeight = '90vh';
-                      swalPopup.style.overflowY = 'auto';
-                      swalPopup.style.width = 'auto';
-                      swalPopup.style.maxWidth = '90vw';
-                      if (window.innerWidth <= 768) {
-                        swalPopup.style.width = '95vw';
-                        swalPopup.style.padding = '15px';
-                      }
-                    }
-                  }
+                  allowEscapeKey: false
                 });
+
                 setTimeout(() => {
                   Swal.close();
                   showTab('today');
-                  // Fix for mobile scroll lock after tab switch
                   setTimeout(() => {
                     document.body.style.overflow = 'auto';
                     const searchInputToday = document.getElementById('searchInputToday');
                     if (searchInputToday) {
                       searchInputToday.focus();
-                      searchInputToday.blur(); // Trigger a touch event to unlock scroll on mobile
+                      searchInputToday.blur();
                     }
-                    // Simulate a touch event to unlock scroll
                     if ('ontouchstart' in window) {
                       const event = new Event('touchstart', { bubbles: true });
                       document.body.dispatchEvent(event);
                     }
                   }, 100);
-                }, 4000); // เพิ่ม delay จาก 2000 เป็น 4000ms เพื่อให้ข้อมูลใหม่อัปเดตใน Sheet
+                }, 4000);
               }
             });
           } else {
@@ -2186,7 +2122,7 @@ document.addEventListener('keydown', (e) => {
     }
   });
 }
-      function saveToLocalStorage(key, value) {
+function saveToLocalStorage(key, value) {
         let items = JSON.parse(localStorage.getItem(key)) || [];
         if (!items.includes(value)) {
           items.unshift(value);
