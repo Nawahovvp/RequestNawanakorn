@@ -616,6 +616,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let currentFilteredDataImages = [];
       let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
       let imageDbLoaded = false;
+      let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
       const modalContent = document.getElementById("modalContent");
@@ -2737,33 +2738,45 @@ function updateTableToday() {
 }
 
       function renderTableToday(data) {
-        tableBodyToday.innerHTML = "";
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const statusTd = document.createElement("td");
-          const status = row["status"] || "";
-          statusTd.textContent = status;
-          statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
-          tr.appendChild(statusTd);
-          // Add IDRow column
-          const idRowTd = document.createElement("td");
-          idRowTd.textContent = row["IDRow"] || "";
-          tr.appendChild(idRowTd);
-          const columns = [
-            "Timestamp",
-            "material",
-            "description",
-            "quantity",
-            "vibhavadi",
-            "employeeName",
-            "team",
-            "CallNumber",
-            "CallType",
-            "remark",
-          ];
-          columns.forEach((col) => {
-  const td = document.createElement("td");
-  let value = row[col] || "";
+  tableBodyToday.innerHTML = "";
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    const statusTd = document.createElement("td");
+    const status = row["status"] || "";
+    statusTd.textContent = status;
+    statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+    tr.appendChild(statusTd);
+
+    // IDRow
+    const idRowTd = document.createElement("td");
+    idRowTd.textContent = row["IDRow"] || "";
+    tr.appendChild(idRowTd);
+
+    const columns = [
+      "Timestamp",
+      "material",
+      "description",
+      "quantity",
+      "vibhavadi",        // ← เราจะแทนที่ค่านี้ใหม่
+      "employeeName",
+      "team",
+      "CallNumber",
+      "CallType",
+      "remark",
+    ];
+
+    columns.forEach((col) => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      // === ส่วนสำคัญ: แทนที่ค่าคอลัมน์ "vibhavadi" ด้วยข้อมูลจริงจาก MainSap ===
+      if (col === "vibhavadi") {
+        const material = (row["material"] || "").toString().trim();
+        const realStock = vibhavadiStockMap[material];
+        value = typeof realStock === 'number' ? realStock.toLocaleString() : "0";
+        td.style.color = realStock > 0 ? "#27ae60" : "#e74c3c";
+        td.style.fontWeight = "bold";
+      }
   if (col === "Timestamp") {
     value = formatTimestamp(value); // เพิ่มบรรทัดนี้
   }
@@ -2896,70 +2909,111 @@ lastPageButtonToday.onclick = () => {
   currentPageToday = totalPages;
   updateTableToday();
 };
-      async function loadTodayData() {
-        document.getElementById("loading").style.display = "flex";
-        document.getElementById("loadingToday").style.display = "block";
-        errorContainerToday.style.display = "none";
-        console.log("Starting data load from Opensheet:", requestSheetUrl);
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000); // เพิ่ม timeout เป็น 30 วินาที
-          // เพิ่ม cache busting เพื่อให้ข้อมูลใหม่แสดงทันที
-          const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
-          const response = await fetch(cacheBustUrl, {
-            signal: controller.signal,
-            mode: 'cors', // เพิ่ม mode: 'cors' เพื่อแก้ปัญหา CORS
-            cache: 'no-cache' // เพิ่ม cache: 'no-cache' เพื่อให้ข้อมูลสดใหม่
-          });
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Today data loaded successfully:", data);
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error("No data received or data is empty");
-          }
-          allDataToday = data;
-          currentPageToday = 1; // Reset page on load
-          updateTableToday();
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loadingToday").style.display = "none";
-          document.getElementById("data-table-today").style.display = "table";
-          // Fix for mobile scroll after loading
-          setTimeout(() => {
-            document.body.style.overflow = 'auto';
-            if ('ontouchstart' in window) {
-              const event = new Event('touchstart', { bubbles: true });
-              document.body.dispatchEvent(event);
-            }
-          }, 100);
-        } catch (error) {
-          console.error("Error loading today data:", error);
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loadingToday").style.display = "none";
-          errorContainerToday.style.display = "block";
-          if (error.name === 'AbortError') {
-            document.getElementById("error-message-today").textContent = "การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือลองใหม่";
-          } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-            document.getElementById("error-message-today").textContent = "ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public (Anyone with the link can view)";
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            document.getElementById("error-message-today").textContent = "เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่";
-          } else {
-            document.getElementById("error-message-today").textContent = `ไม่สามารถโหลดข้อมูลได้: ${error.message}. กรุณาตรวจสอบ Sheet ID หรือชื่อ Sheet`;
-          }
-          Swal.fire({
-            icon: "error",
-            title: "ไม่สามารถโหลดข้อมูล",
-            text: error.name === 'AbortError'
-              ? "การเชื่อมต่อช้าเกินไป กรุณาตรวจสอบเครือข่ายหรือลองใหม่"
-              : error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')
-              ? "Google Sheets ต้องแชร์เป็น Public (ดูได้โดยไม่ต้องล็อกอิน) กรุณาตรวจสอบการแชร์"
-              : "ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบ Sheet ID, ชื่อ Sheet หรือการแชร์สาธารณะ",
-            confirmButtonText: "ตกลง",
-          });
-        }
+async function loadVibhavadiStockMap() {
+  if (Object.keys(vibhavadiStockMap).length > 0) {
+    console.log("ใช้ Cache คลังวิภาวดี");
+    return;
+  }
+
+  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap?_=${Date.now()}`;
+  
+  try {
+    const res = await fetch(mainSapUrl);
+    const data = await res.json();
+
+    data.forEach(row => {
+      const material = (row.Material || "").toString().trim();
+      const vibhavadi = parseInt(row["วิภาวดี"] || 0, 10);
+      if (material) {
+        vibhavadiStockMap[material] = vibhavadi;
       }
+    });
+
+    console.log(`โหลดข้อมูลคลังวิภาวดีสำเร็จ: ${Object.keys(vibhavadiStockMap).length} รายการ`);
+  } catch (err) {
+    console.error("โหลดข้อมูลคลังวิภาวดีล้มเหลว:", err);
+    // ถ้าโหลดไม่ได้ ให้ใช้ค่าเดิมต่อไป
+  }
+}
+      async function loadTodayData() {
+  // แสดง Loading
+  document.getElementById("loading").style.display = "flex";
+  document.getElementById("loadingToday").style.display = "block";
+  errorContainerToday.style.display = "none";
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 วินาที
+
+    // โหลดข้อมูลคลังวิภาวดี (MainSap) ก่อนเสมอ แต่โหลดแค่ครั้งเดียว
+    if (Object.keys(vibhavadiStockMap).length === 0) {
+      console.log("กำลังโหลดข้อมูลสต็อกจากคลังวิภาวดี (MainSap)...");
+      await loadVibhavadiStockMap(); // ดึงข้อมูลจริงจาก Sheet
+    } else {
+      console.log("ใช้ Cache สต็อกวิภาวดีแล้ว (เร็วมาก!)");
+    }
+
+    // ดึงข้อมูลรายการเบิกวันนี้ (Request Sheet)
+    const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
+    const response = await fetch(cacheBustUrl, {
+      signal: controller.signal,
+      cache: 'no-cache' // บังคับดึงข้อมูลใหม่ทุกครั้ง
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("ไม่พบข้อมูลการเบิกวันนี้");
+    }
+
+    // บันทึกข้อมูลลงตัวแปร global
+    allDataToday = data;
+    currentPageToday = 1;
+
+    // อัปเดตตาราง (จะดึงสต็อกวิภาวดีจริงมาแสดงอัตโนมัติ)
+    updateTableToday();
+
+    // ซ่อน Loading
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingToday").style.display = "none";
+
+    console.log("โหลดข้อมูลวันนี้สำเร็จ!", data.length, "รายการ");
+
+  } catch (error) {
+    console.error("โหลดข้อมูลวันนี้ล้มเหลว:", error);
+
+    // ซ่อน Loading ทั้งหมด
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingToday").style.display = "none";
+    errorContainerToday.style.display = "block";
+
+    // ข้อความแจ้งเตือนผู้ใช้
+    let msg = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+    if (error.name === 'AbortError') {
+      msg = "การเชื่อมต่อช้าเกินไป กรุณาลองใหม่";
+    } else if (error.message.includes('403') || error.message.includes('CORS')) {
+      msg = "ไม่สามารถเข้าถึง Google Sheets ได้ (ตรวจสอบการแชร์เป็น Public)";
+    } else if (error.message.includes('Failed to fetch')) {
+      msg = "ไม่มีการเชื่อมต่ออินเทอร์เน็ต";
+    }
+
+    document.getElementById("error-message-today").textContent = msg;
+
+    // แจ้งเตือนด้วย SweetAlert
+    Swal.fire({
+      icon: "error",
+      title: "โหลดข้อมูลไม่สำเร็จ",
+      text: msg,
+      confirmButtonText: "ตกลง"
+    });
+  }
+}
       // All tab functions (now after variables)
       closeModalAll.onclick = () => modalAll.style.display = "none";
       window.onclick = event => {
@@ -3436,6 +3490,7 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+// ========== ฟังก์ชันช่วยสำหรับการจัดการวันที่ไทย ==========
 // ========== ฟังก์ชันช่วยสำหรับการแปลงวันที่ค.ศ. ที่มีเวลา ==========
 function parseDateTimeToJSDate(dateTimeStr) {
   if (!dateTimeStr || typeof dateTimeStr !== 'string') return null;
