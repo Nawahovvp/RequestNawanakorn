@@ -252,12 +252,11 @@
             </div>
           </div>
           <div id="detailModal" class="modal">
-            <div class="modal-content">
-              <span class="close" id="closeModal">×</span>
-              <h2>รายละเอียด</h2>
-              <div id="modalContent"></div>
-            </div>
-          </div>
+  <div class="modal-content" style="max-width:600px; width:90%;">
+    <span id="closeModal" class="close">&times;</span>
+    <div id="modalContent"></div>
+  </div>
+</div>
         </div>
         <div id="all" class="tab-content">
           <div id="searchContainerAll">
@@ -532,7 +531,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       const ageHours = (Date.now() - timestamp) / (1000 * 60 * 60);
       if (ageHours < expireHours) {
         console.log("ใช้ Cache:", key);
-        return data;  // แก้ตรงนี้
+        return data;
       }
     }
   } catch (e) {
@@ -542,13 +541,21 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
   console.log("ดึงข้อมูลใหม่จากเซิร์ฟเวอร์:", key);
   const freshData = await fetchFn();
 
+  // ✅ บันทึกข้อมูล + timestamp ลง Cache
   try {
     const cache = await caches.open(CACHE_NAME);
-    await cache.put(key, new Response(JSON.stringify({
-      data: freshData,
-      timestamp: Date.now()
-    })));
-  } catch (e) {}
+    await cache.put(
+      key,
+      new Response(
+        JSON.stringify({
+          data: freshData,
+          timestamp: Date.now()
+        })
+      )
+    );
+  } catch (e) {
+    // ถ้าบันทึก cache ไม่ได้ (เช่น พื้นที่เต็ม) → ไม่ error
+  }
 
   return freshData;
 }
@@ -809,7 +816,7 @@ async function loadEmployeeData() {
   }
   const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
   const employeeSheetName = "Employee";
-  const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}?_=${Date.now()}`;
+  const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
   employeeDataPromise = fetch(employeeUrl)
     .then(res => res.json())
     .then(data => {
@@ -1117,16 +1124,17 @@ function initSwiper(modal, totalSlides) {
   // รองรับการปัดนิ้วบนมือถือ
   let startX = 0;
   container.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-  }, { passive: true });
-  container.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = startX - endX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) nextBtn.click(); // ปัดซ้าย → ถัดไป
-      else prevBtn.click(); // ปัดขวา → ย้อนกลับ
-    }
-  }, { passive: true });
+  startX = e.touches[0].clientX;
+}, { passive: true });
+
+container.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextBtn.click();
+    else prevBtn.click();
+  }
+}, { passive: true });
   update(); // แสดงรูปแรก
 }
 function initSwiper(modal) {
@@ -1168,12 +1176,18 @@ function initSwiper(modal) {
  
   // Touch Swipe
   let startX = 0;
-  container.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-  container.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    if (startX - endX > 50) goNext(); // Swipe left
-    if (endX - startX > 50) goPrev(); // Swipe right
-  });
+  container.addEventListener('touchstart', e => {
+  startX = e.touches[0].clientX;
+}, { passive: true });
+
+container.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextBtn.click();
+    else prevBtn.click();
+  }
+}, { passive: true });
  
   // Keyboard (arrow keys)
   document.addEventListener('keydown', e => {
@@ -1243,146 +1257,112 @@ document.addEventListener('keydown', (e) => {
         errorContainer.style.display = "none";
         loadData();
       });
-   function renderTable(data) {
-  const tableBody = document.querySelector("#data-table tbody");
-  if (!tableBody) {
-    console.error("Table body for #data-table not found");
-    Swal.fire({
-      icon: "error",
-      title: "ข้อผิดพลาด",
-      text: "ไม่พบตารางข้อมูล กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
-      confirmButtonText: "ตกลง",
-    });
+   function renderTableToday(data) {
+  if (!tableBodyToday) {
+    console.error("Table body for #data-table-today not found");
     return;
   }
 
-  tableBody.innerHTML = "";
-
-  if (!data || data.length === 0) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 10;
-    td.textContent = "ไม่พบข้อมูลอะไหล่";
-    td.style.textAlign = "center";
-    td.style.padding = "50px";
-    td.style.color = "#999";
-    td.style.fontSize = "18px";
-    tr.appendChild(td);
-    tableBody.appendChild(tr);
-    return;
-  }
+  const fragment = document.createDocumentFragment();
 
   data.forEach((row) => {
     const tr = document.createElement("tr");
 
-    // ปุ่ม "เบิก"
-    const btnTd = document.createElement("td");
-    const btn = document.createElement("button");
-    btn.textContent = "เบิก";
-    btn.className = "requisition-button";
-    btn.onclick = () => showRequisitionDialog(row);
-    btnTd.appendChild(btn);
-    tr.appendChild(btnTd);
+    // Status (สีเขียว/แดง)
+    const statusTd = document.createElement("td");
+    const status = row["status"] || "";
+    statusTd.textContent = status;
+    statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+    tr.appendChild(statusTd);
 
+    // IDRow
+    const idRowTd = document.createElement("td");
+    idRowTd.textContent = row["IDRow"] || "";
+    tr.appendChild(idRowTd);
+
+    // คอลัมน์หลัก
     const columns = [
-      "UrlWeb",
-      "Material",
-      "Description",
-      "วิภาวดี",
-      "Unrestricted",
-      "Rebuilt",
-      "หมายเหตุ",
-      "Product",
-      "OCRTAXT"
+      "Timestamp", "material", "description", "quantity",
+      "vibhavadi", "employeeName", "team", "callNumber",
+      "callType", "remark"
     ];
 
-    const vibha = parseFloat(row["วิภาวดี"]) || 0;
-    const unre = parseFloat(row["Unrestricted"]) || 0;
-    let textColor = "";
-    let fontWeight = "";
-
-    if (vibha > 0) {
-      textColor = "#4caf50";
-      fontWeight = "bold";
-    } else if (unre > 0) {
-      textColor = "#2196f3";
-      fontWeight = "bold";
-    }
-
-    columns.forEach((col) => {
+    columns.forEach(col => {
       const td = document.createElement("td");
       let value = row[col] || "";
 
-      // Format ตัวเลข
-      if (col === "วิภาวดี" || col === "Unrestricted") {
-        const num = parseFloat(value);
-        value = (!isNaN(num) && num > 0) ? num.toLocaleString() : "";
+      // จัดรูปแบบเวลา
+      if (col === "Timestamp") {
+        value = formatTimestamp(value);
       }
 
-      // สีแดงสำหรับ Rebuilt / หมายเหตุ
-      if ((col === "Rebuilt" || col === "หมายเหตุ") && value) {
+      // จัดรูปแบบตัวเลข
+      if ((col === "quantity" || col === "vibhavadi") && value !== "") {
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          value = num.toLocaleString("en-US", { maximumFractionDigits: 0 });
+        }
+      }
+
+      // ไฮไลต์ remark
+      if (col === "remark" && value) {
         td.style.color = "#d32f2f";
         td.style.fontWeight = "bold";
       }
 
-      // สีสถานะคงคลัง
-      if (["Material", "Description", "วิภาวดี", "Unrestricted"].includes(col)) {
-        if (textColor) td.style.color = textColor;
-        if (fontWeight) td.style.fontWeight = fontWeight;
-      }
-
-      // คอลัมน์ UrlWeb → แสดงเป็นรูป thumbnail
-      if (col === "UrlWeb" && value) {
-        let fileId = "";
-        if (value.includes("/d/")) fileId = value.split("/d/")[1].split("/")[0];
-        else if (value.includes("id=")) fileId = value.split("id=")[1].split("&")[0];
-        else if (/^[a-zA-Z0-9-_]+$/.test(value.trim())) fileId = value.trim();
-
-        if (fileId) {
-          const container = document.createElement("div");
-          container.style.cursor = "pointer";
-          container.title = "คลิกเพื่อดูรายละเอียดและรูปภาพทั้งหมด";
-
-          const img = document.createElement("img");
-          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w120`;
-          img.alt = "รูปอะไหล่";
-          img.style.width = "64px";
-          img.style.height = "64px";
-          img.style.objectFit = "cover";
-          img.style.borderRadius = "10px";
-          img.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
-          img.style.transition = "all 0.25s ease";
-
-          img.onerror = () => {
-            img.src = 'https://via.placeholder.com/64/333/ccc?text=NO+IMG';
-          };
-
-          // Hover effect
-          container.onmouseover = () => img.style.transform = "scale(1.15)";
-          container.onmouseout = () => img.style.transform = "scale(1)";
-
-          // คลิก → เปิด showDetailModal (ใช้ modal หลัก)
-          container.onclick = (e) => {
-            e.stopPropagation();
-            showDetailModal(row, "imageModal", "imageModalContent"); // ใช้ฟังก์ชันจริง 100%
-          };
-
-          container.appendChild(img);
-          td.appendChild(container);
-        } else {
-          td.textContent = "ลิงก์ไม่ถูกต้อง";
-          td.style.color = "#999";
-          td.style.fontStyle = "italic";
-        }
-      } else {
-        td.textContent = value;
-      }
-
+      td.textContent = value;
       tr.appendChild(td);
     });
 
-    tableBody.appendChild(tr);
+    // ปุ่ม "ดูรายละเอียด"
+    const detailTd = document.createElement("td");
+    const detailBtn = document.createElement("button");
+    detailBtn.textContent = "ดูรายละเอียด";
+    detailBtn.className = "pending-detail-button";
+    detailBtn.onclick = () => {
+      // สร้าง HTML สำหรับ modal
+      const detailHtml = columns.map(col => {
+        let label = "";
+        switch (col) {
+          case "Timestamp": label = "วันเวลา"; break;
+          case "material": label = "Material"; break;
+          case "description": label = "Description"; break;
+          case "quantity": label = "จำนวน"; break;
+          case "vibhavadi": label = "วิภาวดี"; break;
+          case "employeeName": label = "ชื่อช่าง"; break;
+          case "team": label = "หน่วยงาน"; break;
+          case "callNumber": label = "เลขที่ Call"; break;
+          case "callType": label = "Call Type"; break;
+          case "remark": label = "หมายเหตุ"; break;
+          default: label = col;
+        }
+        let value = row[col] || "";
+        if (col === "Timestamp") {
+          value = formatTimestamp(value);
+        }
+        if ((col === "quantity" || col === "vibhavadi") && value !== "") {
+          const num = parseFloat(value);
+          if (!isNaN(num)) {
+            value = num.toLocaleString("en-US");
+          }
+        }
+        const valueHtml = col === "remark" && value
+          ? `<span style="color:#d32f2f; font-weight:bold;">${value}</span>`
+          : `<span>${value}</span>`;
+        return `<div style="margin:6px 0;"><strong>${label}:</strong> ${valueHtml}</div>`;
+      }).join("");
+
+      modalContent.innerHTML = detailHtml;
+      modal.style.display = "block";
+    };
+    detailTd.appendChild(detailBtn);
+    tr.appendChild(detailTd);
+
+    fragment.appendChild(tr);
   });
+
+  tableBodyToday.innerHTML = "";
+  tableBodyToday.appendChild(fragment);
 }
       async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
@@ -2362,6 +2342,107 @@ function saveToLocalStorage(key, value) {
         renderTableData();
         renderPagination(currentFilteredData.length);
       }
+      // ✅ ประกาศ renderTable แบบ function declaration (hoist ได้)
+function renderTable(data) {
+  const tableBody = document.querySelector("#data-table tbody");
+  if (!tableBody) {
+    console.error("Table body for #data-table not found");
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    // ปุ่มเบิก
+    const requisitionTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "เบิก";
+    btn.className = "requisition-button";
+    btn.onclick = () => showRequisitionDialog(row);
+    requisitionTd.appendChild(btn);
+    tr.appendChild(requisitionTd);
+
+    // คอลัมน์หลัก
+    const columns = [
+      "UrlWeb", "Material", "Description", "วิภาวดี", "Unrestricted",
+      "Rebuilt", "หมายเหตุ", "Product", "OCRTAXT"
+    ];
+
+    const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+    const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
+    let textColor = "";
+    let fontWeight = "";
+    if (vibhavadiValue > 0) {
+      textColor = "#4caf50";
+      fontWeight = "bold";
+    } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
+      textColor = "#2196f3";
+      fontWeight = "bold";
+    }
+
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      let value = row[col] || "";
+
+      if ((col === "วิภาวดี" || col === "Unrestricted") && value !== "") {
+        const num = parseFloat(value);
+        if (!isNaN(num)) {
+          value = num.toLocaleString("en-US");
+        }
+      }
+
+      if ((col === "หมายเหตุ" || col === "Rebuilt") && value) {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+
+      if (["Material", "Description", "วิภาวดี", "Unrestricted"].includes(col)) {
+        if (textColor) td.style.color = textColor;
+        if (fontWeight) td.style.fontWeight = fontWeight;
+      }
+
+      if (col === "UrlWeb" && value) {
+        let fileId = "";
+        if (value.includes("/d/")) {
+          fileId = value.split("/d/")[1].split("/")[0];
+        } else if (value.includes("id=")) {
+          fileId = value.split("id=")[1].split("&")[0];
+        } else if (/^[a-zA-Z0-9-_]+$/.test(value.trim())) {
+          fileId = value.trim();
+        }
+        if (fileId) {
+          const imgContainer = document.createElement("div");
+          imgContainer.style.cursor = "pointer";
+          imgContainer.title = "คลิกเพื่อดูรายละเอียด";
+          const img = document.createElement("img");
+          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w100-h100`;
+          img.alt = "รูปอะไหล่";
+          img.style.width = "60px";
+          img.style.height = "60px";
+          img.style.objectFit = "cover";
+          img.style.borderRadius = "6px";
+          img.loading = "lazy";
+          img.onerror = () => {
+            img.src = 'https://via.placeholder.com/60/ccc/999?text=NOIMG';
+          };
+          imgContainer.onclick = () => {
+            showDetailModal(row, "imageModal", "imageModalContent");
+          };
+          imgContainer.appendChild(img);
+          td.appendChild(imgContainer);
+        } else {
+          td.textContent = value;
+        }
+      } else {
+        td.textContent = value;
+      }
+      tr.appendChild(td);
+    });
+    fragment.appendChild(tr);
+  });
+  tableBody.innerHTML = "";
+  tableBody.appendChild(fragment);
+}
       function renderTableData() {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -2460,7 +2541,7 @@ searchInput2.addEventListener("input", debounce(e => {
         allData = await getCachedData(cacheKey, async () => {
          const controller = new AbortController();
          const timeoutId = setTimeout(() => controller.abort(), 90000);
-         const res = await fetch(url + "?_=" + Date.now(), { signal: controller.signal });
+         const res = await fetch(url, { signal: controller.signal });
          clearTimeout(timeoutId);
            if (!res.ok) throw new Error("HTTP " + res.status);
          return await res.json();
@@ -2658,7 +2739,7 @@ searchButtonImages.addEventListener("click", () => {
   getCachedData(cacheKey, async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90000);
-    const res = await fetch(url + "?_=" + Date.now(), { signal: controller.signal });
+    const res = await fetch(url , { signal: controller.signal });
     clearTimeout(timeoutId);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const raw = await res.json();
@@ -2689,7 +2770,7 @@ async function loadImageDatabase() {
   const cacheKey = "image-database-mainsapimage";
   try {
     imageDatabase = await getCachedData(cacheKey, async () => {
-      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage?_=${Date.now()}`);
+      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage`);
       const data = await res.json();
       const db = {};
       let count = 0;
@@ -3054,7 +3135,7 @@ async function loadVibhavadiStockMap() {
     return;
   }
 
-  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap?_=${Date.now()}`;
+  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap`;
   
   try {
     const res = await fetch(mainSapUrl);
@@ -3665,7 +3746,7 @@ async function openAnnouncementDeck() {
     didOpen: () => Swal.showLoading()
   });
   try {
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_=${Date.now()}`);
+    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information`);
     const data = await res.json();
     if (!data || data.length === 0) {
       Swal.fire({
