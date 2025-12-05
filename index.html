@@ -3633,9 +3633,6 @@ async function loadVibhavadiStockMap() {
       document.addEventListener('DOMContentLoaded', () => {
         addSortListenersPending();
       });
-      // Initial calls (now safe after all variables defined)
-      loadTheme();
-      checkLoginStatus();
       // Auto-load default data if logged in
       if (appContent.classList.contains('logged-in')) {
         loadData();
@@ -4042,6 +4039,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
+      // Initial calls (now safe after all variables defined)
+      loadTheme();
+      checkLoginStatus();
     </script>
   </body>
 </html>
