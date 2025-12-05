@@ -563,7 +563,9 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let employeeData = [];
       let employeeDataLoaded = false;        // เพิ่มบรรทัดนี้
       let partsDataLoaded = false;          // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
-      let imagesDataLoaded = false;         // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
+      let imagesDataLoaded = false;   
+      let todayDataLoaded = false;
+      let pendingDataLoaded = false;      // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
       // Global search values for syncing between parts and images tabs
       let globalSearch1 = '';
       let globalSearch2 = '';
@@ -601,6 +603,7 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let currentPage = 1;
       let itemsPerPage = 20;
       let currentFilteredData = [];
+      
       // Images tab variables (moved up)
       const searchInputImages1 = document.getElementById("searchInputImages1");
       const searchInputImages2 = document.getElementById("searchInputImages2");
@@ -934,58 +937,42 @@ async function loadEmployeeData() {
       });
       // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
-  // 1. ซ่อนทุก tab-content ก่อน
-  const contents = document.querySelectorAll(".tab-content");
-  contents.forEach(tab => tab.classList.remove("active"));
-  // 2. แสดง tab ที่เลือก
-  const targetTab = document.getElementById(tabId);
-  if (targetTab) {
-    targetTab.classList.add("active");
-  } else {
-    console.error("ไม่พบ tab:", tabId);
-    return;
-  }
-  // 3. อัปเดต Bottom Navigation (ปุ่มล่าง)
-  const navButtons = document.querySelectorAll(".nav-btn");
-  navButtons.forEach(btn => btn.classList.remove("active"));
-  const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
-  if (activeNav) activeNav.classList.add("active");
-  // 4. แสดง Loading (ยกเว้น pending-calls ที่มี loading ภายใน)
-  if (tabId !== "pending-calls") {
-    document.getElementById("loading").style.display = "flex";
-  }
-  // 5. โหลดข้อมูลตามแท็บ
+  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+  const target = document.getElementById(tabId);
+  if (!target) return;
+  target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(`[data-tab="${tabId}"]`)?.classList.add("active");
+
+  document.getElementById("loading").style.display = "flex";
+
   switch (tabId) {
     case "parts":
-      // คืนค่าค้นหาเดิม (sync กับ tab images)
-      document.getElementById('searchInput1').value = globalSearch1;
-      document.getElementById('searchInput2').value = globalSearch2;
-      // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง (สำคัญมาก!)
-      loadImageDatabase(); // ไม่ต้อง await ก็ได้
-  loadData();
-  break;
-    case "images":
-      // คืนค่าค้นหาเดิม
-      document.getElementById('searchInputImages1').value = globalSearch1;
-      document.getElementById('searchInputImages2').value = globalSearch2;
-      // บังคับโหลดฐานข้อมูลรูปภาพใหม่ทุกครั้ง
+      searchInput1.value = globalSearch1 || '';
+      searchInput2.value = globalSearch2 || '';
       loadImageDatabase();
-  loadImagesData();
-  break;
-    case "today":
-      loadTodayData();
+      if (!partsDataLoaded) loadData().then(() => { partsDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
-    case "all":
-      loadAllData();
+    case "images":
+      searchInputImages1.value = globalSearch1 || '';
+      searchInputImages2.value = globalSearch2 || '';
+      loadImageDatabase();
+      if (!imagesDataLoaded) loadImagesData().then(() => { imagesDataLoaded = true; hideLoading(); });
+      else hideLoading();
+      break;
+    case "today":
+      if (!todayDataLoaded) loadTodayData().then(() => { todayDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
     case "pending-calls":
-      loadPendingCallsData();
+      if (!pendingDataLoaded) loadPendingCallsData().then(() => { pendingDataLoaded = true; hideLoading(); });
+      else hideLoading();
       break;
     default:
-      console.warn("ไม่รู้จัก tabId:", tabId);
       hideLoading();
   }
-  // 6. เลื่อนขึ้นบนสุดทุกครั้งที่เปลี่ยนแท็บ (UX ดี)
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // ฟังก์ชันปิด Loading (ใช้ร่วมกับ showTab)
@@ -2533,27 +2520,27 @@ searchInput2.addEventListener("input", debounce(e => {
         renderTableData();
         renderPagination(currentFilteredData.length);
       });
-      async function loadData() {
-      document.getElementById("loading").style.display = "flex";
-        errorContainer.style.display = "none";
-        const cacheKey = "parts-data-main-sap";
-        try {
-        allData = await getCachedData(cacheKey, async () => {
-         const controller = new AbortController();
-         const timeoutId = setTimeout(() => controller.abort(), 90000);
-         const res = await fetch(url, { signal: controller.signal });
-         clearTimeout(timeoutId);
-           if (!res.ok) throw new Error("HTTP " + res.status);
-         return await res.json();
-       },
-     2); // Cache 2 ชั่วโมง (ปรับได้)
+     async function loadData() {
+  document.getElementById("loading").style.display = "flex";
+  errorContainer.style.display = "none";
+  const cacheKey = "parts-data-main-sap";
+  try {
+    allData = await getCachedData(cacheKey, async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    }, 24); // Cache 24 ชม.
+
     tempFilteredData = [...allData];
     currentFilteredData = [...allData];
     applyFilters();
     hideLoading();
     partsDataLoaded = true;
   } catch (err) {
-    console.error(err);
+    console.error("โหลดข้อมูลอะไหล่ล้มเหลว:", err);
     errorContainer.style.display = "block";
     hideLoading();
   }
@@ -2734,38 +2721,36 @@ searchButtonImages.addEventListener("click", () => {
       async function loadImagesData() {
   document.getElementById("loading").style.display = "flex";
   errorContainerImages.style.display = "none";
-
   const cacheKey = "images-data-with-id";
-  getCachedData(cacheKey, async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
-    const res = await fetch(url , { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const raw = await res.json();
-    // กรองเฉพาะที่มี id (รูป)
-    return raw.filter(row => row.id && row.id.trim() !== "");
-  }, 4) // Cache 4 ชั่วโมง เพราะรูปเปลี่ยนช้ากว่า
-  .then(data => {
+  try {
+    const data = await getCachedData(cacheKey, async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const raw = await res.json();
+      return raw.filter(row => row.id && row.id.trim() !== "");
+    }, 24);
+
     allDataImages = data;
     tempFilteredDataImages = [...data];
     currentFilteredDataImages = [...data];
     applyFiltersImages();
     hideLoading();
     imagesDataLoaded = true;
-  })
-  .catch(err => {
-    console.error(err);
+  } catch (err) {
+    console.error("โหลดข้อมูลรูปภาพล้มเหลว:", err);
     errorContainerImages.style.display = "block";
     hideLoading();
-  });
+  }
 }
       // โหลดข้อมูลรูปจาก Sheet ใหม่: MainSapimage
 // === แทนที่ฟังก์ชัน loadImageDatabase ด้วยเวอร์ชันนี้ ===
 async function loadImageDatabase() {
-  if (imageDbLoaded) {
+ if (imageDbLoaded) {
     console.log("ใช้ Cache ฐานข้อมูลรูปภาพ");
-    return imageDatabase; // ส่งกลับของเก่าเลย
+    return imageDatabase;
   }
   const cacheKey = "image-database-mainsapimage";
   try {
@@ -3617,64 +3602,31 @@ async function loadVibhavadiStockMap() {
         }).length / itemsPerPagePending);
         filterAndRenderTablePending();
       };
-      async function loadPendingCallsData() {
-  console.log("Starting data load for pending calls from:", urlPending);
-
-  const cacheKey = "pending-calls-data-v2"; // เปลี่ยนชื่อ key เล็กน้อยเพื่อรีเซ็ต cache ครั้งแรก
-
+     async function loadPendingCallsData() {
+  console.log("กำลังโหลดข้อมูล Pending Calls...");
+  const cacheKey = "pending-calls-data-v3";
   try {
     allDataPending = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      // ยังคงมี cache busting เผื่อกรณีด่วน (แต่จะใช้ cache ปกติถ้าไม่เกิน 4 ชม.)
-      const response = await fetch(urlPending + "?_=" + Date.now(), {
+      const res = await fetch(urlPending + "?_=" + Date.now(), { 
         signal: controller.signal,
-        cache: 'no-cache' // ป้องกัน browser cache ด้วย
+        cache: 'no-cache'
       });
-
       clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }, 6);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("No data received or data is empty");
-      }
-
-      return data;
-    }, 4); // Cache 4 ชั่วโมง
-
-    // ดำเนินการต่อเมื่อได้ข้อมูลแล้ว
     populateTeamFilterPending(allDataPending);
     addSortListenersPending();
     filterAndRenderTablePending();
-
-    console.log("Pending calls data loaded successfully:", allDataPending.length, "rows");
-
+    pendingDataLoaded = true;
+    hideLoading();
   } catch (error) {
-    console.error("Error loading pending calls data:", error);
-
-    // แสดง error ในตารางเหมือนเดิม
-    if (error.name === 'AbortError') {
-      tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">การโหลดข้อมูลใช้เวลานานเกินไป กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</td></tr>';
-    } else if (error.message.includes('HTTP error! status: 403') || error.message.includes('CORS')) {
-      tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">ไม่สามารถเข้าถึงข้อมูลได้ กรุณาตรวจสอบการแชร์ Google Sheets ให้เป็น Public</td></tr>';
-    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดปัญหาการเชื่อมต่อเครือข่าย กรุณาเช็คอินเทอร์เน็ตแล้วลองใหม่</td></tr>';
-    } else {
-      tableBodyPending.innerHTML = `<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
-    }
-
-    Swal.fire({
-      icon: "error",
-      title: "โหลดข้อมูลไม่สำเร็จ",
-      text: "ไม่สามารถโหลดข้อมูลอะไหล่ค้างตาม Call ได้ในขณะนี้",
-      confirmButtonText: "ตกลง",
-    });
+    console.error("โหลด Pending Calls ล้มเหลว:", error);
+    tableBodyPending.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#e74c3c;">โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</td></tr>';
+    hideLoading();
   }
 }
       // Add sort listeners for pending calls
