@@ -948,14 +948,21 @@ function showTab(tabId) {
   document.getElementById("loading").style.display = "flex";
 
   switch (tabId) {
-    case "parts":
-      searchInput1.value = globalSearch1 || '';
-      searchInput2.value = globalSearch2 || '';
-      loadImageDatabase();
-      if (!partsDataLoaded) loadData().then(() => { partsDataLoaded = true; hideLoading(); });
-      else hideLoading();
-      break;
-
+   case "parts":
+  searchInput1.value = globalSearch1 || '';
+  searchInput2.value = globalSearch2 || '';
+  loadImageDatabase();
+  if (!partsDataLoaded) {
+    loadData().then(() => {
+      partsDataLoaded = true;
+      hideLoading();
+      // ไม่ต้อง apply filter เพราะ loadData() เรียก applyFilters() อยู่แล้ว
+    });
+  } else {
+    applyFilters(); // 👈 เพิ่มบรรทัดนี้!
+    hideLoading();
+  }
+  break;
     case "images":
   searchInputImages1.value = globalSearch1 || '';
   searchInputImages2.value = globalSearch2 || '';
