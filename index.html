@@ -955,13 +955,15 @@ function showTab(tabId) {
       if (!partsDataLoaded) loadData().then(() => { partsDataLoaded = true; hideLoading(); });
       else hideLoading();
       break;
+
     case "images":
-      searchInputImages1.value = globalSearch1 || '';
-      searchInputImages2.value = globalSearch2 || '';
-      loadImageDatabase();
-      if (!imagesDataLoaded) loadImagesData().then(() => { imagesDataLoaded = true; hideLoading(); });
-      else hideLoading();
-      break;
+  searchInputImages1.value = globalSearch1 || '';
+  searchInputImages2.value = globalSearch2 || '';
+  loadImageDatabase(); // ยังใช้ได้ สำหรับแสดงรูปใน modal
+  // ไม่โหลดข้อมูลใหม่ → ใช้ allData เดิม
+  applyFiltersImages(); // กรองจาก allData + มี id
+  hideLoading();
+  break;
     case "today":
       if (!todayDataLoaded) loadTodayData().then(() => { todayDataLoaded = true; hideLoading(); });
       else hideLoading();
@@ -2436,30 +2438,30 @@ function renderTable(data) {
         renderTable(currentFilteredData.slice(startIndex, endIndex));
       }
       function applyFilters() {
-        const keyword1 = searchInput1.value.trim().toLowerCase();
-        let filtered1 = allData;
-        if (keyword1) {
-          // ค้นหาในทุกคอลัมน์สำหรับ Filter 1
-          filtered1 = allData.filter((row) => {
-            const searchFields = ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"];
-            return searchFields.some(field => (row[field] || "").toLowerCase().includes(keyword1));
-          });
-        }
-        tempFilteredData = filtered1;
-        const keyword2 = searchInput2.value.trim().toLowerCase();
-        let filtered2 = tempFilteredData;
-        if (keyword2) {
-          // ค้นหาในทุกคอลัมน์สำหรับ Filter 2 (จาก tempFilteredData)
-          filtered2 = tempFilteredData.filter((row) => {
-            const searchFields = ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"];
-            return searchFields.some(field => (row[field] || "").toLowerCase().includes(keyword2));
-          });
-        }
-        currentFilteredData = filtered2;
-        currentPage = 1;
-        renderTableData();
-        renderPagination(currentFilteredData.length);
-      }
+  const keyword1 = (globalSearch1 || "").trim().toLowerCase();
+  const keyword2 = (globalSearch2 || "").trim().toLowerCase();
+
+  let filtered = allData;
+
+  if (keyword1) {
+    filtered = filtered.filter(row =>
+      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
+        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword1))
+    );
+  }
+
+  if (keyword2) {
+    filtered = filtered.filter(row =>
+      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
+        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword2))
+    );
+  }
+
+  currentFilteredData = filtered;
+  currentPage = 1;
+  renderTableData();
+  renderPagination(filtered.length);
+}
       searchInput1.addEventListener("input", debounce(e => {
   globalSearch1 = e.target.value;
   document.getElementById("searchInputImages1").value = globalSearch1;
@@ -2631,30 +2633,35 @@ searchInput2.addEventListener("input", debounce(e => {
         renderGalleryDataImages(currentFilteredDataImages.slice(startIndex, endIndex));
       }
       function applyFiltersImages() {
-        const keyword1 = searchInputImages1.value.trim().toLowerCase();
-        let filtered1 = allDataImages;
-        if (keyword1) {
-          // ค้นหาในทุกคอลัมน์สำหรับ Filter 1
-          filtered1 = allDataImages.filter((row) => {
-            const searchFields = ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"];
-            return searchFields.some(field => (row[field] || "").toLowerCase().includes(keyword1));
-          });
-        }
-        tempFilteredDataImages = filtered1;
-        const keyword2 = searchInputImages2.value.trim().toLowerCase();
-        let filtered2 = tempFilteredDataImages;
-        if (keyword2) {
-          // ค้นหาในทุกคอลัมน์สำหรับ Filter 2 (จาก tempFilteredDataImages)
-          filtered2 = tempFilteredDataImages.filter((row) => {
-            const searchFields = ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"];
-            return searchFields.some(field => (row[field] || "").toLowerCase().includes(keyword2));
-          });
-        }
-        currentFilteredDataImages = filtered2;
-        currentPageImages = 1;
-        renderTableDataImages();
-        renderPaginationImages(currentFilteredDataImages.length);
-      }
+  // เริ่มจาก allData ของแท็บอะไหล่
+  let filtered = allData.filter(row => {
+    // ต้องมี id (จาก MainSap หรือ MainSapimage ก็ได้)
+    const hasId = (row.id && row.id.trim() !== "") || 
+                  (row.Material && imageDatabase[row.Material] && imageDatabase[row.Material].length > 0);
+    return hasId;
+  });
+
+  const keyword1 = searchInputImages1.value.trim().toLowerCase();
+  if (keyword1) {
+    filtered = filtered.filter(row =>
+      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
+        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword1))
+    );
+  }
+
+  const keyword2 = searchInputImages2.value.trim().toLowerCase();
+  if (keyword2) {
+    filtered = filtered.filter(row =>
+      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
+        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword2))
+    );
+  }
+
+  currentFilteredDataImages = filtered;
+  currentPageImages = 1;
+  renderTableDataImages();
+  renderPaginationImages(filtered.length);
+}
       searchInputImages1.addEventListener("input", debounce(e => {
   globalSearch1 = e.target.value;
   document.getElementById("searchInput1").value = globalSearch1;
@@ -2718,34 +2725,7 @@ searchButtonImages.addEventListener("click", () => {
         renderTableDataImages();
         renderPaginationImages(currentFilteredDataImages.length);
       });
-      async function loadImagesData() {
-  document.getElementById("loading").style.display = "flex";
-  errorContainerImages.style.display = "none";
-  const cacheKey = "images-data-with-id";
-  try {
-    const data = await getCachedData(cacheKey, async () => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const raw = await res.json();
-      return raw.filter(row => row.id && row.id.trim() !== "");
-    }, 24);
 
-    allDataImages = data;
-    tempFilteredDataImages = [...data];
-    currentFilteredDataImages = [...data];
-    applyFiltersImages();
-    hideLoading();
-    imagesDataLoaded = true;
-  } catch (err) {
-    console.error("โหลดข้อมูลรูปภาพล้มเหลว:", err);
-    errorContainerImages.style.display = "block";
-    hideLoading();
-  }
-}
-      // โหลดข้อมูลรูปจาก Sheet ใหม่: MainSapimage
 // === แทนที่ฟังก์ชัน loadImageDatabase ด้วยเวอร์ชันนี้ ===
 async function loadImageDatabase() {
  if (imageDbLoaded) {
