@@ -625,6 +625,11 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
       let currentFilteredDataImages = [];
       let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
       let imageDbLoaded = false;
+      function extractIdFromUrlWeb(url) {
+  if (!url || typeof url !== 'string') return '';
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/) || url.match(/uc\?id=([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : '';
+}
       let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
       // Today tab variables (moved up)
       const modal = document.getElementById("detailModal");
@@ -948,7 +953,7 @@ function showTab(tabId) {
   document.getElementById("loading").style.display = "flex";
 
   switch (tabId) {
-   case "parts":
+    case "parts":
   searchInput1.value = globalSearch1 || '';
   searchInput2.value = globalSearch2 || '';
   loadImageDatabase();
@@ -2567,48 +2572,52 @@ searchInput2.addEventListener("input", debounce(e => {
       });
       // Updated render function for gallery
       function renderGalleryDataImages(data) {
-        if (!galleryContainer) {
-          console.error("Gallery container not found");
-          Swal.fire({
-            icon: "error",
-            title: "ข้อผิดพลาด",
-            text: "ไม่พบ container สำหรับแสดง gallery กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
-            confirmButtonText: "ตกลง",
-          });
-          return;
-        }
-        galleryContainer.innerHTML = "";
-        data.forEach((row) => {
-          const galleryItem = document.createElement("div");
-          galleryItem.className = "gallery-item";
-          // Convert values to numbers for comparison
-          const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-          const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
-          // Determine styling based on conditions
-          let textColor = "";
-          let fontWeight = "";
-          if (vibhavadiValue > 0) {
-            textColor = "#4caf50"; // Green
-            fontWeight = "bold";
-          } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
-            textColor = "#2196f3"; // Blue
-            fontWeight = "bold";
-          }
-          const thumbnailSrc = row.id ? `https://drive.google.com/thumbnail?id=${row.id}&sz=w300-h300` : '';
-          galleryItem.innerHTML = `
-            <img src="${thumbnailSrc}" alt="${row.Description || 'Image'}" class="gallery-thumbnail"
-              style="color: ${textColor}; font-weight: ${fontWeight};"
-              onclick="showDetailModal(${JSON.stringify(row).replace(/"/g, '&quot;')}, 'imageModalImages', 'imageModalContentImages')" // Use unified function
-              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='; this.onclick=null;">
-            <div class="gallery-info">
-              <div class="gallery-material" style="color: ${textColor}; font-weight: ${fontWeight};">${row.Material || ''}</div>
-              <div class="gallery-description">${row.Description || ''}</div>
-            </div>
-          `;
-          galleryContainer.appendChild(galleryItem);
-        });
-      }
-      function renderPaginationImages(totalItems) {
+  if (!galleryContainer) {
+    console.error("Gallery container not found");
+    Swal.fire({
+      icon: "error",
+      title: "ข้อผิดพลาด",
+      text: "ไม่พบ container สำหรับแสดง gallery กรุณาตรวจสอบโครงสร้างหน้าเว็บ",
+      confirmButtonText: "ตกลง",
+    });
+    return;
+  }
+  galleryContainer.innerHTML = "";
+  data.forEach((row) => {
+    const galleryItem = document.createElement("div");
+    galleryItem.className = "gallery-item";
+    // Convert values to numbers for comparison
+    const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+    const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
+    // Determine styling based on conditions
+    let textColor = "";
+    let fontWeight = "";
+    if (vibhavadiValue > 0) {
+      textColor = "#4caf50"; // Green
+      fontWeight = "bold";
+    } else if (vibhavadiValue === 0 && unrestrictedValue > 0) {
+      textColor = "#2196f3"; // Blue
+      fontWeight = "bold";
+    }
+    // Fix: Get ID from imageDatabase first, fallback to UrlWeb
+    const material = row.Material || '';
+    const idsFromDb = imageDatabase[material] || [];
+    const id = idsFromDb[0] || extractIdFromUrlWeb(row.UrlWeb);
+    const thumbnailSrc = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w300-h300` : '';
+    galleryItem.innerHTML = `
+      <img src="${thumbnailSrc}" alt="${row.Description || 'Image'}" class="gallery-thumbnail"
+        style="color: ${textColor}; font-weight: ${fontWeight};"
+        onclick="showDetailModal(${JSON.stringify(row).replace(/"/g, '&quot;')}, 'imageModalImages', 'imageModalContentImages')" // Use unified function
+        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='; this.onclick=null;">
+      <div class="gallery-info">
+        <div class="gallery-material" style="color: ${textColor}; font-weight: ${fontWeight};">${row.Material || ''}</div>
+        <div class="gallery-description">${row.Description || ''}</div>
+      </div>
+    `;
+    galleryContainer.appendChild(galleryItem);
+  });
+}
+function renderPaginationImages(totalItems) {
         const totalPages = Math.ceil(totalItems / itemsPerPageImages);
         pageNumbersImages.innerHTML = "";
         if (totalPages === 0) {
