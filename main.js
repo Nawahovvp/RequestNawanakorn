@@ -1,54 +1,54 @@
-      // === ระบบอัปเดตแอปทันที + แจ้งเตือนผู้ใช้ ===
-  let newWorker;
-  let isUpdateShown = false;
-  function showUpdateToast() {
-    if (isUpdateShown) return;
-    isUpdateShown = true;
-    Swal.fire({
-      title: 'มีอัปเดตใหม่!',
-      html: 'แอปได้รับการปรับปรุงแล้ว<br><small>กดรีเฟรชเพื่อใช้งานเวอร์ชันล่าสุด</small>',
-      icon: 'info',
-      confirmButtonText: 'รีเฟรชเลย',
-      cancelButtonText: 'ภายหลัง',
-      showCancelButton: true,
-      allowOutsideClick: false,
-      timer: 20000,
-      timerProgressBar: true,
-      customClass: {
-        popup: 'animated bounceIn'
+// === ระบบอัปเดตแอปทันที + แจ้งเตือนผู้ใช้ ===
+let newWorker;
+let isUpdateShown = false;
+function showUpdateToast() {
+  if (isUpdateShown) return;
+  isUpdateShown = true;
+  Swal.fire({
+    title: 'มีอัปเดตใหม่!',
+    html: 'แอปได้รับการปรับปรุงแล้ว<br><small>กดรีเฟรชเพื่อใช้งานเวอร์ชันล่าสุด</small>',
+    icon: 'info',
+    confirmButtonText: 'รีเฟรชเลย',
+    cancelButtonText: 'ภายหลัง',
+    showCancelButton: true,
+    allowOutsideClick: false,
+    timer: 20000,
+    timerProgressBar: true,
+    customClass: {
+      popup: 'animated bounceIn'
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      if (newWorker) {
+        newWorker.postMessage({ type: 'SKIP_WAITING' });
       }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        if (newWorker) {
-          newWorker.postMessage({ type: 'SKIP_WAITING' });
-        }
-        window.location.reload();
-      }
-    });
-  }
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => {
-        console.log('SW registered');
-        // บังคับเช็คอัปเดตทุกครั้งที่เปิดแอป
-        reg.update();
-        reg.addEventListener('updatefound', () => {
-          newWorker = reg.installing;
-          if (!newWorker) return;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              showUpdateToast();
-            }
-          });
-        });
-      })
-      .catch(err => console.log('SW registration failed:', err));
-    // รีโหลดอัตโนมัติเมื่อ SW เปลี่ยน
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
-    });
-  }
-  // === แสดงเวอร์ชันแอปในเมนูตั้งค่า (อัตโนมัติจาก sw.js) ===
+    }
+  });
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => {
+      console.log('SW registered');
+      // บังคับเช็คอัปเดตทุกครั้งที่เปิดแอป
+      reg.update();
+      reg.addEventListener('updatefound', () => {
+        newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateToast();
+          }
+        });
+      });
+    })
+    .catch(err => console.log('SW registration failed:', err));
+  // รีโหลดอัตโนมัติเมื่อ SW เปลี่ยน
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+// === แสดงเวอร์ชันแอปในเมนูตั้งค่า (อัตโนมัติจาก sw.js) ===
 function updateAppVersionDisplay() {
   // ดึงเวอร์ชันจาก sw.js โดยตรง (ถ้า Service Worker โหลดแล้ว)
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -75,7 +75,7 @@ navigator.serviceWorker.addEventListener('message', event => {
 document.addEventListener('DOMContentLoaded', updateAppVersionDisplay);
 // แก้ไข showSettings() เดิมของคุณ ให้เรียกอัปเดตเวอร์ชันด้วย
 const originalShowSettings = window.showSettings; // เก็บฟังก์ชันเดิมไว้
-window.showSettings = function() {
+window.showSettings = function () {
   // เรียกฟังก์ชันเดิมของคุณก่อน
   if (typeof originalShowSettings === 'function') {
     originalShowSettings();
@@ -83,8 +83,8 @@ window.showSettings = function() {
   // แล้วค่อยอัปเดตเวอร์ชัน
   updateAppVersionDisplay();
 };
-      'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
-      // ========== ระบบ Cache ขั้นเทพ (2025) สำหรับ Parts + Images ==========
+'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
+// ========== ระบบ Cache ขั้นเทพ (2025) สำหรับ Parts + Images ==========
 const CACHE_VERSION = "v18";
 const CACHE_NAME = `partgo-cache-${CACHE_VERSION}`;
 
@@ -125,87 +125,87 @@ async function getCachedData(key, fetchFn, expireHours = 1) {
 
   return freshData;
 }
-      // Global employee data
-      let employeeData = [];
-      let employeeDataLoaded = false;        // เพิ่มบรรทัดนี้
-      let partsDataLoaded = false;          // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
-      let imagesDataLoaded = false;   
-      let todayDataLoaded = false;
-      let pendingDataLoaded = false;      // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
-      // Global search values for syncing between parts and images tabs
-      let globalSearch1 = '';
-      let globalSearch2 = '';
-      // Global for today tab: toggle pending only
-      let showOnlyPending = true; // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
-      // Sort config for today tab
-      let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
-      // Pagination config for today tab
-      let currentPageToday = 1;
-      let itemsPerPageToday = 20; // Default to 20 items per page
-      // Opensheet URL for Request sheet
-      const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
-      // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
-      const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
-      // Parts tab variables (moved up to avoid initialization error)
-      const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
-      const sheetName = "MainSap";
-      const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
-      const searchInput1 = document.getElementById("searchInput1");
-      const searchInput2 = document.getElementById("searchInput2");
-      const searchButton = document.getElementById("searchButton");
-      const tableBody = document.querySelector("#data-table tbody");
-          const tableContainerParts = document.querySelector("#parts .table-container");
-      const pagination = document.getElementById("pagination");
-      const pageNumbers = document.getElementById("pageNumbers");
-      const itemsPerPageSelect = document.getElementById("itemsPerPage");
-      const firstPageButton = document.getElementById("firstPage");
-      const prevPageButton = document.getElementById("prevPage");
-      const nextPageButton = document.getElementById("nextPage");
-      const lastPageButton = document.getElementById("lastPage");
-      const errorContainer = document.getElementById("error-container");
-      const retryButton = document.getElementById("retry-button");
-      let allData = [];
-      let tempFilteredData = [];
-      let currentPage = 1;
-      let itemsPerPage = 20;
-      let currentFilteredData = [];
-      
-      // Images tab variables (moved up)
-      const searchInputImages1 = document.getElementById("searchInputImages1");
-      const searchInputImages2 = document.getElementById("searchInputImages2");
-      const searchButtonImages = document.getElementById("searchButtonImages");
-      const galleryContainer = document.getElementById("gallery-container-images");
-      const paginationImages = document.getElementById("paginationImages");
-      const pageNumbersImages = document.getElementById("pageNumbersImages");
-      const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
-      const firstPageButtonImages = document.getElementById("firstPageImages");
-      const prevPageButtonImages = document.getElementById("prevPageImages");
-      const nextPageButtonImages = document.getElementById("nextPageImages");
-      const lastPageButtonImages = document.getElementById("lastPageImages");
-      const errorContainerImages = document.getElementById("error-container-images");
-      const retryButtonImages = document.getElementById("retry-button-images");
-      let allDataImages = [];
-      let tempFilteredDataImages = [];
-      let currentPageImages = 1;
-      let itemsPerPageImages = 20;
-      let currentFilteredDataImages = [];
-      let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
-      let imageDbLoaded = false;
-      function extractIdFromUrlWeb(url) {
+// Global employee data
+let employeeData = [];
+let employeeDataLoaded = false;        // เพิ่มบรรทัดนี้
+let partsDataLoaded = false;          // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
+let imagesDataLoaded = false;
+let todayDataLoaded = false;
+let pendingDataLoaded = false;      // เพิ่มบรรทัดนี้ (สำหรับข้อ 2)
+// Global search values for syncing between parts and images tabs
+let globalSearch1 = '';
+let globalSearch2 = '';
+// Global for today tab: toggle pending only
+let showOnlyPending = true; // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
+// Sort config for today tab
+let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
+// Pagination config for today tab
+let currentPageToday = 1;
+let itemsPerPageToday = 20; // Default to 20 items per page
+// Opensheet URL for Request sheet
+const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
+// GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
+const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
+// Parts tab variables (moved up to avoid initialization error)
+const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
+const sheetName = "MainSap";
+const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+const searchInput1 = document.getElementById("searchInput1");
+const searchInput2 = document.getElementById("searchInput2");
+const searchButton = document.getElementById("searchButton");
+const tableBody = document.querySelector("#data-table tbody");
+const tableContainerParts = document.querySelector("#parts .table-container");
+const pagination = document.getElementById("pagination");
+const pageNumbers = document.getElementById("pageNumbers");
+const itemsPerPageSelect = document.getElementById("itemsPerPage");
+const firstPageButton = document.getElementById("firstPage");
+const prevPageButton = document.getElementById("prevPage");
+const nextPageButton = document.getElementById("nextPage");
+const lastPageButton = document.getElementById("lastPage");
+const errorContainer = document.getElementById("error-container");
+const retryButton = document.getElementById("retry-button");
+let allData = [];
+let tempFilteredData = [];
+let currentPage = 1;
+let itemsPerPage = 20;
+let currentFilteredData = [];
+
+// Images tab variables (moved up)
+const searchInputImages1 = document.getElementById("searchInputImages1");
+const searchInputImages2 = document.getElementById("searchInputImages2");
+const searchButtonImages = document.getElementById("searchButtonImages");
+const galleryContainer = document.getElementById("gallery-container-images");
+const paginationImages = document.getElementById("paginationImages");
+const pageNumbersImages = document.getElementById("pageNumbersImages");
+const itemsPerPageSelectImages = document.getElementById("itemsPerPageImages");
+const firstPageButtonImages = document.getElementById("firstPageImages");
+const prevPageButtonImages = document.getElementById("prevPageImages");
+const nextPageButtonImages = document.getElementById("nextPageImages");
+const lastPageButtonImages = document.getElementById("lastPageImages");
+const errorContainerImages = document.getElementById("error-container-images");
+const retryButtonImages = document.getElementById("retry-button-images");
+let allDataImages = [];
+let tempFilteredDataImages = [];
+let currentPageImages = 1;
+let itemsPerPageImages = 20;
+let currentFilteredDataImages = [];
+let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
+let imageDbLoaded = false;
+function extractIdFromUrlWeb(url) {
   if (!url || typeof url !== 'string') return '';
   const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/) || url.match(/uc\?id=([a-zA-Z0-9-_]+)/);
   return match ? match[1] : '';
 }
-      let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
-      // Today tab variables (moved up)
-      const modal = document.getElementById("detailModal");
-      const modalContent = document.getElementById("modalContent");
-      const closeModal = document.getElementById("closeModal");
-      const searchInputToday = document.getElementById("searchInputToday");
-      const tableBodyToday = document.querySelector("#data-table-today tbody");
-      const errorContainerToday = document.getElementById("error-container-today");
-      const retryButtonToday = document.getElementById("retry-button-today");
-      // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
+let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
+// Today tab variables (moved up)
+const modal = document.getElementById("detailModal");
+const modalContent = document.getElementById("modalContent");
+const closeModal = document.getElementById("closeModal");
+const searchInputToday = document.getElementById("searchInputToday");
+const tableBodyToday = document.querySelector("#data-table-today tbody");
+const errorContainerToday = document.getElementById("error-container-today");
+const retryButtonToday = document.getElementById("retry-button-today");
+// === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
 toggleAllDataBtn.addEventListener("click", () => {
   showOnlyPending = !showOnlyPending;
   if (showOnlyPending) {
@@ -225,227 +225,315 @@ toggleAllDataBtn.addEventListener("click", () => {
   currentPageToday = 1;
   updateTableToday();
 });
-     
-      // Pagination elements for today tab
-      const paginationToday = document.getElementById("paginationToday");
-      const pageNumbersToday = document.getElementById("pageNumbersToday");
-      const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
-      const firstPageButtonToday = document.getElementById("firstPageToday");
-      const prevPageButtonToday = document.getElementById("prevPageToday");
-      const nextPageButtonToday = document.getElementById("nextPageToday");
-      const lastPageButtonToday = document.getElementById("lastPageToday");
-      let allDataToday = [];
-      let currentFilteredDataToday = [];
-      // All tab variables (moved up)
-      const modalAll = document.getElementById("detailModalAll");
-      const modalContentAll = document.getElementById("modalContentAll");
-      const closeModalAll = document.getElementById("closeModalAll");
-      const searchInputAll = document.getElementById("searchInputAll");
-      const tableBodyAll = document.querySelector("#data-table-all tbody");
-      const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
-      const firstPageButtonAll = document.getElementById("firstPageAll");
-      const prevPageButtonAll = document.getElementById("prevPageAll");
-      const nextPageButtonAll = document.getElementById("nextPageAll");
-      const lastPageButtonAll = document.getElementById("lastPageAll");
-      const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
-      let allDataAll = [];
-      let currentPageAll = 1;
-      let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
-      // Pending calls tab variables (moved up)
-      const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
-      const sheetNamePending = 'Call_Report';
-      const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
-      const modalPending = document.getElementById("detailModalPending");
-      const modalContentPending = document.getElementById("modalContentPending");
-      const closeModalPending = document.getElementById("closeModalPending");
-      const teamFilterPending = document.getElementById("teamFilterPending");
-      const searchInputPending = document.getElementById("searchInputPending");
-      const searchButtonPending = document.getElementById("searchButtonPending");
-      const tableBodyPending = document.querySelector("#data-table-pending tbody");
-      const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
-      const firstPageButtonPending = document.getElementById("firstPagePending");
-      const prevPageButtonPending = document.getElementById("prevPagePending");
-      const nextPageButtonPending = document.getElementById("nextPagePending");
-      const lastPageButtonPending = document.getElementById("lastPagePending");
-      const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
-      let allDataPending = [];
-      let currentPagePending = 1;
-      let itemsPerPagePending = 20;
-      let sortConfigPending = { column: null, direction: 'asc' };
-      let employeeDataPromise = null; 
-      // Image Modal Handling for #parts (moved up)
-      const imageModal = document.getElementById('imageModal');
-      const imageModalContent = document.getElementById('imageModalContent');
-      const closeImageModal = document.getElementById('closeImageModal');
-      closeImageModal.onclick = () => {
-        imageModal.style.display = 'none';
-      };
-      // Image Modal Handling for #images (moved up)
-      const imageModalImages = document.getElementById('imageModalImages');
-      const imageModalContentImages = document.getElementById('imageModalContentImages');
-      const closeImageModalImages = document.getElementById('closeImageModalImages');
-      closeImageModalImages.onclick = () => {
-        imageModalImages.style.display = 'none';
-      };
-      // Theme Management
-      function setTheme(theme) {
-        localStorage.setItem('theme', theme);
-        document.body.classList.remove('dark-mode', 'light-mode');
-        document.body.classList.add(theme + '-mode');
-      }
-      function loadTheme() {
-        const theme = localStorage.getItem('theme') || 'light';
-        setTheme(theme);
-        if (document.getElementById('themeSelect')) {
-          document.getElementById('themeSelect').value = theme;
-        }
-      }
-      function debounce(fn, delay = 300) {
+
+// Pagination elements for today tab
+const paginationToday = document.getElementById("paginationToday");
+const pageNumbersToday = document.getElementById("pageNumbersToday");
+const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
+const firstPageButtonToday = document.getElementById("firstPageToday");
+const prevPageButtonToday = document.getElementById("prevPageToday");
+const nextPageButtonToday = document.getElementById("nextPageToday");
+const lastPageButtonToday = document.getElementById("lastPageToday");
+let allDataToday = [];
+let currentFilteredDataToday = [];
+// All tab variables (moved up)
+const modalAll = document.getElementById("detailModalAll");
+const modalContentAll = document.getElementById("modalContentAll");
+const closeModalAll = document.getElementById("closeModalAll");
+const searchInputAll = document.getElementById("searchInputAll");
+const tableBodyAll = document.querySelector("#data-table-all tbody");
+const pageNumbersContainerAll = document.getElementById("pageNumbersAll");
+const firstPageButtonAll = document.getElementById("firstPageAll");
+const prevPageButtonAll = document.getElementById("prevPageAll");
+const nextPageButtonAll = document.getElementById("nextPageAll");
+const lastPageButtonAll = document.getElementById("lastPageAll");
+const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
+let allDataAll = [];
+let currentPageAll = 1;
+let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
+// Pending calls tab variables (moved up)
+const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
+const sheetNamePending = 'Call_Report';
+const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
+const modalPending = document.getElementById("detailModalPending");
+const modalContentPending = document.getElementById("modalContentPending");
+const closeModalPending = document.getElementById("closeModalPending");
+const teamFilterPending = document.getElementById("teamFilterPending");
+const searchInputPending = document.getElementById("searchInputPending");
+const searchButtonPending = document.getElementById("searchButtonPending");
+const tableBodyPending = document.querySelector("#data-table-pending tbody");
+const pageNumbersContainerPending = document.getElementById("pageNumbersPending");
+const firstPageButtonPending = document.getElementById("firstPagePending");
+const prevPageButtonPending = document.getElementById("prevPagePending");
+const nextPageButtonPending = document.getElementById("nextPagePending");
+const lastPageButtonPending = document.getElementById("lastPagePending");
+const itemsPerPageSelectPending = document.getElementById("itemsPerPagePending");
+let allDataPending = [];
+let currentPagePending = 1;
+let itemsPerPagePending = 20;
+let sortConfigPending = { column: null, direction: 'asc' };
+let employeeDataPromise = null;
+// Image Modal Handling for #parts (moved up)
+const imageModal = document.getElementById('imageModal');
+const imageModalContent = document.getElementById('imageModalContent');
+const closeImageModal = document.getElementById('closeImageModal');
+closeImageModal.onclick = () => {
+  imageModal.style.display = 'none';
+};
+// Image Modal Handling for #images (moved up)
+const imageModalImages = document.getElementById('imageModalImages');
+const imageModalContentImages = document.getElementById('imageModalContentImages');
+const closeImageModalImages = document.getElementById('closeImageModalImages');
+closeImageModalImages.onclick = () => {
+  imageModalImages.style.display = 'none';
+};
+// Theme Management
+function setTheme(theme) {
+  localStorage.setItem('theme', theme);
+  document.body.classList.remove('dark-mode', 'light-mode');
+  document.body.classList.add(theme + '-mode');
+}
+function loadTheme() {
+  const theme = localStorage.getItem('theme') || 'light';
+  setTheme(theme);
+  if (document.getElementById('themeSelect')) {
+    document.getElementById('themeSelect').value = theme;
+  }
+}
+function debounce(fn, delay = 300) {
   let timeout;
   return (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => fn(...args), delay);
   };
 }
-      async function showSettings() {
-const currentTheme = localStorage.getItem('theme') || 'light';
-const savedUsername = localStorage.getItem('username');
-const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
-// แสดงข้อมูลพื้นฐาน
-document.getElementById('modalUserName').textContent = savedUserName;
-document.getElementById('modalUserID').textContent = savedUsername || '-';
-document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
-document.getElementById('themeSelect').value = currentTheme;
-// ดึงหน่วยงาน
-try {
-const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
-document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
-document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
-} catch (err) {
-document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
-document.getElementById('modalUserTeam').style.color = '#e74c3c';
+async function showSettings() {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  const savedUsername = localStorage.getItem('username');
+  const savedUserName = localStorage.getItem('userName') || 'ไม่พบชื่อ';
+  const userAuth = localStorage.getItem('userAuth') || 'None'; // ดึงค่า Auth
+
+  // แสดงข้อมูลพื้นฐาน
+  document.getElementById('modalUserName').textContent = savedUserName;
+  document.getElementById('modalUserID').textContent = savedUsername || '-';
+  document.getElementById('modalUserTeam').textContent = 'กำลังโหลด...';
+  document.getElementById('modalUserAuth').textContent = userAuth === '0326' ? 'Active' : 'None'; // เพิ่มบรรทัดนี้
+  document.getElementById('themeSelect').value = currentTheme;
+
+  // สีสถานะ Auth
+  const authElement = document.getElementById('modalUserAuth');
+  if (userAuth === '0326') {
+    authElement.style.color = '#27ae60'; // สีเขียว
+    authElement.style.fontWeight = 'bold';
+  } else {
+    authElement.style.color = '#e74c3c'; // สีแดง
+    authElement.style.fontWeight = 'bold';
+  }
+
+  // ดึงหน่วยงาน
+  try {
+    const user = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
+    document.getElementById('modalUserTeam').textContent = user?.หน่วยงาน || 'ไม่พบข้อมูลหน่วยงาน';
+    document.getElementById('modalUserTeam').style.color = user?.หน่วยงาน ? '#1976d2' : '#e74c3c';
+  } catch (err) {
+    document.getElementById('modalUserTeam').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+    document.getElementById('modalUserTeam').style.color = '#e74c3c';
+  }
+
+  // แสดงปุ่มประกาศสำหรับ admin (7512411)
+  const adminSection = document.getElementById('adminAnnouncementSection');
+  if (savedUsername === '7512411' && adminSection) {
+    adminSection.style.display = 'block';
+  } else if (adminSection) {
+    adminSection.style.display = 'none';
+  }
+
+  // เปิด Modal
+  document.getElementById('settingsModal').style.display = 'block';
+
+  // ผูก event ทุกครั้งที่เปิด Settings
+  document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
+  document.getElementById('themeSelect').addEventListener('change', function (e) {
+    setTheme(e.target.value);
+  });
+
+  // เรียกอัปเดตเวอร์ชันแอป (ถ้ามี)
+  updateAppVersionDisplay();
 }
-// แสดงปุ่มประกาศสำหรับ admin (7512411)
-const adminSection = document.getElementById('adminAnnouncementSection');
-if (savedUsername === '7512411' && adminSection) {
-adminSection.style.display = 'block';
-} else if (adminSection) {
-adminSection.style.display = 'none';
+// ฟังก์ชันตรวจสอบสิทธิ์การเบิก
+function checkAuthForRequisition() {
+  const userAuth = localStorage.getItem('userAuth') || 'None';
+  const savedUsername = localStorage.getItem('username');
+
+  // ถ้าเป็น Admin ให้อนุญาตเสมอ
+  if (savedUsername === '7512411') {
+    return true;
+  }
+
+  // ถ้า Auth = 0326 ให้อนุญาต
+  if (userAuth === '0326') {
+    return true;
+  }
+
+  // ถ้าไม่ใช่ ให้แสดง Popup และ return false
+  Swal.fire({
+    icon: 'warning',
+    title: 'สิทธิ์ไม่เพียงพอ!',
+    html: `
+      <div style="text-align:center; padding:10px;">
+        <i class="fas fa-lock" style="font-size:60px; color:#f39c12; margin-bottom:15px;"></i>
+        <p style="font-size:18px; font-weight:bold; color:#e67e22;">คุณไม่มีสิทธิ์ในการเบิกอะไหล่</p>
+        <p style="color:#7f8c8d; margin-top:10px;">กรุณาติดต่อ Admin เพื่อสอบถามสิทธิ์</p>
+        <div style="margin-top:20px; padding:15px; background:#fff3cd; border-radius:10px; border-left:5px solid #f39c12;">
+          <p style="margin:0; font-size:14px; color:#856404;">
+            <i class="fas fa-info-circle"></i> 
+            ผู้ใช้ทั่วไปสามารถค้นหาข้อมูลได้เท่านั้น
+          </p>
+        </div>
+      </div>
+    `,
+    confirmButtonText: 'ตกลง',
+    confirmButtonColor: '#f39c12',
+    width: window.innerWidth <= 480 ? '90%' : '500px'
+  });
+
+  return false;
 }
-// เปิด Modal
-document.getElementById('settingsModal').style.display = 'block';
-// ผูก event ทุกครั้งที่เปิด Settings
-document.getElementById('themeSelect').onchange = null; // ล้าง event เก่า
-document.getElementById('themeSelect').addEventListener('change', function(e) {
-setTheme(e.target.value);
-});
-// เรียกอัปเดตเวอร์ชันแอป (ถ้ามี)
-updateAppVersionDisplay();
+// Close settings modal
+document.getElementById('closeSettings').onclick = () => {
+  document.getElementById('settingsModal').style.display = 'none';
+};
+window.onclick = (event) => {
+  const settingsModal = document.getElementById('settingsModal');
+  if (event.target === settingsModal) {
+    settingsModal.style.display = 'none';
+  }
+  // Existing modals...
+  if (event.target == modal) closeModal.click();
+  if (event.target == modalAll) closeModalAll.click();
+  if (event.target == modalPending) closeModalPending.click();
+  // Image modals
+  if (event.target === imageModal) {
+    imageModal.style.display = 'none';
+  }
+  if (event.target === imageModalImages) {
+    imageModalImages.style.display = 'none';
+  }
+};
+// Login System
+const loginModal = document.getElementById('loginModal');
+const appContent = document.getElementById('appContent');
+const logoutBtn = document.getElementById('logoutBtn');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const loginError = document.getElementById('loginError');
+const rememberMeCheckbox = document.getElementById('rememberMe');
+const togglePasswordIcon = document.getElementById('togglePassword');
+const userNameSmall = document.getElementById('userNameSmall');
+function togglePasswordVisibility() {
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+  togglePasswordIcon.classList.toggle('fa-eye-slash');
+  togglePasswordIcon.classList.toggle('fa-eye');
 }
-      // Close settings modal
-      document.getElementById('closeSettings').onclick = () => {
-        document.getElementById('settingsModal').style.display = 'none';
-      };
-      window.onclick = (event) => {
-        const settingsModal = document.getElementById('settingsModal');
-        if (event.target === settingsModal) {
-          settingsModal.style.display = 'none';
-        }
-        // Existing modals...
-        if (event.target == modal) closeModal.click();
-        if (event.target == modalAll) closeModalAll.click();
-        if (event.target == modalPending) closeModalPending.click();
-        // Image modals
-        if (event.target === imageModal) {
-          imageModal.style.display = 'none';
-        }
-        if (event.target === imageModalImages) {
-          imageModalImages.style.display = 'none';
-        }
-      };
-      // Login System
-      const loginModal = document.getElementById('loginModal');
-      const appContent = document.getElementById('appContent');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
-      const loginError = document.getElementById('loginError');
-      const rememberMeCheckbox = document.getElementById('rememberMe');
-      const togglePasswordIcon = document.getElementById('togglePassword');
-      const userNameSmall = document.getElementById('userNameSmall');
-      function togglePasswordVisibility() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        togglePasswordIcon.classList.toggle('fa-eye-slash');
-        togglePasswordIcon.classList.toggle('fa-eye');
-      }
-      // แทนที่ฟังก์ชัน loadEmployeeData() เดิมทั้งหมดด้วยอันนี้
+// แทนที่ฟังก์ชัน loadEmployeeData() เดิมทั้งหมดด้วยอันนี้
 async function loadEmployeeData() {
   if (employeeDataLoaded && employeeData.length > 0) {
     return employeeData;
   }
-  // ถ้ามี promise ค้างอยู่ → ใช้ promise เดิม (ป้องกัน fetch ซ้ำ)
+  
   if (employeeDataPromise) {
     return employeeDataPromise;
   }
+  
   const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-  const employeeSheetName = "Employee";
+  const employeeSheetName = "Employee_Auth";
   const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
+  
   employeeDataPromise = fetch(employeeUrl)
     .then(res => res.json())
     .then(data => {
+      console.log("ข้อมูลพนักงานที่ดึงมา:", data); // เพิ่มบรรทัดนี้เพื่อ debug
       employeeData = data;
       employeeDataLoaded = true;
-      employeeDataPromise = null; // รีเซ็ตหลังโหลดเสร็จ
+      
+      // อัปเดต Auth ใน localStorage ถ้ามีการล็อกอินอยู่
+      const savedUsername = localStorage.getItem('username');
+      if (savedUsername) {
+        const employee = employeeData.find(e => 
+          e.IDRec && e.IDRec.toString().trim() === savedUsername
+        );
+        if (employee && employee.Auth) {
+          localStorage.setItem('userAuth', employee.Auth);
+          console.log(`ตั้งค่า Auth สำหรับ ${savedUsername}: ${employee.Auth}`); // Debug
+        } else {
+          localStorage.setItem('userAuth', 'None');
+          console.log(`ไม่พบ Auth สำหรับ ${savedUsername}`); // Debug
+        }
+      }
+      
+      employeeDataPromise = null;
       return data;
     })
     .catch(err => {
       employeeDataPromise = null;
       throw err;
     });
+    
   return employeeDataPromise;
 }
-      async function handleLogin() {
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        loginError.style.display = 'none';
-        if (!username || !password) {
-          loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-          loginError.style.display = 'block';
-          return;
-        }
-        try {
-          employeeData = await loadEmployeeData();
-          const expectedPassword = username.slice(-4);
-          const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
-          if (employee && employee.Name) {
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('username', username);
-            localStorage.setItem('userName', employee.Name);
-            if (rememberMeCheckbox.checked) {
-              localStorage.setItem('savedUsername', username);
-              localStorage.setItem('rememberMe', 'true');
-            } else {
-              localStorage.removeItem('savedUsername');
-              localStorage.removeItem('rememberMe');
-            }
-            checkLoginStatus();
-            setTimeout(() => {
-              const searchInput = document.getElementById('searchInput1');
-              if (searchInput) searchInput.focus();
-            }, 500);
-          } else {
-            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-            loginError.style.display = 'block';
-            passwordInput.value = ''; // Clear password on error
-          }
-        } catch (error) {
-          loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
-          loginError.style.display = 'block';
-          console.error('Login error:', error);
-        }
+async function handleLogin() {
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+  loginError.style.display = 'none';
+  
+  if (!username || !password) {
+    loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+    loginError.style.display = 'block';
+    return;
+  }
+  
+  try {
+    employeeData = await loadEmployeeData();
+    const expectedPassword = username.slice(-4);
+    const employee = employeeData.find(e => 
+      e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password
+    );
+    
+    if (employee && employee.Name) {
+      // บันทึกข้อมูลผู้ใช้รวมถึง Auth
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('userName', employee.Name);
+      localStorage.setItem('userAuth', employee.Auth || 'None'); // ✅ บันทึก Auth
+      
+      console.log(`ผู้ใช้ ${username} ล็อกอินสำเร็จ, Auth = ${employee.Auth || 'None'}`); // Debug
+      
+      if (rememberMeCheckbox.checked) {
+        localStorage.setItem('savedUsername', username);
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('rememberMe');
       }
-     async function checkLoginStatus() {
+      
+      checkLoginStatus();
+      setTimeout(() => {
+        const searchInput = document.getElementById('searchInput1');
+        if (searchInput) searchInput.focus();
+      }, 500);
+    } else {
+      loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+      loginError.style.display = 'block';
+      passwordInput.value = '';
+    }
+  } catch (error) {
+    loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
+    loginError.style.display = 'block';
+    console.error('Login error:', error);
+  }
+}
+async function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
   
@@ -457,6 +545,17 @@ async function loadEmployeeData() {
     try {
       // ✅ รอให้โหลด employee data ให้เสร็จก่อน
       await loadEmployeeData();
+      
+      // ✅ อัปเดต Auth จาก employeeData
+      const employee = employeeData.find(e => e.IDRec?.toString().trim() === savedUsername);
+      if (employee && employee.Auth) {
+        localStorage.setItem('userAuth', employee.Auth);
+        console.log(`ตั้งค่า Auth สำหรับ ${savedUsername}: ${employee.Auth}`);
+      } else {
+        localStorage.setItem('userAuth', 'None');
+        console.log(`ไม่พบ Auth สำหรับ ${savedUsername}`);
+      }
+      
       // โหลดฐานข้อมูลรูปภาพ
       loadImageDatabase().catch(console.error);
       
@@ -478,6 +577,7 @@ async function loadEmployeeData() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     localStorage.removeItem('userName');
+    localStorage.removeItem('userAuth');
   }
   
   // โหลดการตั้งค่า "Remember me"
@@ -489,24 +589,25 @@ async function loadEmployeeData() {
     }
   }
 }
-     function handleLogout() {
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('savedUsername');
-        localStorage.removeItem('savedPassword');
-        localStorage.removeItem('rememberMe');
-        checkLoginStatus();
-        // Close settings modal if open
-        document.getElementById('settingsModal').style.display = 'none';
-      }
-      // Allow Enter key for login
-      passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          handleLogin();
-        }
-      });
-      // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
+function handleLogout() {
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userAuth'); // เพิ่มบรรทัดนี้
+  localStorage.removeItem('savedUsername');
+  localStorage.removeItem('savedPassword');
+  localStorage.removeItem('rememberMe');
+  checkLoginStatus();
+  // Close settings modal if open
+  document.getElementById('settingsModal').style.display = 'none';
+}
+// Allow Enter key for login
+passwordInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    handleLogin();
+  }
+});
+// === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
   document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
   const target = document.getElementById(tabId);
@@ -520,28 +621,28 @@ function showTab(tabId) {
 
   switch (tabId) {
     case "parts":
-  searchInput1.value = globalSearch1 || '';
-  searchInput2.value = globalSearch2 || '';
-  loadImageDatabase();
-  if (!partsDataLoaded) {
-    loadData().then(() => {
-      partsDataLoaded = true;
-      hideLoading();
-      // ไม่ต้อง apply filter เพราะ loadData() เรียก applyFilters() อยู่แล้ว
-    });
-  } else {
-    applyFilters(); // 👈 เพิ่มบรรทัดนี้!
-    hideLoading();
-  }
-  break;
+      searchInput1.value = globalSearch1 || '';
+      searchInput2.value = globalSearch2 || '';
+      loadImageDatabase();
+      if (!partsDataLoaded) {
+        loadData().then(() => {
+          partsDataLoaded = true;
+          hideLoading();
+          // ไม่ต้อง apply filter เพราะ loadData() เรียก applyFilters() อยู่แล้ว
+        });
+      } else {
+        applyFilters(); // 👈 เพิ่มบรรทัดนี้!
+        hideLoading();
+      }
+      break;
     case "images":
-  searchInputImages1.value = globalSearch1 || '';
-  searchInputImages2.value = globalSearch2 || '';
-  loadImageDatabase(); // ยังใช้ได้ สำหรับแสดงรูปใน modal
-  // ไม่โหลดข้อมูลใหม่ → ใช้ allData เดิม
-  applyFiltersImages(); // กรองจาก allData + มี id
-  hideLoading();
-  break;
+      searchInputImages1.value = globalSearch1 || '';
+      searchInputImages2.value = globalSearch2 || '';
+      loadImageDatabase(); // ยังใช้ได้ สำหรับแสดงรูปใน modal
+      // ไม่โหลดข้อมูลใหม่ → ใช้ allData เดิม
+      applyFiltersImages(); // กรองจาก allData + มี id
+      hideLoading();
+      break;
     case "today":
       if (!todayDataLoaded) loadTodayData().then(() => { todayDataLoaded = true; hideLoading(); });
       else hideLoading();
@@ -559,29 +660,36 @@ function showTab(tabId) {
 function hideLoading() {
   document.getElementById("loading").style.display = "none";
 }
-  function showQRCode() {
-        Swal.fire({
-          title: '📷 สแกน QR Code',
-          html: `
+function showQRCode() {
+  Swal.fire({
+    title: '📷 สแกน QR Code',
+    html: `
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://request-nawanakorn.vercel.app/" alt="QR Code" class="swal2-qrcode" style="width: 150px; height: 150px;">
             <p>สแกนเพื่อเข้าสู่ระบบขอเบิกอะไหล่</p>
           `,
-          confirmButtonText: 'ปิด',
-          customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            confirmButton: 'swal2-confirm'
-          }
-        });
-      }
-    
+    confirmButtonText: 'ปิด',
+    customClass: {
+      popup: 'swal2-popup',
+      title: 'swal2-title',
+      confirmButton: 'swal2-confirm'
+    }
+  });
+}
+
 // === แทนที่ฟังก์ชัน showDetailModal ทั้งหมด ===
 // === showDetailModal เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showDetailModal(row, modalId, contentId) {
   const material = (row.Material || "").toString().trim();
   console.log("เปิด Modal รายละเอียด → Material:", material);
+  
+  // ตรวจสอบสิทธิ์ Auth
+  const userAuth = localStorage.getItem('userAuth') || 'None';
+  const savedUsername = localStorage.getItem('username');
+  const hasPermission = savedUsername === '7512411' || userAuth === '0326';
+  
   let galleryHtml = '';
   let imageIds = [];
+  
   // 1. ลำดับความสำคัญ: ดึงจากฐานใหม่ MainSapimage ก่อน
   if (imageDbLoaded && imageDatabase[material] && imageDatabase[material].length > 0) {
     imageIds = imageDatabase[material];
@@ -590,23 +698,24 @@ function showDetailModal(row, modalId, contentId) {
   // 2. ถ้าไม่มี → ดึงจาก UrlWeb เดิม (fallback)
   else if (row.UrlWeb && typeof row.UrlWeb === 'string') {
     const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
-                  row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
-                  row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
+      row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
+      row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
     if (match && match[1]) {
       imageIds = [match[1]];
       console.log("ใช้รูปจาก UrlWeb เดิม (fallback):", imageIds[0]);
     }
   }
+  
   // สร้าง Gallery ตามจำนวนรูป
   if (imageIds.length === 0) {
-  galleryHtml = `
+    galleryHtml = `
     <div style="width:380px;height:380px;background:#000;display:flex;align-items:center;justify-content:center;margin:0 auto;color:#ccc;font-size:20px;">
       ไม่มีรูปภาพในระบบ
     </div>`;
-}
-// กรณีมีรูป (ไม่ว่าจะ 1 หรือหลายรูป → ใช้โครงสร้างเดียวกัน)
-else {
-  galleryHtml = `
+  }
+  // กรณีมีรูป (ไม่ว่าจะ 1 หรือหลายรูป → ใช้โครงสร้างเดียวกัน)
+  else {
+    galleryHtml = `
     <div class="image-swiper-container">
       <div class="image-swiper-wrapper" style="width:${imageIds.length * 100}%;">
         ${imageIds.map(id => `
@@ -624,15 +733,31 @@ else {
         <div class="swiper-counter">1 / ${imageIds.length}</div>
       ` : ''}
     </div>`;
-}
+  }
+  
+  // สร้างปุ่ม "เบิกเลย" ตามสิทธิ์
+  let requisitionButtonHtml = '';
+  if (hasPermission) {
+    requisitionButtonHtml = `
+      <button class="requisition-button header-btn" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
+        เบิกเลย
+      </button>
+    `;
+  } else {
+    requisitionButtonHtml = `
+      <button class="requisition-button-disabled header-btn" onclick="checkAuthForRequisition()" 
+              title="ไม่มีสิทธิ์เบิกอะไหล่" style="opacity:0.7; cursor:not-allowed;">
+        เบิกเลย
+      </button>
+    `;
+  }
+  
   // ส่วนข้อมูลด้านล่าง
   const infoHtml = `
     <div class="detail-info">
       <div class="detail-header-row">
         <h2>รายละเอียดอะไหล่</h2>
-        <button class="requisition-button header-btn" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
-          เบิกเลย
-        </button>
+        ${requisitionButtonHtml}
       </div>
       <div class="detail-row"><span class="label">Material</span><span class="value">${material}</span></div>
       <div class="detail-row"><span class="label">Description</span><span class="value">${row.Description || '-'}</span></div>
@@ -642,8 +767,17 @@ else {
       ${row["Product"] ? `<div class="detail-row"><span class="label">Product</span><span class="value">${row["Product"]}</span></div>` : ''}
       ${row["OCRTAXT"] ? `<div class="detail-row"><span class="label">Spec</span><span class="value spec-text">${row["OCRTAXT"]}</span></div>` : ''}
       ${row["หมายเหตุ"] ? `<div class="detail-row"><span class="label" style="color:#e74c3c;font-weight:bold;">หมายเหตุ</span><span class="value" style="color:#e74c3c;font-weight:bold;">${row["หมายเหตุ"]}</span></div>` : ''}
+      
+      <!-- แสดงสถานะสิทธิ์ของผู้ใช้ -->
+      <div class="detail-row" style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd;">
+        <span class="label" style="color:#7f8c8d;">สถานะสิทธิ์:</span>
+        <span class="value" style="color:${hasPermission ? '#27ae60' : '#e74c3c'}; font-weight:bold;">
+          ${hasPermission ? '✓ สามารถเบิกได้' : '✗ ไม่มีสิทธิ์เบิก'}
+        </span>
+      </div>
     </div>
   `;
+  
   // แสดง Modal
   const modal = document.getElementById(modalId);
   const content = document.getElementById(contentId);
@@ -651,10 +785,11 @@ else {
   modal.style.display = 'block';
   modal.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  
   // ถ้ามีหลายรูป → เริ่ม Swipe
- if (imageIds.length > 1) {
-  setTimeout(() => initSwiper(modal, imageIds.length), 150); // เพิ่ม delay นิดนึงให้ DOM สร้างเสร็จ
-}
+  if (imageIds.length > 1) {
+    setTimeout(() => initSwiper(modal, imageIds.length), 150); // เพิ่ม delay นิดนึงให้ DOM สร้างเสร็จ
+  }
 }
 // === ฟังก์ชัน Swipe (ต้องมีด้วย) ===
 // ตัวแปรเก็บ index ปัจจุบันของแต่ละ Modal
@@ -669,8 +804,8 @@ function initSwiper(modal, totalSlides) {
   const counter = container.querySelector('.swiper-counter');
   const modalId = modal.id;
   if (imageIds.length > 1) {
-  setTimeout(() => initSwiper(modal, imageIds.length), 100);
-}
+    setTimeout(() => initSwiper(modal, imageIds.length), 100);
+  }
   // เริ่มที่รูปแรก
   currentSwiperIndex[modalId] = currentSwiperIndex[modalId] || 0;
   const update = () => {
@@ -691,89 +826,89 @@ function initSwiper(modal, totalSlides) {
   // รองรับการปัดนิ้วบนมือถือ
   let startX = 0;
   container.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
-}, { passive: true });
+    startX = e.touches[0].clientX;
+  }, { passive: true });
 
-container.addEventListener('touchend', e => {
-  const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
-  if (Math.abs(diff) > 50) {
-    if (diff > 0) nextBtn.click();
-    else prevBtn.click();
-  }
-}, { passive: true });
+  container.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextBtn.click();
+      else prevBtn.click();
+    }
+  }, { passive: true });
   update(); // แสดงรูปแรก
 }
 function initSwiper(modal) {
   const container = modal.querySelector('.image-swiper-container');
   if (!container) return;
- 
+
   const wrapper = container.querySelector('.image-swiper-wrapper');
   const prevBtn = container.querySelector('.swiper-prev');
   const nextBtn = container.querySelector('.swiper-next');
   const counter = container.querySelector('.swiper-counter');
   const modalId = modal.id;
- 
+
   currentSwiperIndex[modalId] = 0;
   const totalSlides = wrapper.children.length;
- 
+
   const updateSlide = () => {
     const idx = currentSwiperIndex[modalId];
     wrapper.style.transform = `translateX(-${idx * 100}%)`;
     counter.textContent = `${idx + 1} / ${totalSlides}`;
   };
- 
+
   const goPrev = () => {
     let idx = currentSwiperIndex[modalId];
     idx = idx > 0 ? idx - 1 : totalSlides - 1;
     currentSwiperIndex[modalId] = idx;
     updateSlide();
   };
- 
+
   const goNext = () => {
     let idx = currentSwiperIndex[modalId];
     idx = idx < totalSlides - 1 ? idx + 1 : 0;
     currentSwiperIndex[modalId] = idx;
     updateSlide();
   };
- 
+
   // ลูกศร
   if (prevBtn) prevBtn.onclick = goPrev;
   if (nextBtn) nextBtn.onclick = goNext;
- 
+
   // Touch Swipe
   let startX = 0;
   container.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
-}, { passive: true });
+    startX = e.touches[0].clientX;
+  }, { passive: true });
 
-container.addEventListener('touchend', e => {
-  const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
-  if (Math.abs(diff) > 50) {
-    if (diff > 0) nextBtn.click();
-    else prevBtn.click();
-  }
-}, { passive: true });
- 
+  container.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextBtn.click();
+      else prevBtn.click();
+    }
+  }, { passive: true });
+
   // Keyboard (arrow keys)
   document.addEventListener('keydown', e => {
     if (modal.style.display !== 'block') return;
     if (e.key === 'ArrowLeft') goPrev();
     if (e.key === 'ArrowRight') goNext();
   });
- 
+
   updateSlide();
 }
 // Global handlers สำหรับปุ่มลูกศร (ถ้าต้องการเรียกจาก onclick)
-window.handleSwiperPrev = function(btn) {
+window.handleSwiperPrev = function (btn) {
   const container = btn.closest('.image-swiper-container');
   const modalId = container.closest('.image-modal, .image-modal-images').id;
   const prevIdx = (currentSwiperIndex[modalId] || 0) - 1;
   currentSwiperIndex[modalId] = prevIdx < 0 ? container.querySelector('.image-swiper-wrapper').children.length - 1 : prevIdx;
   initSwiper(document.getElementById(modalId)); // Re-init to update
 };
-window.handleSwiperNext = function(btn) {
+window.handleSwiperNext = function (btn) {
   const container = btn.closest('.image-swiper-container');
   const modalId = container.closest('.image-modal, .image-modal-images').id;
   const wrapper = container.querySelector('.image-swiper-wrapper');
@@ -807,24 +942,24 @@ document.addEventListener('keydown', (e) => {
     closeAllImageModals();
   }
 });
-      // Event listener for lightbox close on ESC key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
-          closeLightbox();
-        }
-      });
-      // Parts tab functions (now after variables)
-      itemsPerPageSelect.addEventListener("change", () => {
-        itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
-        currentPage = 1;
-        renderTableData();
-        renderPagination(allData.length);
-      });
-      retryButton.addEventListener("click", () => {
-        errorContainer.style.display = "none";
-        loadData();
-      });
-   function renderTableToday(data) {
+// Event listener for lightbox close on ESC key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('lightbox').style.display === 'flex') {
+    closeLightbox();
+  }
+});
+// Parts tab functions (now after variables)
+itemsPerPageSelect.addEventListener("change", () => {
+  itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
+  currentPage = 1;
+  renderTableData();
+  renderPagination(allData.length);
+});
+retryButton.addEventListener("click", () => {
+  errorContainer.style.display = "none";
+  loadData();
+});
+function renderTableToday(data) {
   if (!tableBodyToday) {
     console.error("Table body for #data-table-today not found");
     return;
@@ -931,12 +1066,18 @@ document.addEventListener('keydown', (e) => {
   tableBodyToday.innerHTML = "";
   tableBodyToday.appendChild(fragment);
 }
-      async function showRequisitionDialog(row) {
+async function showRequisitionDialog(row) {
+  // ตรวจสอบสิทธิ์ก่อน
+  if (!checkAuthForRequisition()) {
+    return;
+  }
+  
   document.body.style.overflow = 'hidden';
   const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
   const unrestrictedValue = parseFloat(row["Unrestricted"]) || 0;
   const remark = row["หมายเหตุ"] || '';
   const hasStockVibha = vibhavadiValue > 0;
+  
   // ตรวจสอบเงื่อนไขใหม่: ถ้านวนคร = 0 และหมายเหตุไม่ว่าง
   if (unrestrictedValue === 0 && remark.trim() !== '') {
     const replacementWarning = await Swal.fire({
@@ -1093,8 +1234,10 @@ document.addEventListener('keydown', (e) => {
     }
   }
 
-  // ========== ส่วนฟอร์มเบิก (ไม่เปลี่ยน) ==========
+  // ========== ส่วนฟอร์มเบิก (แก้ไขเพื่อนำรหัสพนักงานจากผู้ที่ Login) ==========
   let selectedCallType = '';
+  const savedUsername = localStorage.getItem('username') || ''; // ดึงรหัสพนักงานจาก localStorage
+  
   const history = {
     employeeCode: getFromLocalStorage('employeeCode'),
     team: getFromLocalStorage('team'),
@@ -1293,7 +1436,7 @@ Swal.fire({
         }
       </style>
 
-      <!-- แสดง 30000279 Cofrimel Pump Boy Spray Rotors ตรงกลาง -->
+      <!-- แสดง Material + Description ตรงกลาง -->
       <div class="material-header">
         <div class="material-code">${row.Material || ''}</div>
         <div class="material-desc">${row.Description || ''}</div>
@@ -1305,7 +1448,7 @@ Swal.fire({
 
       <label class="swal2-label">🆔 รหัสพนักงาน</label>
       <div style="position:relative;">
-        <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx">
+       <input id="swal-employee-code" class="swal2-input" placeholder="7xxxxxx" value="${savedUsername}" readonly>
         <div id="employee-code-history" class="autocomplete-items" style="display:none;"></div>
       </div>
       <span id="swal-employee-code-error" class="error-message"></span>
@@ -1352,192 +1495,124 @@ Swal.fire({
     confirmButton: 'swal2-confirm-btn',
     cancelButton: 'swal2-cancel-btn'
   },
-  // ใส่ preConfirm / didOpen เดิมของคุณต่อจากนี้
-  // preConfirm: () => { ... },
-  // didOpen: (popup) => { ... }
-
-
-
-    focusConfirm: false,
-    showCancelButton: true,
-    showCloseButton: true,
-    closeButtonHtml: '<i class="fas fa-times"></i>',
-    confirmButtonText: 'ยืนยัน',
-    cancelButtonText: 'ยกเลิก',
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    didOpen: () => {
-      const swalContainer = document.querySelector('.swal2-container');
-      if (swalContainer) {
-        swalContainer.style.zIndex = '99998';
-        swalContainer.style.position = 'fixed';
-        swalContainer.style.top = '0';
-        swalContainer.style.left = '0';
-        swalContainer.style.width = '100vw';
-        swalContainer.style.height = '100vh';
-        swalContainer.style.display = 'flex';
-        swalContainer.style.justifyContent = 'center';
-        swalContainer.style.alignItems = 'center';
+  focusConfirm: false,
+  showCancelButton: true,
+  showCloseButton: true,
+  closeButtonHtml: '<i class="fas fa-times"></i>',
+  confirmButtonText: 'ยืนยัน',
+  cancelButtonText: 'ยกเลิก',
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+  didOpen: () => {
+    const swalContainer = document.querySelector('.swal2-container');
+    if (swalContainer) {
+      swalContainer.style.zIndex = '99998';
+      swalContainer.style.position = 'fixed';
+      swalContainer.style.top = '0';
+      swalContainer.style.left = '0';
+      swalContainer.style.width = '100vw';
+      swalContainer.style.height = '100vh';
+      swalContainer.style.display = 'flex';
+      swalContainer.style.justifyContent = 'center';
+      swalContainer.style.alignItems = 'center';
+    }
+    const swalBackdrop = document.querySelector('.swal2-backdrop');
+    if (swalBackdrop) {
+      swalBackdrop.style.zIndex = '99997';
+      swalBackdrop.style.position = 'fixed';
+      swalBackdrop.style.top = '0';
+      swalBackdrop.style.left = '0';
+      swalBackdrop.style.width = '100vw';
+      swalBackdrop.style.height = '100vh';
+      swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      swalBackdrop.style.backdropFilter = 'blur(8px)';
+    }
+    const swalPopup = document.querySelector('.swal2-popup');
+    if (swalPopup) {
+      swalPopup.style.zIndex = '99999';
+      swalPopup.style.position = 'relative';
+      swalPopup.style.margin = '0';
+      swalPopup.style.transform = 'none';
+      swalPopup.style.maxHeight = '90vh';
+      swalPopup.style.overflowY = 'auto';
+      swalPopup.style.width = 'auto';
+      swalPopup.style.maxWidth = '90vw';
+      if (window.innerWidth <= 768) {
+        swalPopup.style.width = '95vw';
+        swalPopup.style.padding = '15px';
       }
-      const swalBackdrop = document.querySelector('.swal2-backdrop');
-      if (swalBackdrop) {
-        swalBackdrop.style.zIndex = '99997';
-        swalBackdrop.style.position = 'fixed';
-        swalBackdrop.style.top = '0';
-        swalBackdrop.style.left = '0';
-        swalBackdrop.style.width = '100vw';
-        swalBackdrop.style.height = '100vh';
-        swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        swalBackdrop.style.backdropFilter = 'blur(8px)';
-      }
-      const swalPopup = document.querySelector('.swal2-popup');
-      if (swalPopup) {
-        swalPopup.style.zIndex = '99999';
-        swalPopup.style.position = 'relative';
-        swalPopup.style.margin = '0';
-        swalPopup.style.transform = 'none';
-        swalPopup.style.maxHeight = '90vh';
-        swalPopup.style.overflowY = 'auto';
-        swalPopup.style.width = 'auto';
-        swalPopup.style.maxWidth = '90vw';
-        if (window.innerWidth <= 768) {
-          swalPopup.style.width = '95vw';
-          swalPopup.style.padding = '15px';
-        }
-      }
-      const quantityInput = document.getElementById('swal-quantity');
-      const employeeCodeInput = document.getElementById('swal-employee-code');
-      const contactInput = document.getElementById('swal-contact');
-      const callNumberInput = document.getElementById('swal-call-number');
-      const remarkInput = document.getElementById('swal-remark');
-      const confirmButton = document.querySelector('.swal2-confirm');
-      confirmButton.disabled = true;
+    }
+    
+    // ตั้งค่าช่องรหัสพนักงานให้เป็น readonly และแสดงข้อมูลอัตโนมัติ
+    const employeeCodeInput = document.getElementById('swal-employee-code');
+    const savedUserName = localStorage.getItem('userName');
+    
+    if (employeeCodeInput) {
+  employeeCodeInput.value = savedUsername;
+  employeeCodeInput.readOnly = true; // ทำให้อ่านอย่างเดียว ไม่สามารถแก้ไขได้
+  employeeCodeInput.style.backgroundColor = '#f0f0f0'; // เปลี่ยนสีพื้นหลังเพื่อบ่งบอกว่าไม่สามารถแก้ไขได้
+  employeeCodeInput.style.cursor = 'not-allowed';
+  
+  // แสดงชื่อพนักงานและทีมอัตโนมัติ
+  const employeeCode = savedUsername;
+  if (employeeCode && /^\d{7}$/.test(employeeCode) && employeeCode[0] === '7') {
+    const employee = employeeData.find(e => String(e?.IDRec).trim() === employeeCode);
+    if (employee && employee.Name) {
+      document.getElementById('swal-employee-name-display').textContent = `${employee.Name}`;
+      document.getElementById('swal-team-display').textContent = `${employee.หน่วยงาน || ''}`;
+    }
+  }
+}
+    
+    const quantityInput = document.getElementById('swal-quantity');
+    const contactInput = document.getElementById('swal-contact');
+    const callNumberInput = document.getElementById('swal-call-number');
+    const remarkInput = document.getElementById('swal-remark');
+    const confirmButton = document.querySelector('.swal2-confirm');
+    confirmButton.disabled = true;
 
-      const callTypeButtons = document.querySelectorAll('.call-type-btn');
-      callTypeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          callTypeButtons.forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          selectedCallType = btn.dataset.value;
-          validateInputs();
-        });
+    const callTypeButtons = document.querySelectorAll('.call-type-btn');
+    callTypeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        callTypeButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedCallType = btn.dataset.value;
+        validateInputs();
       });
+    });
 
-      function setupAutocomplete(input, key, containerId) {
-        input.addEventListener('input', () => {
-          const container = document.getElementById(containerId);
-          const val = input.value.toLowerCase();
-          const items = getFromLocalStorage(key).filter(item => item.toLowerCase().includes(val));
-          container.innerHTML = '';
-          items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'autocomplete-item';
-            div.textContent = item;
-            div.onclick = () => {
-              input.value = item;
-              container.style.display = 'none';
-              validateInputs();
-            };
-            container.appendChild(div);
-          });
-          container.style.display = items.length ? 'block' : 'none';
-        });
-        input.addEventListener('blur', () => {
-          setTimeout(() => {
-            const container = document.getElementById(containerId);
+    function setupAutocomplete(input, key, containerId) {
+      input.addEventListener('input', () => {
+        const container = document.getElementById(containerId);
+        const val = input.value.toLowerCase();
+        const items = getFromLocalStorage(key).filter(item => item.toLowerCase().includes(val));
+        container.innerHTML = '';
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'autocomplete-item';
+          div.textContent = item;
+          div.onclick = () => {
+            input.value = item;
             container.style.display = 'none';
-          }, 200);
+            validateInputs();
+          };
+          container.appendChild(div);
         });
-      }
-      setupAutocomplete(contactInput, 'contact', 'contact-history');
-      setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
-      const lastContact = getFromLocalStorage('contact')[0];
-      if (lastContact) contactInput.value = lastContact;
+        container.style.display = items.length ? 'block' : 'none';
+      });
+      input.addEventListener('blur', () => {
+        setTimeout(() => {
+          const container = document.getElementById(containerId);
+          container.style.display = 'none';
+        }, 200);
+      });
+    }
+    setupAutocomplete(contactInput, 'contact', 'contact-history');
+    setupAutocomplete(callNumberInput, 'callNumber', 'call-number-history');
+    const lastContact = getFromLocalStorage('contact')[0];
+    if (lastContact) contactInput.value = lastContact;
 
-      const inputs = [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput];
-      function validateInputs() {
-        const errors = {
-          quantityError: document.getElementById('swal-quantity-error'),
-          employeeCodeError: document.getElementById('swal-employee-code-error'),
-          contactError: document.getElementById('swal-contact-error'),
-          callNumberError: document.getElementById('swal-call-number-error'),
-          callTypeError: document.getElementById('swal-call-type-error'),
-          remarkError: document.getElementById('swal-remark-error')
-        };
-        inputs.forEach(input => input.classList.remove('invalid-input'));
-        Object.values(errors).forEach(el => el.textContent = '');
-        let isValid = true;
-        if (!quantityInput.value || quantityInput.value < 1) {
-          errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
-          quantityInput.classList.add('invalid-input');
-          isValid = false;
-        }
-        const employeeCode = employeeCodeInput.value.trim();
-        if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
-          errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
-          employeeCodeInput.classList.add('invalid-input');
-          document.getElementById('swal-employee-name-display').textContent = '';
-          document.getElementById('swal-team-display').textContent = '';
-          isValid = false;
-        } else {
-          const employee = employeeData.find(e =>
-          String(e?.IDRec).trim() === employeeCode
-        );
-          if (!employee || !employee.Name) {
-            errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
-            employeeCodeInput.classList.add('invalid-input');
-            document.getElementById('swal-employee-name-display').textContent = '';
-            document.getElementById('swal-team-display').textContent = '';
-            isValid = false;
-          } else {
-            document.getElementById('swal-employee-name-display').textContent = `${employee.Name}`;
-            document.getElementById('swal-team-display').textContent = `${employee.หน่วยงาน || ''}`;
-            errors.employeeCodeError.textContent = '';
-          }
-        }
-        if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
-          errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
-          contactInput.classList.add('invalid-input');
-          isValid = false;
-        }
-        const hasRemark = remarkInput.value.trim().length > 0;
-        if (!hasRemark) {
-          if (!callNumberInput.value) {
-            errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
-            callNumberInput.classList.add('invalid-input');
-            isValid = false;
-          } else if (
-            (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
-            (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
-          ) {
-            errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
-            callNumberInput.classList.add('invalid-input');
-            isValid = false;
-          }
-          if (!selectedCallType) {
-            errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
-            isValid = false;
-          }
-        }
-        confirmButton.disabled = !isValid;
-      }
-      quantityInput.addEventListener('input', validateInputs);
-      employeeCodeInput.addEventListener('input', validateInputs);
-      contactInput.addEventListener('input', validateInputs);
-      callNumberInput.addEventListener('input', validateInputs);
-      remarkInput.addEventListener('input', validateInputs);
-      validateInputs();
-      quantityInput.focus();
-    },
-    didClose: () => {
-      document.body.style.overflow = 'auto';
-    },
-    preConfirm: () => {
-      const quantityInput = document.getElementById('swal-quantity');
-      const employeeCodeInput = document.getElementById('swal-employee-code');
-      const contactInput = document.getElementById('swal-contact');
-      const callNumberInput = document.getElementById('swal-call-number');
-      const remarkInput = document.getElementById('swal-remark');
+    function validateInputs() {
       const errors = {
         quantityError: document.getElementById('swal-quantity-error'),
         employeeCodeError: document.getElementById('swal-employee-code-error'),
@@ -1546,34 +1621,27 @@ Swal.fire({
         callTypeError: document.getElementById('swal-call-type-error'),
         remarkError: document.getElementById('swal-remark-error')
       };
-      [quantityInput, employeeCodeInput, contactInput, callNumberInput, remarkInput].forEach(input => {
-        input.classList.remove('invalid-input');
-      });
+      
+      const inputs = [quantityInput, contactInput, callNumberInput, remarkInput];
+      inputs.forEach(input => input.classList.remove('invalid-input'));
       Object.values(errors).forEach(el => el.textContent = '');
+      
       let isValid = true;
+      
+      // ตรวจสอบจำนวน
       if (!quantityInput.value || quantityInput.value < 1) {
         errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
         quantityInput.classList.add('invalid-input');
         isValid = false;
       }
-      const employeeCode = employeeCodeInput.value.trim();
-      if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
-        errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
-        employeeCodeInput.classList.add('invalid-input');
-        isValid = false;
-      } else {
-        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-        if (!employee || !employee.Name) {
-          errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
-          employeeCodeInput.classList.add('invalid-input');
-          isValid = false;
-        }
-      }
+      
+      // ตรวจสอบเบอร์ติดต่อ
       if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
         errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
         contactInput.classList.add('invalid-input');
         isValid = false;
       }
+      
       const hasRemark = remarkInput.value.trim().length > 0;
       if (!hasRemark) {
         if (!callNumberInput.value) {
@@ -1593,330 +1661,420 @@ Swal.fire({
           isValid = false;
         }
       }
-      if (isValid) {
-        const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
-        saveToLocalStorage('employeeCode', employeeCode);
-        saveToLocalStorage('contact', contactInput.value);
-        if (callNumberInput.value) {
-          saveToLocalStorage('callNumber', callNumberInput.value);
-        }
-        if (selectedCallType) {
-          saveToLocalStorage('callType', selectedCallType);
-        }
-        return {
-          quantity: quantityInput.value,
-          employeeCode: employeeCode,
-          employeeName: employee ? employee.Name : '',
-          team: employee ? (employee.หน่วยงาน || '') : '',
-          contact: contactInput.value,
-          callNumber: callNumberInput.value,
-          callType: selectedCallType,
-          remark: remarkInput.value
-        };
-      }
-      return false;
+      
+      confirmButton.disabled = !isValid;
     }
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      const formValues = result.value;
-      const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
-      const quantity = parseFloat(formValues.quantity) || 0;
-
-      // ========== ส่วนสรุป + ส่งข้อมูล (ไม่เปลี่ยน) ==========
-      let imageHtml = '';
-      let imageIds = [];
-      if (row.UrlWeb && row.UrlWeb.trim()) {
-        const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
-                      row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
-                      row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
-        if (match && match[1]) {
-          imageIds = [match[1]];
-        }
+    
+    quantityInput.addEventListener('input', validateInputs);
+    contactInput.addEventListener('input', validateInputs);
+    callNumberInput.addEventListener('input', validateInputs);
+    remarkInput.addEventListener('input', validateInputs);
+    
+    validateInputs();
+    quantityInput.focus();
+  },
+  didClose: () => {
+    document.body.style.overflow = 'auto';
+  },
+  preConfirm: () => {
+    const quantityInput = document.getElementById('swal-quantity');
+    const employeeCodeInput = document.getElementById('swal-employee-code');
+    const contactInput = document.getElementById('swal-contact');
+    const callNumberInput = document.getElementById('swal-call-number');
+    const remarkInput = document.getElementById('swal-remark');
+    
+    const errors = {
+      quantityError: document.getElementById('swal-quantity-error'),
+      employeeCodeError: document.getElementById('swal-employee-code-error'),
+      contactError: document.getElementById('swal-contact-error'),
+      callNumberError: document.getElementById('swal-call-number-error'),
+      callTypeError: document.getElementById('swal-call-type-error'),
+      remarkError: document.getElementById('swal-remark-error')
+    };
+    
+    [quantityInput, contactInput, callNumberInput, remarkInput].forEach(input => {
+      input.classList.remove('invalid-input');
+    });
+    
+    Object.values(errors).forEach(el => el.textContent = '');
+    let isValid = true;
+    
+    if (!quantityInput.value || quantityInput.value < 1) {
+      errors.quantityError.textContent = 'กรุณากรอกจำนวนที่มากกว่าหรือเท่ากับ 1';
+      quantityInput.classList.add('invalid-input');
+      isValid = false;
+    }
+    
+    const employeeCode = employeeCodeInput.value.trim();
+    
+    if (!employeeCode || !/^\d{7}$/.test(employeeCode) || employeeCode[0] !== '7') {
+      errors.employeeCodeError.textContent = 'รหัสพนักงานต้องเป็นตัวเลข 7 หลัก เริ่มด้วย 7 (เช่น 7512411)';
+      employeeCodeInput.classList.add('invalid-input');
+      isValid = false;
+    } else {
+      const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+      if (!employee || !employee.Name) {
+        errors.employeeCodeError.textContent = 'ไม่พบรหัสพนักงานนี้ในระบบ';
+        employeeCodeInput.classList.add('invalid-input');
+        isValid = false;
       }
-      if (imageIds.length > 0) {
-        const fileId = imageIds[0];
-        imageHtml = `
-          <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500"
-               alt="รูปอะไหล่"
-               style="width:120px; height:120px; object-fit:cover; border-radius:20px;
-                      border:5px solid #1877f2; box-shadow:0 10px 30px rgba(24,118,242,0.5);
-                      margin-bottom:18px;"
-               onerror="this.style.display='none'; this.nextSibling.style.display='block';">
-          <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
+    }
+    
+    if (!contactInput.value || !/^(0|\+66)[6-9][0-9]{7,8}$/.test(contactInput.value)) {
+      errors.contactError.textContent = 'กรุณากรอกเบอร์ติดต่อที่ถูกต้อง (เช่น 08xxxxxxxx)';
+      contactInput.classList.add('invalid-input');
+      isValid = false;
+    }
+    
+    const hasRemark = remarkInput.value.trim().length > 0;
+    if (!hasRemark) {
+      if (!callNumberInput.value) {
+        errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
+        callNumberInput.classList.add('invalid-input');
+        isValid = false;
+      } else if (
+        (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
+        (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
+      ) {
+        errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
+        callNumberInput.classList.add('invalid-input');
+        isValid = false;
+      }
+      if (!selectedCallType) {
+        errors.callTypeError.textContent = 'กรุณาเลือก Call Type';
+        isValid = false;
+      }
+    }
+    
+    if (isValid) {
+      const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
+      saveToLocalStorage('employeeCode', employeeCode);
+      saveToLocalStorage('contact', contactInput.value);
+      if (callNumberInput.value) {
+        saveToLocalStorage('callNumber', callNumberInput.value);
+      }
+      if (selectedCallType) {
+        saveToLocalStorage('callType', selectedCallType);
+      }
+      return {
+        quantity: quantityInput.value,
+        employeeCode: employeeCode,
+        employeeName: employee ? employee.Name : '',
+        team: employee ? (employee.หน่วยงาน || '') : '',
+        contact: contactInput.value,
+        callNumber: callNumberInput.value,
+        callType: selectedCallType,
+        remark: remarkInput.value
+      };
+    }
+    return false;
+  }
+}).then(async (result) => {
+  if (result.isConfirmed) {
+    const formValues = result.value;
+    const vibhavadiValue = parseFloat(row["วิภาวดี"]) || 0;
+    const quantity = parseFloat(formValues.quantity) || 0;
+
+    // ========== ส่วนสรุป + ส่งข้อมูล (ไม่เปลี่ยน) ==========
+    let imageHtml = '';
+    let imageIds = [];
+    if (row.UrlWeb && row.UrlWeb.trim()) {
+      const match = row.UrlWeb.match(/\/d\/([a-zA-Z0-9-_]+)/) ||
+                    row.UrlWeb.match(/id=([a-zA-Z0-9-_]+)/) ||
+                    row.UrlWeb.match(/uc\?id=([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        imageIds = [match[1]];
+      }
+    }
+    if (imageIds.length > 0) {
+      const fileId = imageIds[0];
+      imageHtml = `
+        <img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w500"
+             alt="รูปอะไหล่"
+             style="width:120px; height:120px; object-fit:cover; border-radius:20px;
+                    border:5px solid #1877f2; box-shadow:0 10px 30px rgba(24,118,242,0.5);
+                    margin-bottom:18px;"
+             onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+        <div style="display:none; text-align:center; color:#e74c3c; font-size:14px; margin-top:10px;">โหลดรูปไม่สำเร็จ</div>
+      `;
+    } else {
+      imageHtml = `
+        <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+                    border-radius:20px; display:flex; align-items:center; justify-content:center;
+                    margin:0 auto 18px; box-shadow:0 8px 25px rgba(24,118,242,0.3);">
+          <i class="fas fa-box-open" style="font-size:50px; color:#1877f2;"></i>
+        </div>
+      `;
+    }
+
+    const summaryResult = await Swal.fire({
+      title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
+      width: window.innerWidth <= 480 ? '95%' : '650px',
+      padding: '20px',
+      background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#ffffff',
+      backdrop: 'rgba(0,0,0,0.8)',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-check-circle"></i> ยืนยัน',
+      cancelButtonText: '<i class="fas fa-edit"></i> แก้ไข',
+      reverseButtons: true,
+      buttonsStyling: false,
+      html: `
+        <div style="text-align:center;">
+          ${imageHtml}
+        </div>
+        <div style="background:${document.body.classList.contains('dark-mode')?'#2d2d2d':'#f8fbff'}; border-radius:18px; padding:20px; margin:10px 0; box-shadow:0 6px 20px rgba(0,0,0,0.12);">
+          <table style="width:100%; border-collapse:separate; border-spacing:0 14px; font-size:15.5px; line-height:1.5;">
+            <tr><td style="color:#555; font-weight:600; width:40%;">Material</td>
+                <td style="font-weight:bold; text-align:right; color:#1a1a1a;">${row.Material || '-'}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">Description</td>
+                <td style="text-align:right;">${row.Description || '-'}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">จำนวนขอเบิก</td>
+                <td style="font-weight:bold; color:#e74c3c; font-size:20px; text-align:right;">${formValues.quantity} ชิ้น</td></tr>
+            <tr><td style="color:#555; font-weight:600;">คลังวิภาวดีมี</td>
+                <td style="color:#27ae60; font-weight:bold; text-align:right;">${vibhavadiValue.toLocaleString()} ชิ้น</td></tr>
+            <tr><td style="color:#555; font-weight:600;">รหัสพนักงาน</td>
+                <td style="text-align:right;">${formValues.employeeCode}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">ชื่อช่าง</td>
+                <td style="color:#2980b9; font-weight:bold; text-align:right;">${formValues.employeeName}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">ทีม / หน่วยงาน</td>
+                <td style="text-align:right;">${formValues.team || '-'}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">เบอร์ติดต่อ</td>
+                <td style="text-align:right;">${formValues.contact}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">เลขที่ Call</td>
+                <td style="text-align:right;">${formValues.callNumber || '<span style="color:#999;">ไม่มี</span>'}</td></tr>
+            <tr><td style="color:#555; font-weight:600;">Call Type</td>
+                <td style="text-align:right;">
+                  ${formValues.callType
+                    ? `<span style="background:#667eea;color:white;padding:6px 18px;border-radius:30px;font-weight:bold;font-size:15px;">${formValues.callType}</span>`
+                    : '<span style="color:#999;">ไม่มี</span>'}
+                </td></tr>
+            ${formValues.remark ?
+              `<tr><td style="color:#555; font-weight:600; vertical-align:top; padding-top:10px;">หมายเหตุ</td>
+               <td style="color:#e74c3c; font-weight:bold; text-align:right; padding-top:10px;">${formValues.remark}</td></tr>` : ''}
+          </table>
+        </div>
+        <div style="margin-top:20px; padding:15px; background:#fff3cd; border-left:6px solid #f39c12; border-radius:12px; font-size:14.5px; color:#856404; text-align:center;">
+          <i class="fas fa-exclamation-triangle" style="margin-right:8px; font-size:18px;"></i>
+          กรุณาตรวจสอบข้อมูลให้ครบถ้วนก่อนกดยืนยัน
+        </div>
+      `,
+      didOpen: () => {
+        const confirmBtn = document.querySelector('.swal2-confirm');
+        const cancelBtn = document.querySelector('.swal2-cancel');
+        confirmBtn.style.cssText = `
+          background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+          color: white !important;
+          padding: 14px 34px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(39,174,96,0.5) !important;
         `;
-      } else {
-        imageHtml = `
-          <div style="width:120px; height:120px; background:linear-gradient(135deg,#e3f2fd,#bbdefb);
-                      border-radius:20px; display:flex; align-items:center; justify-content:center;
-                      margin:0 auto 18px; box-shadow:0 8px 25px rgba(24,118,242,0.3);">
-            <i class="fas fa-box-open" style="font-size:50px; color:#1877f2;"></i>
-          </div>
+        cancelBtn.style.cssText = `
+          background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
+          color: white !important;
+          padding: 14px 34px !important;
+          border-radius: 30px !important;
+          font-size: 17px !important;
+          font-weight: bold !important;
+          box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
         `;
       }
+    });
 
-      const summaryResult = await Swal.fire({
-        title: '<strong style="font-size:22px; color:#1877f2; font-family:\'Kanit\',sans-serif;">สรุปการขอเบิกอะไหล่</strong>',
-        width: window.innerWidth <= 480 ? '95%' : '650px',
-        padding: '20px',
-        background: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#ffffff',
-        backdrop: 'rgba(0,0,0,0.8)',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-check-circle"></i> ยืนยัน',
-        cancelButtonText: '<i class="fas fa-edit"></i> แก้ไข',
-        reverseButtons: true,
-        buttonsStyling: false,
+    if (summaryResult.isConfirmed) {
+      const detailModal = document.getElementById('imageModal');
+      const imageModalImages = document.getElementById('imageModalImages');
+      if (detailModal) detailModal.style.display = 'none';
+      if (imageModalImages) imageModalImages.style.display = 'none';
+
+      const jsonPayload = {
+        material: row.Material || '',
+        description: row.Description || '',
+        quantity: parseInt(formValues.quantity),
+        contact: formValues.contact,
+        employeeCode: formValues.employeeCode,
+        team: formValues.team,
+        employeeName: formValues.employeeName,
+        callNumber: formValues.callNumber || '',
+        callType: formValues.callType || '',
+        remark: formValues.remark || '',
+        vibhavadi: vibhavadiValue.toString()
+      };
+
+      Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
         html: `
-          <div style="text-align:center;">
-            ${imageHtml}
-          </div>
-          <div style="background:${document.body.classList.contains('dark-mode')?'#2d2d2d':'#f8fbff'}; border-radius:18px; padding:20px; margin:10px 0; box-shadow:0 6px 20px rgba(0,0,0,0.12);">
-            <table style="width:100%; border-collapse:separate; border-spacing:0 14px; font-size:15.5px; line-height:1.5;">
-              <tr><td style="color:#555; font-weight:600; width:40%;">Material</td>
-                  <td style="font-weight:bold; text-align:right; color:#1a1a1a;">${row.Material || '-'}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">Description</td>
-                  <td style="text-align:right;">${row.Description || '-'}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">จำนวนขอเบิก</td>
-                  <td style="font-weight:bold; color:#e74c3c; font-size:20px; text-align:right;">${formValues.quantity} ชิ้น</td></tr>
-              <tr><td style="color:#555; font-weight:600;">คลังวิภาวดีมี</td>
-                  <td style="color:#27ae60; font-weight:bold; text-align:right;">${vibhavadiValue.toLocaleString()} ชิ้น</td></tr>
-              <tr><td style="color:#555; font-weight:600;">รหัสพนักงาน</td>
-                  <td style="text-align:right;">${formValues.employeeCode}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">ชื่อช่าง</td>
-                  <td style="color:#2980b9; font-weight:bold; text-align:right;">${formValues.employeeName}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">ทีม / หน่วยงาน</td>
-                  <td style="text-align:right;">${formValues.team || '-'}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">เบอร์ติดต่อ</td>
-                  <td style="text-align:right;">${formValues.contact}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">เลขที่ Call</td>
-                  <td style="text-align:right;">${formValues.callNumber || '<span style="color:#999;">ไม่มี</span>'}</td></tr>
-              <tr><td style="color:#555; font-weight:600;">Call Type</td>
-                  <td style="text-align:right;">
-                    ${formValues.callType
-                      ? `<span style="background:#667eea;color:white;padding:6px 18px;border-radius:30px;font-weight:bold;font-size:15px;">${formValues.callType}</span>`
-                      : '<span style="color:#999;">ไม่มี</span>'}
-                  </td></tr>
-              ${formValues.remark ?
-                `<tr><td style="color:#555; font-weight:600; vertical-align:top; padding-top:10px;">หมายเหตุ</td>
-                 <td style="color:#e74c3c; font-weight:bold; text-align:right; padding-top:10px;">${formValues.remark}</td></tr>` : ''}
-            </table>
-          </div>
-          <div style="margin-top:20px; padding:15px; background:#fff3cd; border-left:6px solid #f39c12; border-radius:12px; font-size:14.5px; color:#856404; text-align:center;">
-            <i class="fas fa-exclamation-triangle" style="margin-right:8px; font-size:18px;"></i>
-            กรุณาตรวจสอบข้อมูลให้ครบถ้วนก่อนกดยืนยัน
+          <div class="swal2-spinner-container">
+            <div class="swal2-spinner"></div>
+            <p>กรุณารอสักครู่...</p>
           </div>
         `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         didOpen: () => {
-          const confirmBtn = document.querySelector('.swal2-confirm');
-          const cancelBtn = document.querySelector('.swal2-cancel');
-          confirmBtn.style.cssText = `
-            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
-            color: white !important;
-            padding: 14px 34px !important;
-            border-radius: 30px !important;
-            font-size: 17px !important;
-            font-weight: bold !important;
-            box-shadow: 0 6px 20px rgba(39,174,96,0.5) !important;
-          `;
-          cancelBtn.style.cssText = `
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d) !important;
-            color: white !important;
-            padding: 14px 34px !important;
-            border-radius: 30px !important;
-            font-size: 17px !important;
-            font-weight: bold !important;
-            box-shadow: 0 6px 20px rgba(127,140,141,0.5) !important;
-          `;
+          const swalContainer = document.querySelector('.swal2-container');
+          if (swalContainer) {
+            swalContainer.style.zIndex = '99998';
+            swalContainer.style.position = 'fixed';
+            swalContainer.style.top = '0';
+            swalContainer.style.left = '0';
+            swalContainer.style.width = '100vw';
+            swalContainer.style.height = '100vh';
+            swalContainer.style.display = 'flex';
+            swalContainer.style.justifyContent = 'center';
+            swalContainer.style.alignItems = 'center';
+          }
+          const swalBackdrop = document.querySelector('.swal2-backdrop');
+          if (swalBackdrop) {
+            swalBackdrop.style.zIndex = '99997';
+            swalBackdrop.style.position = 'fixed';
+            swalBackdrop.style.top = '0';
+            swalBackdrop.style.left = '0';
+            swalBackdrop.style.width = '100vw';
+            swalBackdrop.style.height = '100vh';
+            swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            swalBackdrop.style.backdropFilter = 'blur(8px)';
+          }
+          const swalPopup = document.querySelector('.swal2-popup');
+          if (swalPopup) {
+            swalPopup.style.zIndex = '99999';
+            swalPopup.style.position = 'relative';
+            swalPopup.style.margin = '0';
+            swalPopup.style.transform = 'none';
+            swalPopup.style.maxHeight = '90vh';
+            swalPopup.style.overflowY = 'auto';
+            swalPopup.style.width = 'auto';
+            swalPopup.style.maxWidth = '90vw';
+            if (window.innerWidth <= 768) {
+              swalPopup.style.width = '95vw';
+              swalPopup.style.padding = '15px';
+            }
+          }
         }
       });
 
-      if (summaryResult.isConfirmed) {
-        const detailModal = document.getElementById('imageModal');
-        const imageModalImages = document.getElementById('imageModalImages');
-        if (detailModal) detailModal.style.display = 'none';
-        if (imageModalImages) imageModalImages.style.display = 'none';
-
-        const jsonPayload = {
-          material: row.Material || '',
-          description: row.Description || '',
-          quantity: parseInt(formValues.quantity),
-          contact: formValues.contact,
-          employeeCode: formValues.employeeCode,
-          team: formValues.team,
-          employeeName: formValues.employeeName,
-          callNumber: formValues.callNumber || '',
-          callType: formValues.callType || '',
-          remark: formValues.remark || '',
-          vibhavadi: vibhavadiValue.toString()
-        };
-
-        Swal.fire({
-          title: 'กำลังบันทึกข้อมูล...',
-          html: `
-            <div class="swal2-spinner-container">
-              <div class="swal2-spinner"></div>
-              <p>กรุณารอสักครู่...</p>
-            </div>
-          `,
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          didOpen: () => {
-            const swalContainer = document.querySelector('.swal2-container');
-            if (swalContainer) {
-              swalContainer.style.zIndex = '99998';
-              swalContainer.style.position = 'fixed';
-              swalContainer.style.top = '0';
-              swalContainer.style.left = '0';
-              swalContainer.style.width = '100vw';
-              swalContainer.style.height = '100vh';
-              swalContainer.style.display = 'flex';
-              swalContainer.style.justifyContent = 'center';
-              swalContainer.style.alignItems = 'center';
-            }
-            const swalBackdrop = document.querySelector('.swal2-backdrop');
-            if (swalBackdrop) {
-              swalBackdrop.style.zIndex = '99997';
-              swalBackdrop.style.position = 'fixed';
-              swalBackdrop.style.top = '0';
-              swalBackdrop.style.left = '0';
-              swalBackdrop.style.width = '100vw';
-              swalBackdrop.style.height = '100vh';
-              swalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-              swalBackdrop.style.backdropFilter = 'blur(8px)';
-            }
-            const swalPopup = document.querySelector('.swal2-popup');
-            if (swalPopup) {
-              swalPopup.style.zIndex = '99999';
-              swalPopup.style.position = 'relative';
-              swalPopup.style.margin = '0';
-              swalPopup.style.transform = 'none';
-              swalPopup.style.maxHeight = '90vh';
-              swalPopup.style.overflowY = 'auto';
-              swalPopup.style.width = 'auto';
-              swalPopup.style.maxWidth = '90vw';
-              if (window.innerWidth <= 768) {
-                swalPopup.style.width = '95vw';
-                swalPopup.style.padding = '15px';
-              }
-            }
-          }
+      try {
+        const response = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
         });
-
-        try {
-          const response = await fetch(gasUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
-          });
-          const gasResult = await response.json();
-          if (gasResult.status === 'success') {
-            Swal.fire({
-              icon: 'success',
-              title: 'ส่งข้อมูลสำเร็จ!',
-              text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
-              confirmButtonText: 'OK'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                const imageModal = document.getElementById('imageModal');
-                const imageModalImages = document.getElementById('imageModalImages');
-                if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
-                if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
-
-                Swal.fire({
-                  title: 'กำลังเปลี่ยนหน้าไปยังข้อมูลที่ท่านบันทึก...',
-                  html: `
-                    <div class="swal2-spinner-container">
-                      <div class="swal2-spinner"></div>
-                      <p>กรุณารอสักครู่...</p>
-                    </div>
-                  `,
-                  showConfirmButton: false,
-                  allowOutsideClick: false,
-                  allowEscapeKey: false
-                });
-
-                setTimeout(() => {
-                  Swal.close();
-                  showTab('today');
-                  loadTodayData();
-                  setTimeout(() => {
-                    document.body.style.overflow = 'auto';
-                    const searchInputToday = document.getElementById('searchInputToday');
-                    if (searchInputToday) {
-                      searchInputToday.focus();
-                      searchInputToday.blur();
-                    }
-                    if ('ontouchstart' in window) {
-                      const event = new Event('touchstart', { bubbles: true });
-                      document.body.dispatchEvent(event);
-                    }
-                  }, 100);
-                }, 4000);
-              }
-            });
-          } else {
-            throw new Error(gasResult.data || 'GAS return error');
-          }
-        } catch (error) {
-          console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
+        const gasResult = await response.json();
+        if (gasResult.status === 'success') {
           Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
-            text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
-            confirmButtonText: 'ตกลง'
+            icon: 'success',
+            title: 'ส่งข้อมูลสำเร็จ!',
+            text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
+            confirmButtonText: 'OK'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const imageModal = document.getElementById('imageModal');
+              const imageModalImages = document.getElementById('imageModalImages');
+              if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
+              if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
+
+              Swal.fire({
+                title: 'กำลังเปลี่ยนหน้าไปยังข้อมูลที่ท่านบันทึก...',
+                html: `
+                  <div class="swal2-spinner-container">
+                    <div class="swal2-spinner"></div>
+                    <p>กรุณารอสักครู่...</p>
+                  </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+              });
+
+              setTimeout(() => {
+                Swal.close();
+                showTab('today');
+                loadTodayData();
+                setTimeout(() => {
+                  document.body.style.overflow = 'auto';
+                  const searchInputToday = document.getElementById('searchInputToday');
+                  if (searchInputToday) {
+                    searchInputToday.focus();
+                    searchInputToday.blur();
+                  }
+                  if ('ontouchstart' in window) {
+                    const event = new Event('touchstart', { bubbles: true });
+                    document.body.dispatchEvent(event);
+                  }
+                }, 100);
+              }, 4000);
+            }
           });
+        } else {
+          throw new Error(gasResult.data || 'GAS return error');
         }
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: `ไม่สามารถบันทึกข้อมูลได้: ${error.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
+          confirmButtonText: 'ตกลง'
+        });
       }
     }
-  });
+  }
+});
 }
 function saveToLocalStorage(key, value) {
-        let items = JSON.parse(localStorage.getItem(key)) || [];
-        if (!items.includes(value)) {
-          items.unshift(value);
-          if (items.length > 5) items.pop();
-          localStorage.setItem(key, JSON.stringify(items));
-        }
-      }
-      function getFromLocalStorage(key) {
-        return JSON.parse(localStorage.getItem(key)) || [];
-      }
-      function renderPagination(totalItems) {
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        pageNumbers.innerHTML = "";
-        if (totalPages === 0) {
-          firstPageButton.disabled = true;
-          prevPageButton.disabled = true;
-          nextPageButton.disabled = true;
-          lastPageButton.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const button = document.createElement("button");
-        button.textContent = currentPage;
-        button.className = "active";
-        button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbers.appendChild(button);
-        firstPageButton.disabled = currentPage === 1;
-        prevPageButton.disabled = currentPage === 1;
-        nextPageButton.disabled = currentPage === totalPages;
-        lastPageButton.disabled = currentPage === totalPages;
-      }
-      function changePage(page) {
-        currentPage = page;
-        renderTableData();
-        renderPagination(currentFilteredData.length);
-      }
-      // ✅ ประกาศ renderTable แบบ function declaration (hoist ได้)
+  let items = JSON.parse(localStorage.getItem(key)) || [];
+  if (!items.includes(value)) {
+    items.unshift(value);
+    if (items.length > 5) items.pop();
+    localStorage.setItem(key, JSON.stringify(items));
+  }
+}
+function getFromLocalStorage(key) {
+  return JSON.parse(localStorage.getItem(key)) || [];
+}
+function renderPagination(totalItems) {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  pageNumbers.innerHTML = "";
+  if (totalPages === 0) {
+    firstPageButton.disabled = true;
+    prevPageButton.disabled = true;
+    nextPageButton.disabled = true;
+    lastPageButton.disabled = true;
+    return;
+  }
+  // แสดงเฉพาะหน้าปัจจุบัน
+  const button = document.createElement("button");
+  button.textContent = currentPage;
+  button.className = "active";
+  button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
+  pageNumbers.appendChild(button);
+  firstPageButton.disabled = currentPage === 1;
+  prevPageButton.disabled = currentPage === 1;
+  nextPageButton.disabled = currentPage === totalPages;
+  lastPageButton.disabled = currentPage === totalPages;
+}
+function changePage(page) {
+  currentPage = page;
+  renderTableData();
+  renderPagination(currentFilteredData.length);
+}
+// ✅ ประกาศ renderTable แบบ function declaration (hoist ได้)
 function renderTable(data) {
   const tableBody = document.querySelector("#data-table tbody");
   if (!tableBody) {
     console.error("Table body for #data-table not found");
     return;
   }
+
   const fragment = document.createDocumentFragment();
+  const userAuth = localStorage.getItem('userAuth') || 'None';
+  const savedUsername = localStorage.getItem('username');
+  const hasPermission = savedUsername === '7512411' || userAuth === '0326';
+
   data.forEach(row => {
     const tr = document.createElement("tr");
 
@@ -1924,8 +2082,19 @@ function renderTable(data) {
     const requisitionTd = document.createElement("td");
     const btn = document.createElement("button");
     btn.textContent = "เบิก";
-    btn.className = "requisition-button";
-    btn.onclick = () => showRequisitionDialog(row);
+
+    if (hasPermission) {
+      btn.className = "requisition-button";
+      btn.onclick = () => showRequisitionDialog(row);
+    } else {
+      btn.className = "requisition-button-disabled";
+      btn.disabled = true;
+      btn.style.opacity = "0.5";
+      btn.style.cursor = "not-allowed";
+      btn.title = "ไม่มีสิทธิ์เบิกอะไหล่";
+      btn.onclick = () => checkAuthForRequisition();
+    }
+
     requisitionTd.appendChild(btn);
     tr.appendChild(requisitionTd);
 
@@ -2010,12 +2179,12 @@ function renderTable(data) {
   tableBody.innerHTML = "";
   tableBody.appendChild(fragment);
 }
-      function renderTableData() {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        renderTable(currentFilteredData.slice(startIndex, endIndex));
-      }
-      function applyFilters() {
+function renderTableData() {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  renderTable(currentFilteredData.slice(startIndex, endIndex));
+}
+function applyFilters() {
   const keyword1 = (globalSearch1 || "").trim().toLowerCase();
   const keyword2 = (globalSearch2 || "").trim().toLowerCase();
 
@@ -2040,7 +2209,7 @@ function renderTable(data) {
   renderTableData();
   renderPagination(filtered.length);
 }
-      searchInput1.addEventListener("input", debounce(e => {
+searchInput1.addEventListener("input", debounce(e => {
   globalSearch1 = e.target.value;
   document.getElementById("searchInputImages1").value = globalSearch1;
   applyFilters();
@@ -2051,56 +2220,56 @@ searchInput2.addEventListener("input", debounce(e => {
   document.getElementById("searchInputImages2").value = globalSearch2;
   applyFilters();
 }));
-               // ปุ่มแว่นตาใกล้ searchInput2 -> เคลียร์เฉพาะช่องของแท็บอะไหล่
-      searchButton.addEventListener("click", () => {
-        // เคลียร์ช่องค้นหาแท็บอะไหล่
-        searchInput1.value = "";
-        searchInput2.value = "";
-        // เคลียร์ตัวแปร global ของฝั่งอะไหล่
-        globalSearch1 = "";
-        globalSearch2 = "";
-        // คำนวณใหม่ (จะแสดงข้อมูลทั้งหมดเพราะช่องว่าง)
-        triggerFadeAndFilter(tableContainerParts, applyFilters);
-      });
-      searchInput1.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          applyFilters();
-          searchInput1.blur();
-        }
-      });
-      searchInput2.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          applyFilters();
-          searchInput2.blur();
-        }
-      });
-      firstPageButton.addEventListener("click", () => {
-        currentPage = 1;
-        renderTableData();
-        renderPagination(currentFilteredData.length);
-      });
-      prevPageButton.addEventListener("click", () => {
-        if (currentPage > 1) {
-          currentPage--;
-          renderTableData();
-          renderPagination(currentFilteredData.length);
-        }
-      });
-      nextPageButton.addEventListener("click", () => {
-        const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
-        if (currentPage < totalPages) {
-          currentPage++;
-          renderTableData();
-          renderPagination(currentFilteredData.length);
-        }
-      });
-      lastPageButton.addEventListener("click", () => {
-        const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
-        currentPage = totalPages;
-        renderTableData();
-        renderPagination(currentFilteredData.length);
-      });
-     async function loadData() {
+// ปุ่มแว่นตาใกล้ searchInput2 -> เคลียร์เฉพาะช่องของแท็บอะไหล่
+searchButton.addEventListener("click", () => {
+  // เคลียร์ช่องค้นหาแท็บอะไหล่
+  searchInput1.value = "";
+  searchInput2.value = "";
+  // เคลียร์ตัวแปร global ของฝั่งอะไหล่
+  globalSearch1 = "";
+  globalSearch2 = "";
+  // คำนวณใหม่ (จะแสดงข้อมูลทั้งหมดเพราะช่องว่าง)
+  triggerFadeAndFilter(tableContainerParts, applyFilters);
+});
+searchInput1.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    applyFilters();
+    searchInput1.blur();
+  }
+});
+searchInput2.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    applyFilters();
+    searchInput2.blur();
+  }
+});
+firstPageButton.addEventListener("click", () => {
+  currentPage = 1;
+  renderTableData();
+  renderPagination(currentFilteredData.length);
+});
+prevPageButton.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderTableData();
+    renderPagination(currentFilteredData.length);
+  }
+});
+nextPageButton.addEventListener("click", () => {
+  const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderTableData();
+    renderPagination(currentFilteredData.length);
+  }
+});
+lastPageButton.addEventListener("click", () => {
+  const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
+  currentPage = totalPages;
+  renderTableData();
+  renderPagination(currentFilteredData.length);
+});
+async function loadData() {
   document.getElementById("loading").style.display = "flex";
   errorContainer.style.display = "none";
   const cacheKey = "parts-data-main-sap";
@@ -2125,19 +2294,19 @@ searchInput2.addEventListener("input", debounce(e => {
     hideLoading();
   }
 }
-      // Images tab functions (now after variables)
-      itemsPerPageSelectImages.addEventListener("change", () => {
-        itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
-        currentPageImages = 1;
-        renderTableDataImages();
-        renderPaginationImages(allDataImages.length);
-      });
-      retryButtonImages.addEventListener("click", () => {
-        errorContainerImages.style.display = "none";
-        loadImagesData();
-      });
-      // Updated render function for gallery
-      function renderGalleryDataImages(data) {
+// Images tab functions (now after variables)
+itemsPerPageSelectImages.addEventListener("change", () => {
+  itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
+  currentPageImages = 1;
+  renderTableDataImages();
+  renderPaginationImages(allDataImages.length);
+});
+retryButtonImages.addEventListener("click", () => {
+  errorContainerImages.style.display = "none";
+  loadImagesData();
+});
+// Updated render function for gallery
+function renderGalleryDataImages(data) {
   if (!galleryContainer) {
     console.error("Gallery container not found");
     Swal.fire({
@@ -2184,42 +2353,42 @@ searchInput2.addEventListener("input", debounce(e => {
   });
 }
 function renderPaginationImages(totalItems) {
-        const totalPages = Math.ceil(totalItems / itemsPerPageImages);
-        pageNumbersImages.innerHTML = "";
-        if (totalPages === 0) {
-          firstPageButtonImages.disabled = true;
-          prevPageButtonImages.disabled = true;
-          nextPageButtonImages.disabled = true;
-          lastPageButtonImages.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const button = document.createElement("button");
-        button.textContent = currentPageImages;
-        button.className = "active";
-        button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbersImages.appendChild(button);
-        firstPageButtonImages.disabled = currentPageImages === 1;
-        prevPageButtonImages.disabled = currentPageImages === 1;
-        nextPageButtonImages.disabled = currentPageImages === totalPages;
-        lastPageButtonImages.disabled = currentPageImages === totalPages;
-      }
-      function changePageImages(page) {
-        currentPageImages = page;
-        renderTableDataImages();
-        renderPaginationImages(currentFilteredDataImages.length);
-      }
-      function renderTableDataImages() {
-        const startIndex = (currentPageImages - 1) * itemsPerPageImages;
-        const endIndex = startIndex + itemsPerPageImages;
-        renderGalleryDataImages(currentFilteredDataImages.slice(startIndex, endIndex));
-      }
-      function applyFiltersImages() {
+  const totalPages = Math.ceil(totalItems / itemsPerPageImages);
+  pageNumbersImages.innerHTML = "";
+  if (totalPages === 0) {
+    firstPageButtonImages.disabled = true;
+    prevPageButtonImages.disabled = true;
+    nextPageButtonImages.disabled = true;
+    lastPageButtonImages.disabled = true;
+    return;
+  }
+  // แสดงเฉพาะหน้าปัจจุบัน
+  const button = document.createElement("button");
+  button.textContent = currentPageImages;
+  button.className = "active";
+  button.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
+  pageNumbersImages.appendChild(button);
+  firstPageButtonImages.disabled = currentPageImages === 1;
+  prevPageButtonImages.disabled = currentPageImages === 1;
+  nextPageButtonImages.disabled = currentPageImages === totalPages;
+  lastPageButtonImages.disabled = currentPageImages === totalPages;
+}
+function changePageImages(page) {
+  currentPageImages = page;
+  renderTableDataImages();
+  renderPaginationImages(currentFilteredDataImages.length);
+}
+function renderTableDataImages() {
+  const startIndex = (currentPageImages - 1) * itemsPerPageImages;
+  const endIndex = startIndex + itemsPerPageImages;
+  renderGalleryDataImages(currentFilteredDataImages.slice(startIndex, endIndex));
+}
+function applyFiltersImages() {
   // เริ่มจาก allData ของแท็บอะไหล่
   let filtered = allData.filter(row => {
     // ต้องมี id (จาก MainSap หรือ MainSapimage ก็ได้)
-    const hasId = (row.id && row.id.trim() !== "") || 
-                  (row.Material && imageDatabase[row.Material] && imageDatabase[row.Material].length > 0);
+    const hasId = (row.id && row.id.trim() !== "") ||
+      (row.Material && imageDatabase[row.Material] && imageDatabase[row.Material].length > 0);
     return hasId;
   });
 
@@ -2244,7 +2413,7 @@ function renderPaginationImages(totalItems) {
   renderTableDataImages();
   renderPaginationImages(filtered.length);
 }
-      searchInputImages1.addEventListener("input", debounce(e => {
+searchInputImages1.addEventListener("input", debounce(e => {
   globalSearch1 = e.target.value;
   document.getElementById("searchInput1").value = globalSearch1;
   applyFiltersImages();
@@ -2255,7 +2424,7 @@ searchInputImages2.addEventListener("input", debounce(e => {
   document.getElementById("searchInput2").value = globalSearch2;
   applyFiltersImages();
 }));
-     // ปุ่มแว่นตาใกล้ searchInputImages2 -> เคลียร์ทั้งคู่ + เคลียร์ฝั่งอะไหล่ด้วย ให้ค้นใหม่แบบว่าง
+// ปุ่มแว่นตาใกล้ searchInputImages2 -> เคลียร์ทั้งคู่ + เคลียร์ฝั่งอะไหล่ด้วย ให้ค้นใหม่แบบว่าง
 searchButtonImages.addEventListener("click", () => {
   // เคลียร์ช่องค้นหาแท็บรูปภาพ
   searchInputImages1.value = "";
@@ -2269,48 +2438,48 @@ searchButtonImages.addEventListener("click", () => {
   // เรียก filter อีกรอบ (จะกลายเป็นแสดงข้อมูลทั้งหมด เพราะช่องค้นหาว่าง)
   triggerFadeAndFilter(galleryContainer, applyFiltersImages);
 });
-      searchInputImages1.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          applyFiltersImages();
-          searchInputImages1.blur();
-        }
-      });
-      searchInputImages2.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          applyFiltersImages();
-          searchInputImages2.blur();
-        }
-      });
-      firstPageButtonImages.addEventListener("click", () => {
-        currentPageImages = 1;
-        renderTableDataImages();
-        renderPaginationImages(currentFilteredDataImages.length);
-      });
-      prevPageButtonImages.addEventListener("click", () => {
-        if (currentPageImages > 1) {
-          currentPageImages--;
-          renderTableDataImages();
-          renderPaginationImages(currentFilteredDataImages.length);
-        }
-      });
-      nextPageButtonImages.addEventListener("click", () => {
-        const totalPages = Math.ceil(currentFilteredDataImages.length / itemsPerPageImages);
-        if (currentPageImages < totalPages) {
-          currentPageImages++;
-          renderTableDataImages();
-          renderPaginationImages(currentFilteredDataImages.length);
-        }
-      });
-      lastPageButtonImages.addEventListener("click", () => {
-        const totalPages = Math.ceil(currentFilteredDataImages.length / itemsPerPageImages);
-        currentPageImages = totalPages;
-        renderTableDataImages();
-        renderPaginationImages(currentFilteredDataImages.length);
-      });
+searchInputImages1.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    applyFiltersImages();
+    searchInputImages1.blur();
+  }
+});
+searchInputImages2.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    applyFiltersImages();
+    searchInputImages2.blur();
+  }
+});
+firstPageButtonImages.addEventListener("click", () => {
+  currentPageImages = 1;
+  renderTableDataImages();
+  renderPaginationImages(currentFilteredDataImages.length);
+});
+prevPageButtonImages.addEventListener("click", () => {
+  if (currentPageImages > 1) {
+    currentPageImages--;
+    renderTableDataImages();
+    renderPaginationImages(currentFilteredDataImages.length);
+  }
+});
+nextPageButtonImages.addEventListener("click", () => {
+  const totalPages = Math.ceil(currentFilteredDataImages.length / itemsPerPageImages);
+  if (currentPageImages < totalPages) {
+    currentPageImages++;
+    renderTableDataImages();
+    renderPaginationImages(currentFilteredDataImages.length);
+  }
+});
+lastPageButtonImages.addEventListener("click", () => {
+  const totalPages = Math.ceil(currentFilteredDataImages.length / itemsPerPageImages);
+  currentPageImages = totalPages;
+  renderTableDataImages();
+  renderPaginationImages(currentFilteredDataImages.length);
+});
 
 // === แทนที่ฟังก์ชัน loadImageDatabase ด้วยเวอร์ชันนี้ ===
 async function loadImageDatabase() {
- if (imageDbLoaded) {
+  if (imageDbLoaded) {
     console.log("ใช้ Cache ฐานข้อมูลรูปภาพ");
     return imageDatabase;
   }
@@ -2345,8 +2514,8 @@ async function loadImageDatabase() {
     imageDbLoaded = false;
   }
 }
-      // Function to sort data by column (for sortable headers)
-      // แก้ไขใน sortByColumn (ในส่วน if (column === 'Timestamp')) เพื่อ parse ถูกต้อง
+// Function to sort data by column (for sortable headers)
+// แก้ไขใน sortByColumn (ในส่วน if (column === 'Timestamp')) เพื่อ parse ถูกต้อง
 function sortByColumn(a, b, column, direction) {
   let valueA = a[column] || "";
   let valueB = b[column] || "";
@@ -2382,52 +2551,52 @@ function sortByColumn(a, b, column, direction) {
     return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
   }
 }
-      // Add sort listeners for today tab
-      function addSortListenersToday() {
-        const sortableHeaders = document.querySelectorAll("#today th.sortable");
-        sortableHeaders.forEach(header => {
-          header.addEventListener("click", () => {
-            const column = header.getAttribute("data-column");
-            if (sortConfigToday.column === column) {
-              sortConfigToday.direction = sortConfigToday.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-              sortConfigToday.column = column;
-              sortConfigToday.direction = column === 'IDRow' ? 'desc' : 'asc'; // Default descending for IDRow
-            }
-            updateSortArrowsToday();
-            updateTableToday();
-          });
-        });
+// Add sort listeners for today tab
+function addSortListenersToday() {
+  const sortableHeaders = document.querySelectorAll("#today th.sortable");
+  sortableHeaders.forEach(header => {
+    header.addEventListener("click", () => {
+      const column = header.getAttribute("data-column");
+      if (sortConfigToday.column === column) {
+        sortConfigToday.direction = sortConfigToday.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortConfigToday.column = column;
+        sortConfigToday.direction = column === 'IDRow' ? 'desc' : 'asc'; // Default descending for IDRow
       }
-      function updateSortArrowsToday() {
-        const sortableHeaders = document.querySelectorAll("#today th.sortable");
-        sortableHeaders.forEach(header => {
-          const arrow = header.querySelector(".today-arrow");
-          const column = header.getAttribute("data-column");
-          if (column === sortConfigToday.column) {
-            arrow.textContent = sortConfigToday.direction === 'asc' ? '↑' : '↓';
-          } else {
-            arrow.textContent = '';
-          }
-        });
-      }
-      // Initial call to add listeners after load
-      document.addEventListener('DOMContentLoaded', () => {
-        addSortListenersToday();
-      });
-                // ฟังก์ชัน fade-out ก่อน refresh
-      function triggerFadeAndFilter(container, filterFn) {
-        if (!container) {
-          filterFn();
-          return;
-        }
-        container.classList.add("fade-out");
-        setTimeout(() => {
-          filterFn();
-          container.classList.remove("fade-out");
-        }, 200);
-      }
-     function filterByStatus(data) {
+      updateSortArrowsToday();
+      updateTableToday();
+    });
+  });
+}
+function updateSortArrowsToday() {
+  const sortableHeaders = document.querySelectorAll("#today th.sortable");
+  sortableHeaders.forEach(header => {
+    const arrow = header.querySelector(".today-arrow");
+    const column = header.getAttribute("data-column");
+    if (column === sortConfigToday.column) {
+      arrow.textContent = sortConfigToday.direction === 'asc' ? '↑' : '↓';
+    } else {
+      arrow.textContent = '';
+    }
+  });
+}
+// Initial call to add listeners after load
+document.addEventListener('DOMContentLoaded', () => {
+  addSortListenersToday();
+});
+// ฟังก์ชัน fade-out ก่อน refresh
+function triggerFadeAndFilter(container, filterFn) {
+  if (!container) {
+    filterFn();
+    return;
+  }
+  container.classList.add("fade-out");
+  setTimeout(() => {
+    filterFn();
+    container.classList.remove("fade-out");
+  }, 200);
+}
+function filterByStatus(data) {
   let filtered = data;
   if (currentFilter === 'pending') {
     filtered = data.filter(row => row["status"] === "รอเบิก");
@@ -2440,7 +2609,7 @@ function sortByColumn(a, b, column, direction) {
   }
   return filtered;
 }
-     // ฟังก์ชันกรองข้อมูลตามโหมด + คำค้นหา + การเรียงลำดับ
+// ฟังก์ชันกรองข้อมูลตามโหมด + คำค้นหา + การเรียงลำดับ
 function filterDataToday(data) {
   let filtered = data;
   // 1. กรองตามโหมดปุ่ม (รอเบิก หรือ ทั้งหมด)
@@ -2504,7 +2673,7 @@ function updateTableToday() {
   renderPaginationToday(filteredData.length);
 }
 
-      function renderTableToday(data) {
+function renderTableToday(data) {
   tableBodyToday.innerHTML = "";
   data.forEach((row) => {
     const tr = document.createElement("tr");
@@ -2544,83 +2713,83 @@ function updateTableToday() {
         td.style.color = realStock > 0 ? "#27ae60" : "#e74c3c";
         td.style.fontWeight = "bold";
       }
-  if (col === "Timestamp") {
-    value = formatTimestamp(value); // เพิ่มบรรทัดนี้
-  }
-  if (col === "quantity" || col === "vibhavadi") {
-    if (value && !isNaN(value)) {
-      value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
-    } else if (value === "0" || value === 0) {
-      value = "";
-    }
-  }
-  if (col === "remark" && value) {
-    td.style.color = "#d32f2f";
-    td.style.fontWeight = "bold";
-  }
-            if (col === "material" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
-            if (col === "description" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
-            if (col === "Timestamp" && (row["remark"] || "").trim() !== "") {
-              td.style.color = "#d32f2f";
-              td.style.fontWeight = "bold";
-            }
-            if (col === "vibhavadi" && value) {
-              td.style.color = "#4caf50"; // Green color
-              td.style.fontWeight = "bold";
-            }
-            td.textContent = value;
-            tr.appendChild(td);
-          });
-          const detailTd = document.createElement("td");
-          const btn = document.createElement("button");
-          btn.textContent = "ดูรายละเอียด";
-          btn.className = "detail-button";
-          btn.onclick = () => {
-            modalContent.innerHTML = ["IDRow", ...columns]
-  .map((col) => {
-    let label = "";
-    switch (col) {
-      case "IDRow": label = "🆔 ลำดับ"; break;
-      case "Timestamp": label = "📅 วันเวลา"; break;
-                  case "material": label = "🔢 Material"; break;
-                  case "description": label = "🛠️ Description"; break;
-                  case "quantity": label = "🔢 จำนวน"; break;
-                  case "employeeName": label = "👷‍♂️ ชื่อช่าง"; break;
-                  case "team": label = "🏢 หน่วยงาน"; break;
-                  case "CallNumber": label = "📄 Call"; break;
-                  case "CallType": label = "🗳️ CallType"; break;
-                  case "vibhavadi": label = "📦 คลังวิภาวดี"; break;
-                  case "remark": label = "📝 หมายเหตุ"; break;
-                  default: label = col;
-    }
-    let value = row[col] || "";
-    if (col === "Timestamp") {
-      value = formatTimestamp(value); // เพิ่มบรรทัดนี้
-    }
-    const valueHtml = col === "remark" && value
-      ? `<span class='value' style='color:#d32f2f'>${value}</span>`
-      : `<span class='value'>${value}</span>`;
-    return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
-  })
-  .join("");
-            modal.style.display = "block";
-            setTimeout(() => {
-              modal.style.opacity = "1";
-              modal.style.transform = "scale(1)";
-            }, 10);
-          };
-          detailTd.appendChild(btn);
-          tr.appendChild(detailTd);
-          tableBodyToday.appendChild(tr);
-        });
+      if (col === "Timestamp") {
+        value = formatTimestamp(value); // เพิ่มบรรทัดนี้
       }
-      function renderPaginationToday(totalItems) {
+      if (col === "quantity" || col === "vibhavadi") {
+        if (value && !isNaN(value)) {
+          value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
+        } else if (value === "0" || value === 0) {
+          value = "";
+        }
+      }
+      if (col === "remark" && value) {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+      if (col === "material" && (row["remark"] || "").trim() !== "") {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+      if (col === "description" && (row["remark"] || "").trim() !== "") {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+      if (col === "Timestamp" && (row["remark"] || "").trim() !== "") {
+        td.style.color = "#d32f2f";
+        td.style.fontWeight = "bold";
+      }
+      if (col === "vibhavadi" && value) {
+        td.style.color = "#4caf50"; // Green color
+        td.style.fontWeight = "bold";
+      }
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+    const detailTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "ดูรายละเอียด";
+    btn.className = "detail-button";
+    btn.onclick = () => {
+      modalContent.innerHTML = ["IDRow", ...columns]
+        .map((col) => {
+          let label = "";
+          switch (col) {
+            case "IDRow": label = "🆔 ลำดับ"; break;
+            case "Timestamp": label = "📅 วันเวลา"; break;
+            case "material": label = "🔢 Material"; break;
+            case "description": label = "🛠️ Description"; break;
+            case "quantity": label = "🔢 จำนวน"; break;
+            case "employeeName": label = "👷‍♂️ ชื่อช่าง"; break;
+            case "team": label = "🏢 หน่วยงาน"; break;
+            case "CallNumber": label = "📄 Call"; break;
+            case "CallType": label = "🗳️ CallType"; break;
+            case "vibhavadi": label = "📦 คลังวิภาวดี"; break;
+            case "remark": label = "📝 หมายเหตุ"; break;
+            default: label = col;
+          }
+          let value = row[col] || "";
+          if (col === "Timestamp") {
+            value = formatTimestamp(value); // เพิ่มบรรทัดนี้
+          }
+          const valueHtml = col === "remark" && value
+            ? `<span class='value' style='color:#d32f2f'>${value}</span>`
+            : `<span class='value'>${value}</span>`;
+          return `<div><span class='label'>${label}:</span> ${valueHtml}</div>`;
+        })
+        .join("");
+      modal.style.display = "block";
+      setTimeout(() => {
+        modal.style.opacity = "1";
+        modal.style.transform = "scale(1)";
+      }, 10);
+    };
+    detailTd.appendChild(btn);
+    tr.appendChild(detailTd);
+    tableBodyToday.appendChild(tr);
+  });
+}
+function renderPaginationToday(totalItems) {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPageToday));
 
   pageNumbersToday.innerHTML = "";
@@ -2647,11 +2816,11 @@ function updateTableToday() {
   nextPageButtonToday.disabled = isLast;
   lastPageButtonToday.disabled = isLast;
 }
-      searchInputToday.addEventListener("input", debounce(() => {
+searchInputToday.addEventListener("input", debounce(() => {
   currentPageToday = 1;
   updateTableToday();
 }));
-      firstPageButtonToday.onclick = () => {
+firstPageButtonToday.onclick = () => {
   currentPageToday = 1;
   updateTableToday();
 };
@@ -2683,7 +2852,7 @@ async function loadVibhavadiStockMap() {
   }
 
   const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap`;
-  
+
   try {
     const res = await fetch(mainSapUrl);
     const data = await res.json();
@@ -2702,7 +2871,7 @@ async function loadVibhavadiStockMap() {
     // ถ้าโหลดไม่ได้ ให้ใช้ค่าเดิมต่อไป
   }
 }
-      async function loadTodayData() {
+async function loadTodayData() {
   // แสดง Loading
   document.getElementById("loading").style.display = "flex";
   document.getElementById("loadingToday").style.display = "block";
@@ -2781,397 +2950,397 @@ async function loadVibhavadiStockMap() {
     });
   }
 }
-      // All tab functions (now after variables)
-      closeModalAll.onclick = () => modalAll.style.display = "none";
-      window.onclick = event => {
-        if (event.target == modalAll) modalAll.style.display = "none";
-      };
-      itemsPerPageSelectAll.addEventListener("change", (e) => {
-        itemsPerPageAll = parseInt(e.target.value);
-        currentPageAll = 1;
-        renderTableAll(allDataAll);
-      });
-      function renderTableAll(data) {
-        tableBodyAll.innerHTML = '';
-        const startIdx = (currentPageAll - 1) * itemsPerPageAll;
-        const endIdx = startIdx + itemsPerPageAll;
-        const paginatedData = data.slice(startIdx, endIdx);
-        paginatedData.forEach((row, i) => {
-          const tr = document.createElement("tr");
-          tr.style.animationDelay = `${i * 0.05}s`; // Fade-in ทีละแถว
-            const status = row["status"] || "";
-            const statusTd = document.createElement("td");
-            statusTd.textContent = status;
-            statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
-            tr.appendChild(statusTd);
-            const columns = ["timestamp", "material", "description", "quantity", "employeeName", "team","callNumber","callType", "remark"];
-            columns.forEach(col => {
-              const td = document.createElement("td");
-              td.textContent = row[col] || "";
-              tr.appendChild(td);
-            });
-            const detailTd = document.createElement("td");
-            const btn = document.createElement("button");
-            btn.textContent = "ดูรายละเอียด";
-            btn.className = "detail-button";
-            btn.onclick = () => {
-              modalContentAll.innerHTML = columns.map(col => {
-                const label = col === "timestamp" ? "วันเวลา" : col;
-                return `<div><span class='label'>${label}:</span> <span class='value'>${row[col] || ''}</span></div>`;
-              }).join('');
-              modalAll.style.display = "block";
-            };
-            detailTd.appendChild(btn);
-            tr.appendChild(detailTd);
-            tableBodyAll.appendChild(tr);
-        });
-        updatePaginationAll(data);
+// All tab functions (now after variables)
+closeModalAll.onclick = () => modalAll.style.display = "none";
+window.onclick = event => {
+  if (event.target == modalAll) modalAll.style.display = "none";
+};
+itemsPerPageSelectAll.addEventListener("change", (e) => {
+  itemsPerPageAll = parseInt(e.target.value);
+  currentPageAll = 1;
+  renderTableAll(allDataAll);
+});
+function renderTableAll(data) {
+  tableBodyAll.innerHTML = '';
+  const startIdx = (currentPageAll - 1) * itemsPerPageAll;
+  const endIdx = startIdx + itemsPerPageAll;
+  const paginatedData = data.slice(startIdx, endIdx);
+  paginatedData.forEach((row, i) => {
+    const tr = document.createElement("tr");
+    tr.style.animationDelay = `${i * 0.05}s`; // Fade-in ทีละแถว
+    const status = row["status"] || "";
+    const statusTd = document.createElement("td");
+    statusTd.textContent = status;
+    statusTd.className = status === "สั่งเบิกแล้ว" ? "status-green" : "status-red";
+    tr.appendChild(statusTd);
+    const columns = ["timestamp", "material", "description", "quantity", "employeeName", "team", "callNumber", "callType", "remark"];
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      td.textContent = row[col] || "";
+      tr.appendChild(td);
+    });
+    const detailTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "ดูรายละเอียด";
+    btn.className = "detail-button";
+    btn.onclick = () => {
+      modalContentAll.innerHTML = columns.map(col => {
+        const label = col === "timestamp" ? "วันเวลา" : col;
+        return `<div><span class='label'>${label}:</span> <span class='value'>${row[col] || ''}</span></div>`;
+      }).join('');
+      modalAll.style.display = "block";
+    };
+    detailTd.appendChild(btn);
+    tr.appendChild(detailTd);
+    tableBodyAll.appendChild(tr);
+  });
+  updatePaginationAll(data);
+}
+function updatePaginationAll(data) {
+  const totalPages = Math.ceil(data.length / itemsPerPageAll);
+  pageNumbersContainerAll.innerHTML = '';
+  if (totalPages === 0) {
+    firstPageButtonAll.disabled = true;
+    prevPageButtonAll.disabled = true;
+    nextPageButtonAll.disabled = true;
+    lastPageButtonAll.disabled = true;
+    return;
+  }
+  // แสดงเฉพาะหน้าปัจจุบัน
+  const pageNumberButton = document.createElement("button");
+  pageNumberButton.className = `all-page-number active`;
+  pageNumberButton.textContent = currentPageAll;
+  pageNumberButton.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
+  pageNumbersContainerAll.appendChild(pageNumberButton);
+  firstPageButtonAll.disabled = currentPageAll === 1;
+  prevPageButtonAll.disabled = currentPageAll === 1;
+  nextPageButtonAll.disabled = currentPageAll === totalPages;
+  lastPageButtonAll.disabled = currentPageAll === totalPages;
+}
+// ปุ่มเลื่อนไปหน้าแรก
+firstPageButtonAll.onclick = () => {
+  currentPageAll = 1;
+  renderTableAll(allDataAll);
+};
+// ปุ่มย้อนกลับ
+prevPageButtonAll.onclick = () => {
+  if (currentPageAll > 1) {
+    currentPageAll--;
+    renderTableAll(allDataAll);
+  }
+};
+// ปุ่มไปหน้า next
+nextPageButtonAll.onclick = () => {
+  const totalPages = Math.ceil(allDataAll.length / itemsPerPageAll);
+  if (currentPageAll < totalPages) {
+    currentPageAll++;
+    renderTableAll(allDataAll);
+  }
+};
+// ปุ่มไปหน้าสุดท้าย
+lastPageButtonAll.onclick = () => {
+  currentPageAll = Math.ceil(allDataAll.length / itemsPerPageAll);
+  renderTableAll(allDataAll);
+};
+searchInputAll.addEventListener("input", e => {
+  const keyword = e.target.value.toLowerCase();
+  const filtered = allDataAll.filter(row => {
+    return (
+      (row["material"] || "").toLowerCase().includes(keyword) ||
+      (row["description"] || "").toLowerCase().includes(keyword) ||
+      (row["employeeName"] || "").toLowerCase().includes(keyword) ||
+      (row["team"] || "").toLowerCase().includes(keyword) ||
+      (row["remark"] || "").toLowerCase().includes(keyword)
+    );
+  });
+  renderTableAll(filtered);
+});
+async function loadAllData() {
+  try {
+    const response = await fetch(`${gasUrl}?action=getRequests`);
+    const res = await response.json();
+    if (res.status === 'success') {
+      allDataAll = res.data;
+      renderTableAll(allDataAll);
+    } else {
+      throw new Error(res.data || 'GAS error');
+    }
+  } catch (error) {
+    console.error("ไม่สามารถโหลดข้อมูลได้:", error);
+    tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+  }
+}
+// Pending-calls tab functions (now after variables)
+closeModalPending.onclick = () => modalPending.style.display = "none";
+window.onclick = event => {
+  if (event.target == modalPending) modalPending.style.display = "none";
+};
+itemsPerPageSelectPending.addEventListener("change", (e) => {
+  itemsPerPagePending = parseInt(e.target.value);
+  currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนจำนวนรายการต่อหน้า
+  filterAndRenderTablePending();
+});
+searchInputPending.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
+    filterAndRenderTablePending();
+  }
+});
+searchButtonPending.addEventListener("click", () => {
+  currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
+  filterAndRenderTablePending();
+});
+function populateTeamFilterPending(data) {
+  const filteredData = data.filter(row => {
+    const vipa = Number(row["Vipa"] || 0);
+    const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
+    return vipa > 0 &&
+      !pendingDept.includes("stock วิภาวดี 62") &&
+      !pendingDept.includes("nec_ยกเลิกผลิต");
+  });
+  const teams = [...new Set(filteredData.map(row => row["Team"]).filter(team => team && team.trim() !== ""))].sort();
+  teamFilterPending.innerHTML = '<option value="">ทั้งหมด</option>';
+  if (teams.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "ไม่มีทีมที่ตรงตามเงื่อนไข";
+    option.disabled = true;
+    teamFilterPending.appendChild(option);
+  } else {
+    teams.forEach(team => {
+      const option = document.createElement("option");
+      option.value = team;
+      option.textContent = team;
+      teamFilterPending.appendChild(option);
+    });
+  }
+}
+function addSortListenersPending() {
+  const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
+  sortableHeaders.forEach(header => {
+    header.addEventListener("click", () => {
+      const column = header.getAttribute("data-column");
+      if (sortConfigPending.column === column) {
+        sortConfigPending.direction = sortConfigPending.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortConfigPending.column = column;
+        sortConfigPending.direction = 'asc';
       }
-      function updatePaginationAll(data) {
-        const totalPages = Math.ceil(data.length / itemsPerPageAll);
-        pageNumbersContainerAll.innerHTML = '';
-        if (totalPages === 0) {
-          firstPageButtonAll.disabled = true;
-          prevPageButtonAll.disabled = true;
-          nextPageButtonAll.disabled = true;
-          lastPageButtonAll.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const pageNumberButton = document.createElement("button");
-        pageNumberButton.className = `all-page-number active`;
-        pageNumberButton.textContent = currentPageAll;
-        pageNumberButton.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbersContainerAll.appendChild(pageNumberButton);
-        firstPageButtonAll.disabled = currentPageAll === 1;
-        prevPageButtonAll.disabled = currentPageAll === 1;
-        nextPageButtonAll.disabled = currentPageAll === totalPages;
-        lastPageButtonAll.disabled = currentPageAll === totalPages;
+      updateSortArrowsPending();
+      filterAndRenderTablePending();
+    });
+  });
+}
+function updateSortArrowsPending() {
+  const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
+  sortableHeaders.forEach(header => {
+    const arrow = header.querySelector(".pending-arrow");
+    const column = header.getAttribute("data-column");
+    if (column === sortConfigPending.column) {
+      arrow.textContent = sortConfigPending.direction === 'asc' ? '↑' : '↓';
+    } else {
+      arrow.textContent = '';
+    }
+  });
+}
+function filterAndRenderTablePending() {
+  const selectedTeam = teamFilterPending.value;
+  const keyword = searchInputPending.value.toLowerCase().trim();
+  let filteredData = allDataPending.filter(row => {
+    const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
+    return Number(row["Vipa"] || 0) > 0 &&
+      !pendingDept.includes("stock วิภาวดี 62") &&
+      !pendingDept.includes("nec_ยกเลิกผลิต") &&
+      (!selectedTeam || row["Team"] === selectedTeam) &&
+      (!keyword ||
+        (row["DateTime"] || "").toLowerCase().includes(keyword) ||
+        (row["Ticket Number"] || "").toLowerCase().includes(keyword) ||
+        (row["Team"] || "").toLowerCase().includes(keyword) ||
+        (row["Brand"] || "").toLowerCase().includes(keyword) ||
+        (row["ค้างหน่วยงาน"] || "").toLowerCase().includes(keyword) ||
+        (row["Material"] || "").toLowerCase().includes(keyword) ||
+        (row["Description"] || "").toLowerCase().includes(keyword) ||
+        (row["Vipa"] || "").toLowerCase().includes(keyword) ||
+        (row["DayRepair"] || "").toLowerCase().includes(keyword)
+      );
+  });
+  if (sortConfigPending.column) {
+    filteredData.sort((a, b) => {
+      let valueA = a[sortConfigPending.column] || "";
+      let valueB = b[sortConfigPending.column] || "";
+      if (sortConfigPending.column === 'DayRepair' || sortConfigPending.column === 'Vipa') {
+        valueA = Number(valueA) || 0;
+        valueB = Number(valueB) || 0;
+        return sortConfigPending.direction === 'asc' ? valueA - valueB : valueB - valueA;
+      } else {
+        valueA = valueA.toString().toLowerCase();
+        valueB = valueB.toString().toLowerCase();
+        return sortConfigPending.direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
       }
-      // ปุ่มเลื่อนไปหน้าแรก
-      firstPageButtonAll.onclick = () => {
-        currentPageAll = 1;
-        renderTableAll(allDataAll);
-      };
-      // ปุ่มย้อนกลับ
-      prevPageButtonAll.onclick = () => {
-        if (currentPageAll > 1) {
-          currentPageAll--;
-          renderTableAll(allDataAll);
-        }
-      };
-      // ปุ่มไปหน้า next
-      nextPageButtonAll.onclick = () => {
-        const totalPages = Math.ceil(allDataAll.length / itemsPerPageAll);
-        if (currentPageAll < totalPages) {
-          currentPageAll++;
-          renderTableAll(allDataAll);
-        }
-      };
-      // ปุ่มไปหน้าสุดท้าย
-      lastPageButtonAll.onclick = () => {
-        currentPageAll = Math.ceil(allDataAll.length / itemsPerPageAll);
-        renderTableAll(allDataAll);
-      };
-      searchInputAll.addEventListener("input", e => {
-        const keyword = e.target.value.toLowerCase();
-        const filtered = allDataAll.filter(row => {
-          return (
-            (row["material"] || "").toLowerCase().includes(keyword) ||
-            (row["description"] || "").toLowerCase().includes(keyword) ||
-            (row["employeeName"] || "").toLowerCase().includes(keyword) ||
-            (row["team"] || "").toLowerCase().includes(keyword) ||
-            (row["remark"] || "").toLowerCase().includes(keyword)
-          );
-        });
-        renderTableAll(filtered);
-      });
-      async function loadAllData() {
-        try {
-          const response = await fetch(`${gasUrl}?action=getRequests`);
-          const res = await response.json();
-          if (res.status === 'success') {
-            allDataAll = res.data;
-            renderTableAll(allDataAll);
-          } else {
-            throw new Error(res.data || 'GAS error');
-          }
-        } catch (error) {
-          console.error("ไม่สามารถโหลดข้อมูลได้:", error);
-          tableBodyAll.innerHTML = '<tr><td colspan="11">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-        }
+    });
+  }
+  // ตรวจสอบว่า currentPage อยู่ในช่วงที่ถูกต้อง
+  const totalPages = Math.ceil(filteredData.length / itemsPerPagePending);
+  if (currentPagePending > totalPages) {
+    currentPagePending = totalPages || 1;
+  }
+  renderTablePending(filteredData);
+  updateCallCountPending(filteredData);
+}
+teamFilterPending.addEventListener("change", () => {
+  currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนทีม
+  filterAndRenderTablePending();
+});
+function updateCallCountPending(data) {
+  const uniqueTickets = [...new Set(data.map(row => row["Ticket Number"]))];
+  const count = uniqueTickets.length;
+  const callCountValue = document.getElementById("callCountValuePending");
+  callCountValue.textContent = count;
+}
+function formatDateTimePending(dateTime) {
+  if (!dateTime) return "";
+  const datePart = dateTime.split(" ")[0];
+  return datePart;
+}
+function renderTablePending(data) {
+  tableBodyPending.innerHTML = '';
+  const startIdx = (currentPagePending - 1) * itemsPerPagePending;
+  const endIdx = startIdx + itemsPerPagePending;
+  const paginatedData = data.slice(startIdx, endIdx);
+  if (paginatedData.length === 0) {
+    tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>';
+    updatePaginationPending(data);
+    return;
+  }
+  const ticketGroups = {};
+  data.forEach(row => {
+    const ticket = row["Ticket Number"];
+    if (!ticketGroups[ticket]) {
+      ticketGroups[ticket] = [];
+    }
+    ticketGroups[ticket].push(row);
+  });
+  const uniqueTickets = Object.keys(ticketGroups).sort();
+  const colorMap = {};
+  uniqueTickets.forEach((ticket, index) => {
+    if (ticket === "24103102058") {
+      colorMap[ticket] = "pending-yellow-light";
+    } else if (ticket === "25011101274") {
+      colorMap[ticket] = "pending-pink-pastel";
+    } else {
+      colorMap[ticket] = index % 2 === 0 ? "pending-yellow-light" : "pending-pink-pastel";
+    }
+  });
+  paginatedData.forEach((row, i) => {
+    const tr = document.createElement("tr");
+    tr.style.animationDelay = `${i * 0.05}s`;
+    const ticket = row["Ticket Number"];
+    tr.className = colorMap[ticket];
+    const columns = ["DateTime", "Ticket Number", "Team", "Brand", "ค้างหน่วยงาน", "Material", "Description", "Vipa", "DayRepair"];
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      let cellValue = row[col] || "";
+      if (col === "DateTime") {
+        cellValue = formatDateTimePending(cellValue);
+      } else if (col === "DayRepair" || col === "Vipa") {
+        const numValue = Number(cellValue);
+        cellValue = isNaN(numValue) ? "" : numValue.toString();
       }
-      // Pending-calls tab functions (now after variables)
-      closeModalPending.onclick = () => modalPending.style.display = "none";
-      window.onclick = event => {
-        if (event.target == modalPending) modalPending.style.display = "none";
-      };
-      itemsPerPageSelectPending.addEventListener("change", (e) => {
-        itemsPerPagePending = parseInt(e.target.value);
-        currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนจำนวนรายการต่อหน้า
-        filterAndRenderTablePending();
-      });
-      searchInputPending.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
-          filterAndRenderTablePending();
-        }
-      });
-      searchButtonPending.addEventListener("click", () => {
-        currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
-        filterAndRenderTablePending();
-      });
-      function populateTeamFilterPending(data) {
-        const filteredData = data.filter(row => {
-          const vipa = Number(row["Vipa"] || 0);
-          const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
-          return vipa > 0 &&
-                 !pendingDept.includes("stock วิภาวดี 62") &&
-                 !pendingDept.includes("nec_ยกเลิกผลิต");
-        });
-        const teams = [...new Set(filteredData.map(row => row["Team"]).filter(team => team && team.trim() !== ""))].sort();
-        teamFilterPending.innerHTML = '<option value="">ทั้งหมด</option>';
-        if (teams.length === 0) {
-          const option = document.createElement("option");
-          option.value = "";
-          option.textContent = "ไม่มีทีมที่ตรงตามเงื่อนไข";
-          option.disabled = true;
-          teamFilterPending.appendChild(option);
-        } else {
-          teams.forEach(team => {
-            const option = document.createElement("option");
-            option.value = team;
-            option.textContent = team;
-            teamFilterPending.appendChild(option);
-          });
-        }
+      td.textContent = cellValue;
+      if (col === "Description") {
+        td.classList.add("pending-text-left");
+      } else if (col === "Vipa" || col === "DayRepair") {
+        td.classList.add("pending-text-center");
       }
-      function addSortListenersPending() {
-        const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
-        sortableHeaders.forEach(header => {
-          header.addEventListener("click", () => {
-            const column = header.getAttribute("data-column");
-            if (sortConfigPending.column === column) {
-              sortConfigPending.direction = sortConfigPending.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-              sortConfigPending.column = column;
-              sortConfigPending.direction = 'asc';
-            }
-            updateSortArrowsPending();
-            filterAndRenderTablePending();
-          });
-        });
+      if ((col === "Material" || col === "Description") && row["Description"] === "Code ผิด") {
+        td.className = "pending-highlight-red";
       }
-      function updateSortArrowsPending() {
-        const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
-        sortableHeaders.forEach(header => {
-          const arrow = header.querySelector(".pending-arrow");
-          const column = header.getAttribute("data-column");
-          if (column === sortConfigPending.column) {
-            arrow.textContent = sortConfigPending.direction === 'asc' ? '↑' : '↓';
-          } else {
-            arrow.textContent = '';
-          }
-        });
-      }
-      function filterAndRenderTablePending() {
-        const selectedTeam = teamFilterPending.value;
-        const keyword = searchInputPending.value.toLowerCase().trim();
-        let filteredData = allDataPending.filter(row => {
-          const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
-          return Number(row["Vipa"] || 0) > 0 &&
-                 !pendingDept.includes("stock วิภาวดี 62") &&
-                 !pendingDept.includes("nec_ยกเลิกผลิต") &&
-                 (!selectedTeam || row["Team"] === selectedTeam) &&
-                 (!keyword ||
-                  (row["DateTime"] || "").toLowerCase().includes(keyword) ||
-                  (row["Ticket Number"] || "").toLowerCase().includes(keyword) ||
-                  (row["Team"] || "").toLowerCase().includes(keyword) ||
-                  (row["Brand"] || "").toLowerCase().includes(keyword) ||
-                  (row["ค้างหน่วยงาน"] || "").toLowerCase().includes(keyword) ||
-                  (row["Material"] || "").toLowerCase().includes(keyword) ||
-                  (row["Description"] || "").toLowerCase().includes(keyword) ||
-                  (row["Vipa"] || "").toLowerCase().includes(keyword) ||
-                  (row["DayRepair"] || "").toLowerCase().includes(keyword)
-                 );
-        });
-        if (sortConfigPending.column) {
-          filteredData.sort((a, b) => {
-            let valueA = a[sortConfigPending.column] || "";
-            let valueB = b[sortConfigPending.column] || "";
-            if (sortConfigPending.column === 'DayRepair' || sortConfigPending.column === 'Vipa') {
-              valueA = Number(valueA) || 0;
-              valueB = Number(valueB) || 0;
-              return sortConfigPending.direction === 'asc' ? valueA - valueB : valueB - valueA;
-            } else {
-              valueA = valueA.toString().toLowerCase();
-              valueB = valueB.toString().toLowerCase();
-              return sortConfigPending.direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
-            }
-          });
+      tr.appendChild(td);
+    });
+    const detailTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "ดูรายละเอียด";
+    btn.className = "pending-detail-button";
+    btn.onclick = () => {
+      modalContentPending.innerHTML = columns.map(col => {
+        let value = row[col] || "";
+        if (col === "DateTime") {
+          value = formatDateTimePending(value);
+        } else if (col === "DayRepair" || col === "Vipa") {
+          const numValue = Number(value);
+          value = isNaN(numValue) ? "" : numValue.toString();
         }
-        // ตรวจสอบว่า currentPage อยู่ในช่วงที่ถูกต้อง
-        const totalPages = Math.ceil(filteredData.length / itemsPerPagePending);
-        if (currentPagePending > totalPages) {
-          currentPagePending = totalPages || 1;
-        }
-        renderTablePending(filteredData);
-        updateCallCountPending(filteredData);
-      }
-      teamFilterPending.addEventListener("change", () => {
-        currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนทีม
-        filterAndRenderTablePending();
-      });
-      function updateCallCountPending(data) {
-        const uniqueTickets = [...new Set(data.map(row => row["Ticket Number"]))];
-        const count = uniqueTickets.length;
-        const callCountValue = document.getElementById("callCountValuePending");
-        callCountValue.textContent = count;
-      }
-      function formatDateTimePending(dateTime) {
-        if (!dateTime) return "";
-        const datePart = dateTime.split(" ")[0];
-        return datePart;
-      }
-      function renderTablePending(data) {
-        tableBodyPending.innerHTML = '';
-        const startIdx = (currentPagePending - 1) * itemsPerPagePending;
-        const endIdx = startIdx + itemsPerPagePending;
-        const paginatedData = data.slice(startIdx, endIdx);
-        if (paginatedData.length === 0) {
-          tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>';
-          updatePaginationPending(data);
-          return;
-        }
-        const ticketGroups = {};
-        data.forEach(row => {
-          const ticket = row["Ticket Number"];
-          if (!ticketGroups[ticket]) {
-            ticketGroups[ticket] = [];
-          }
-          ticketGroups[ticket].push(row);
-        });
-        const uniqueTickets = Object.keys(ticketGroups).sort();
-        const colorMap = {};
-        uniqueTickets.forEach((ticket, index) => {
-          if (ticket === "24103102058") {
-            colorMap[ticket] = "pending-yellow-light";
-          } else if (ticket === "25011101274") {
-            colorMap[ticket] = "pending-pink-pastel";
-          } else {
-            colorMap[ticket] = index % 2 === 0 ? "pending-yellow-light" : "pending-pink-pastel";
-          }
-        });
-        paginatedData.forEach((row, i) => {
-          const tr = document.createElement("tr");
-          tr.style.animationDelay = `${i * 0.05}s`;
-          const ticket = row["Ticket Number"];
-          tr.className = colorMap[ticket];
-          const columns = ["DateTime", "Ticket Number", "Team", "Brand", "ค้างหน่วยงาน", "Material", "Description", "Vipa", "DayRepair"];
-          columns.forEach(col => {
-            const td = document.createElement("td");
-            let cellValue = row[col] || "";
-            if (col === "DateTime") {
-              cellValue = formatDateTimePending(cellValue);
-            } else if (col === "DayRepair" || col === "Vipa") {
-              const numValue = Number(cellValue);
-              cellValue = isNaN(numValue) ? "" : numValue.toString();
-            }
-            td.textContent = cellValue;
-            if (col === "Description") {
-              td.classList.add("pending-text-left");
-            } else if (col === "Vipa" || col === "DayRepair") {
-              td.classList.add("pending-text-center");
-            }
-            if ((col === "Material" || col === "Description") && row["Description"] === "Code ผิด") {
-              td.className = "pending-highlight-red";
-            }
-            tr.appendChild(td);
-          });
-          const detailTd = document.createElement("td");
-          const btn = document.createElement("button");
-          btn.textContent = "ดูรายละเอียด";
-          btn.className = "pending-detail-button";
-          btn.onclick = () => {
-            modalContentPending.innerHTML = columns.map(col => {
-              let value = row[col] || "";
-              if (col === "DateTime") {
-                value = formatDateTimePending(value);
-              } else if (col === "DayRepair" || col === "Vipa") {
-                const numValue = Number(value);
-                value = isNaN(numValue) ? "" : numValue.toString();
-              }
-              let valueClass = (col === "Material" || col === "Description") && row["Description"] === "Code ผิด" ? "pending-highlight-red" : "value";
-              return `<div><span class='label'>${col}:</span> <span class='${valueClass}'>${value}</span></div>`;
-            }).join('');
-            modalPending.style.display = "block";
-          };
-          detailTd.appendChild(btn);
-          tr.appendChild(detailTd);
-          tableBodyPending.appendChild(tr);
-        });
-        updatePaginationPending(data);
-      }
-      function updatePaginationPending(data) {
-        const totalPages = Math.ceil(data.length / itemsPerPagePending);
-        pageNumbersContainerPending.innerHTML = '';
-        if (totalPages === 0) {
-          firstPageButtonPending.disabled = true;
-          prevPageButtonPending.disabled = true;
-          nextPageButtonPending.disabled = true;
-          lastPageButtonPending.disabled = true;
-          return;
-        }
-        // แสดงเฉพาะหน้าปัจจุบัน
-        const pageNumberButton = document.createElement("button");
-        pageNumberButton.className = `pending-page-number active`;
-        pageNumberButton.textContent = currentPagePending;
-        pageNumberButton.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
-        pageNumbersContainerPending.appendChild(pageNumberButton);
-        firstPageButtonPending.disabled = currentPagePending === 1;
-        prevPageButtonPending.disabled = currentPagePending === 1;
-        nextPageButtonPending.disabled = currentPagePending === totalPages;
-        lastPageButtonPending.disabled = currentPagePending === totalPages;
-      }
-      firstPageButtonPending.onclick = () => {
-        currentPagePending = 1;
-        filterAndRenderTablePending();
-      };
-      prevPageButtonPending.onclick = () => {
-        if (currentPagePending > 1) {
-          currentPagePending--;
-          filterAndRenderTablePending();
-        }
-      };
-      nextPageButtonPending.onclick = () => {
-        const totalPages = Math.ceil(allDataPending.filter(row => {
-          const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
-          return Number(row["Vipa"] || 0) > 0 &&
-                 !pendingDept.includes("stock วิภาวดี 62") &&
-                 !pendingDept.includes("nec_ยกเลิกผลิต");
-        }).length / itemsPerPagePending);
-        if (currentPagePending < totalPages) {
-          currentPagePending++;
-          filterAndRenderTablePending();
-        }
-      };
-      lastPageButtonPending.onclick = () => {
-        currentPagePending = Math.ceil(allDataPending.filter(row => {
-          const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
-          return Number(row["Vipa"] || 0) > 0 &&
-                 !pendingDept.includes("stock วิภาวดี 62") &&
-                 !pendingDept.includes("nec_ยกเลิกผลิต");
-        }).length / itemsPerPagePending);
-        filterAndRenderTablePending();
-      };
-     async function loadPendingCallsData() {
+        let valueClass = (col === "Material" || col === "Description") && row["Description"] === "Code ผิด" ? "pending-highlight-red" : "value";
+        return `<div><span class='label'>${col}:</span> <span class='${valueClass}'>${value}</span></div>`;
+      }).join('');
+      modalPending.style.display = "block";
+    };
+    detailTd.appendChild(btn);
+    tr.appendChild(detailTd);
+    tableBodyPending.appendChild(tr);
+  });
+  updatePaginationPending(data);
+}
+function updatePaginationPending(data) {
+  const totalPages = Math.ceil(data.length / itemsPerPagePending);
+  pageNumbersContainerPending.innerHTML = '';
+  if (totalPages === 0) {
+    firstPageButtonPending.disabled = true;
+    prevPageButtonPending.disabled = true;
+    nextPageButtonPending.disabled = true;
+    lastPageButtonPending.disabled = true;
+    return;
+  }
+  // แสดงเฉพาะหน้าปัจจุบัน
+  const pageNumberButton = document.createElement("button");
+  pageNumberButton.className = `pending-page-number active`;
+  pageNumberButton.textContent = currentPagePending;
+  pageNumberButton.disabled = true; // ไม่ให้คลิกได้เพราะเป็นหน้าปัจจุบัน
+  pageNumbersContainerPending.appendChild(pageNumberButton);
+  firstPageButtonPending.disabled = currentPagePending === 1;
+  prevPageButtonPending.disabled = currentPagePending === 1;
+  nextPageButtonPending.disabled = currentPagePending === totalPages;
+  lastPageButtonPending.disabled = currentPagePending === totalPages;
+}
+firstPageButtonPending.onclick = () => {
+  currentPagePending = 1;
+  filterAndRenderTablePending();
+};
+prevPageButtonPending.onclick = () => {
+  if (currentPagePending > 1) {
+    currentPagePending--;
+    filterAndRenderTablePending();
+  }
+};
+nextPageButtonPending.onclick = () => {
+  const totalPages = Math.ceil(allDataPending.filter(row => {
+    const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
+    return Number(row["Vipa"] || 0) > 0 &&
+      !pendingDept.includes("stock วิภาวดี 62") &&
+      !pendingDept.includes("nec_ยกเลิกผลิต");
+  }).length / itemsPerPagePending);
+  if (currentPagePending < totalPages) {
+    currentPagePending++;
+    filterAndRenderTablePending();
+  }
+};
+lastPageButtonPending.onclick = () => {
+  currentPagePending = Math.ceil(allDataPending.filter(row => {
+    const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
+    return Number(row["Vipa"] || 0) > 0 &&
+      !pendingDept.includes("stock วิภาวดี 62") &&
+      !pendingDept.includes("nec_ยกเลิกผลิต");
+  }).length / itemsPerPagePending);
+  filterAndRenderTablePending();
+};
+async function loadPendingCallsData() {
   console.log("กำลังโหลดข้อมูล Pending Calls...");
   const cacheKey = "pending-calls-data-v3";
   try {
     allDataPending = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(urlPending + "?_=" + Date.now(), { 
+      const res = await fetch(urlPending + "?_=" + Date.now(), {
         signal: controller.signal,
         cache: 'no-cache'
       });
@@ -3191,15 +3360,15 @@ async function loadVibhavadiStockMap() {
     hideLoading();
   }
 }
-      // Add sort listeners for pending calls
-      document.addEventListener('DOMContentLoaded', () => {
-        addSortListenersPending();
-      });
-      // Auto-load default data if logged in
-      if (appContent.classList.contains('logged-in')) {
-        loadData();
-      }
-     // เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
+// Add sort listeners for pending calls
+document.addEventListener('DOMContentLoaded', () => {
+  addSortListenersPending();
+});
+// Auto-load default data if logged in
+if (appContent.classList.contains('logged-in')) {
+  loadData();
+}
+// เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
 function formatTimestamp(dateTimeStr) {
   if (!dateTimeStr) return "";
   const [datePart, timePart] = dateTimeStr.split(' ');
@@ -3209,7 +3378,7 @@ function formatTimestamp(dateTimeStr) {
   const formattedTime = timePart || '';
   return `${formattedDate} ${formattedTime}`;
 }
-      // Register Service Worker for PWA
+// Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -3297,10 +3466,10 @@ async function openAnnouncementDeck() {
 
       html += `
         <div style="background:#fff;border-radius:16px;margin:12px 0;overflow:hidden;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isNew?'#e74c3c':'#3498db'};
+                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isNew ? '#e74c3c' : '#3498db'};
                     cursor:pointer;transition:transform 0.2s;" 
              onclick="this.querySelector('.ann-body').style.display=this.querySelector('.ann-body').style.display==='block'?'none':'block';">
-          <div style="padding:16px;background:${isNew?'linear-gradient(135deg,#e74c3c,#c0392b)':'linear-gradient(135deg,#3498db,#2980b9)'};
+          <div style="padding:16px;background:${isNew ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : 'linear-gradient(135deg,#3498db,#2980b9)'};
                       color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:16px;max-width:75%;">เรื่อง: ${subject}</span>
             ${isNew ? '<span style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">ใหม่</span>' : ''}
@@ -3461,7 +3630,7 @@ setTimeout(() => {
     permanentlyHideInstallButton();
   }
 }, 500);
-  // ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
+// ฟังก์ชันเปิดหน้าต่างแก้ไขประกาศ (เฉพาะ 7512411)
 function openAnnouncementEditor() {
   Swal.fire({
     title: '<i class="fas fa-bullhorn"></i> บันทึกข้อความแจ้งเตือน',
@@ -3547,30 +3716,30 @@ function openAnnouncementEditor() {
           'message': message
         })
       })
-      .then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกประกาศสำเร็จ!',
-          html: `
+        .then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกประกาศสำเร็จ!',
+            html: `
             <div style="text-align:center;">
               <h3 style="color:#27ae60; margin:10px 0;">${subject}</h3>
               <p style="font-size:17px; color:#333;">ทุกคนจะเห็นประกาศนี้ทันทีที่เปิดแอป</p>
             </div>
           `,
-          confirmButtonText: 'เสร็จสิ้น',
-          timer: 4000,
-          timerProgressBar: true
+            confirmButtonText: 'เสร็จสิ้น',
+            timer: 4000,
+            timerProgressBar: true
+          });
+        })
+        .catch(err => {
+          console.error('บันทึกประกาศล้มเหลว:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกได้ กรุณาลองใหม่',
+            confirmButtonText: 'ตกลง'
+          });
         });
-      })
-      .catch(err => {
-        console.error('บันทึกประกาศล้มเหลว:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถบันทึกได้ กรุณาลองใหม่',
-          confirmButtonText: 'ตกลง'
-        });
-      });
     }
   });
 }
@@ -3584,8 +3753,8 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
   modalAll.addEventListener('click', (e) => { if (e.target === modalAll) modalAll.style.display = 'none'; });
   modalPending.addEventListener('click', (e) => { if (e.target === modalPending) modalPending.style.display = 'none'; });
-});      
- // ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
+});
+// ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
 window.addEventListener('appinstalled', () => {
   localStorage.setItem('partgo-installed', 'true');
   const btn = document.getElementById('install-btn');
@@ -3601,7 +3770,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
-      // Initial calls (now safe after all variables defined)
-      loadTheme();
-      checkLoginStatus();
-    
+// Initial calls (now safe after all variables defined)
+loadTheme();
+checkLoginStatus();
