@@ -3486,3 +3486,31 @@ body.dark-mode .dark-blue-title {
   box-shadow: none !important;
   background: linear-gradient(135deg, #cccccc, #999999) !important;
 }
+.notification-btn {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #3498db;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.notification-btn:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+  transform: rotate(15deg);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  display: none; /* ซ่อนไว้จนกว่าจะมีข้อความใหม่ */
+  box-shadow: 0 0 5px rgba(231, 76, 60, 0.7);
+}
