@@ -588,6 +588,10 @@ async function checkLoginStatus() {
       rememberMeCheckbox.checked = true;
     }
   }
+   setTimeout(() => {
+      checkNewAnnouncements();
+    }, 1500);
+    setupNotificationAfterLogin();
 }
 function handleLogout() {
   localStorage.removeItem('isLoggedIn');
@@ -653,6 +657,11 @@ function showTab(tabId) {
       break;
     default:
       hideLoading();
+  }
+   if (tabId !== 'loading') {
+    setTimeout(() => {
+      checkNewAnnouncements();
+    }, 500);
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -3419,15 +3428,597 @@ function formatDateTimeToThai(dateTimeStr) {
 }
 
 // ========== แสดงข้อความแจ้งเตือน ==========
+// ฟังก์ชันเปิดดูประกาศ
 async function openAnnouncementDeck() {
+  console.log('เปิดหน้าต่างประกาศ...');
+  
+  // แสดง Loading
+  Swal.fire({
+    title: 'กำลังโหลดประกาศ...',
+    text: 'กรุณารอสักครู่',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showConfirmButton: false,
+    didOpen: () => Swal.showLoading()
+  });
+  
+  try {
+    // ดึงข้อมูลประกาศจาก Google Sheet
+    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`, {
+      cache: 'no-cache'
+    });
+    
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ไม่สามารถโหลดข้อมูลได้`);
+    }
+    
+    const data = await res.json();
+    
+    if (!data || data.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'ยังไม่มีประกาศ',
+        html: `
+          <div style="text-align:center; padding:20px;">
+            <i class="fas fa-inbox" style="font-size:60px; color:#95a5a6; margin-bottom:20px;"></i>
+            <p style="font-size:18px; color:#7f8c8d; font-weight:600;">คลังวิภาวดี 62 ยังไม่ได้ส่งประกาศล่าสุด</p>
+            <p style="color:#bdc3c7; margin-top:10px;">กรุณาตรวจสอบอีกครั้งในภายหลัง</p>
+          </div>
+        `,
+        confirmButtonText: 'ปิด',
+        width: window.innerWidth <= 480 ? '90%' : '400px',
+        customClass: {
+          popup: 'animated fadeIn'
+        }
+      });
+      return;
+    }
+
+    // กรองและเรียงลำดับประกาศ
+    const sorted = data
+      .filter(r => r.message && r.message.trim() !== "")
+      .sort((a, b) => {
+        const dateA = parseDateTimeToJSDate(a.updatedAt);
+        const dateB = parseDateTimeToJSDate(b.updatedAt);
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return dateB - dateA; // เรียงจากใหม่ไปเก่า
+      });
+
+    console.log(`พบ ${sorted.length} ประกาศ`);
+
+    // สร้าง HTML สำหรับแสดงประกาศ
+    let html = `
+      <div style="max-height:65vh; overflow-y:auto; padding:5px; margin:-10px -10px 0 -10px;">
+        <div style="margin-bottom:15px; padding:12px; background:linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius:12px; text-align:center;">
+          <i class="fas fa-bullhorn" style="color:#e74c3c; margin-right:8px;"></i>
+          <span style="font-weight:bold; color:#2c3e50;">มี ${sorted.length} ประกาศ</span>
+        </div>
+    `;
+    
+    let newAnnouncementsCount = 0;
+    const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
+
+    sorted.forEach((item, idx) => {
+      const subject = (item.subject || "ประกาศ").trim();
+      const message = (item.message || "").trim().replace(/\n/g, '<br>');
+      const rawDate = item.updatedAt || "";
+      const by = item.updatedBy || "Admin";
+      const niceDate = formatDateTimeToThai(rawDate);
+      const itemDate = parseDateTimeToJSDate(rawDate);
+      
+      // ตรวจสอบว่าประกาศนี้ใหม่หรือไม่
+      const isNew = itemDate && itemDate.getTime() > parseInt(lastCheckTime);
+      if (isNew) newAnnouncementsCount++;
+
+      // ตรวจสอบว่าประกาศใหม่ภายใน 2 วันหรือไม่
+      const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
+      const isRecent = itemDate && itemDate.getTime() > twoDaysAgo;
+
+      html += `
+        <div class="announcement-item" 
+             style="background:#fff; border-radius:16px; margin:0 0 15px 0; overflow:hidden;
+                    box-shadow:0 4px 15px rgba(0,0,0,0.08); border-left:6px solid ${isNew ? '#e74c3c' : (isRecent ? '#3498db' : '#95a5a6')};
+                    cursor:pointer; transition:all 0.3s ease;"
+             onclick="toggleAnnouncementBody(this)">
+          <div style="padding:16px; background:${isNew ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : (isRecent ? 'linear-gradient(135deg,#3498db,#2980b9)' : 'linear-gradient(135deg,#95a5a6,#7f8c8d)')};
+                      color:white; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+            <div style="flex:1;">
+              <div style="font-size:16px; margin-bottom:4px;">
+                <i class="fas ${isNew ? 'fa-exclamation-circle' : 'fa-info-circle'}" style="margin-right:8px;"></i>
+                ${subject}
+              </div>
+              <div style="font-size:12px; opacity:0.9; display:flex; align-items:center; gap:10px;">
+                <span><i class="far fa-calendar-alt"></i> ${niceDate}</span>
+                ${by !== "Admin" ? `<span><i class="fas fa-user"></i> ${by}</span>` : ''}
+              </div>
+            </div>
+            ${isNew ? '<span style="background:#fff; color:#e74c3c; padding:4px 10px; border-radius:15px; font-size:11px; font-weight:bold; white-space:nowrap;">NEW</span>' : ''}
+          </div>
+          <div class="announcement-body" style="display:none; padding:16px; font-size:15px; color:#2c3e50; line-height:1.6; border-top:1px solid #eee;">
+            <div style="white-space:pre-line;">${message}</div>
+            ${itemDate ? `
+              <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd; color:#7f8c8d; font-size:13px; text-align:right;">
+                <i class="far fa-clock"></i> โพสต์เมื่อ ${formatDateTimeToThai(rawDate)}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+      </div>
+      <div style="margin-top:20px; padding-top:15px; border-top:1px solid #eee; text-align:center;">
+        <div style="margin-bottom:10px; color:#7f8c8d; font-size:14px;">
+          <i class="fas fa-info-circle"></i> คลิกที่แต่ละประกาศเพื่อดูรายละเอียด
+        </div>
+      </div>
+    `;
+
+    // แสดงหน้าต่างประกาศ
+    Swal.fire({
+      title: `<div style="display:flex; align-items:center; gap:10px; color:#2c3e50;">
+                <i class="fas fa-bullhorn" style="color:#e74c3c; font-size:24px;"></i>
+                <span style="font-size:22px; font-weight:700;">ประกาศจากคลังวิภาวดี 62</span>
+                ${newAnnouncementsCount > 0 ? `<span style="background:#e74c3c; color:white; padding:2px 10px; border-radius:15px; font-size:14px;">${newAnnouncementsCount} ใหม่</span>` : ''}
+              </div>`,
+      html: html,
+      width: window.innerWidth <= 480 ? '95%' : '550px',
+      padding: '20px',
+      showConfirmButton: false,
+      showCloseButton: true,
+      closeButtonHtml: '<i class="fas fa-times"></i>',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      customClass: {
+        popup: 'animated fadeInDown faster',
+        closeButton: 'swal2-close-custom'
+      },
+      didOpen: (popup) => {
+        console.log('เปิดหน้าต่างประกาศแล้ว');
+        
+        // เพิ่มปุ่มเคลียร์การแจ้งเตือน
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'clearNotificationsBtn';
+        clearBtn.innerHTML = '<i class="fas fa-check-circle"></i> เคลียร์การแจ้งเตือน';
+        clearBtn.title = 'คลิกเพื่อปิดการแจ้งเตือนทั้งหมด';
+        clearBtn.style.cssText = `
+          position: absolute;
+          top: 20px;
+          right: 65px;
+          background: linear-gradient(135deg, #2ecc71, #27ae60);
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        `;
+        
+        clearBtn.onmouseenter = () => {
+          clearBtn.style.transform = 'translateY(-2px)';
+          clearBtn.style.boxShadow = '0 6px 15px rgba(46, 204, 113, 0.4)';
+        };
+        
+        clearBtn.onmouseleave = () => {
+          clearBtn.style.transform = 'translateY(0)';
+          clearBtn.style.boxShadow = '0 4px 12px rgba(46, 204, 113, 0.3)';
+        };
+        
+        clearBtn.onclick = () => {
+          console.log('เคลียร์การแจ้งเตือน');
+          
+          // บันทึกเวลาปัจจุบันเป็นเวลาที่ตรวจสอบล่าสุด
+          localStorage.setItem('lastAnnouncementCheck', Date.now());
+          
+          // อัปเดต badge
+          updateNotificationBadge(false, 0);
+          
+          // ปิดหน้าต่าง
+          Swal.close();
+          
+          // แสดงข้อความยืนยัน
+          Swal.fire({
+            icon: 'success',
+            title: 'เคลียร์การแจ้งเตือนแล้ว!',
+            html: `
+              <div style="text-align:center; padding:10px;">
+                <i class="fas fa-check-circle" style="font-size:50px; color:#2ecc71; margin-bottom:15px;"></i>
+                <p style="font-size:16px; color:#27ae60; font-weight:600;">ปุ่มกระดิ่งจะไม่แสดงสัญลักษณ์</p>
+                <p style="color:#7f8c8d; margin-top:8px;">จนกว่าจะมีประกาศใหม่จากคลังวิภาวดี 62</p>
+              </div>
+            `,
+            confirmButtonText: 'ตกลง',
+            timer: 2500,
+            timerProgressBar: true,
+            width: window.innerWidth <= 480 ? '90%' : '400px'
+          });
+        };
+        
+        // เพิ่มปุ่มลงใน container ของ Swal
+        const swalContainer = document.querySelector('.swal2-container');
+        if (swalContainer) {
+          swalContainer.appendChild(clearBtn);
+        }
+        
+        // เพิ่ม CSS สำหรับปุ่มปิด
+        const closeButton = document.querySelector('.swal2-close-custom');
+        if (closeButton) {
+          closeButton.style.cssText = `
+            font-size: 24px;
+            color: #95a5a6;
+            transition: all 0.3s;
+          `;
+          closeButton.onmouseenter = () => {
+            closeButton.style.color = '#e74c3c';
+            closeButton.style.transform = 'rotate(90deg)';
+          };
+          closeButton.onmouseleave = () => {
+            closeButton.style.color = '#95a5a6';
+            closeButton.style.transform = 'rotate(0deg)';
+          };
+        }
+        
+        // Scroll to top
+        const content = popup.querySelector('.swal2-html-container');
+        if (content) {
+          content.scrollTop = 0;
+        }
+      },
+      willClose: () => {
+        // ลบปุ่มเคลียร์เมื่อปิดหน้าต่าง
+        const clearBtn = document.getElementById('clearNotificationsBtn');
+        if (clearBtn && clearBtn.parentNode) {
+          clearBtn.parentNode.removeChild(clearBtn);
+        }
+        
+        // อัปเดตเวลาตรวจสอบล่าสุดเมื่อปิดหน้าต่าง (ถ้ามีประกาศใหม่)
+        if (newAnnouncementsCount > 0) {
+          console.log(`ปิดหน้าต่างประกาศ มี ${newAnnouncementsCount} ประกาศใหม่`);
+          localStorage.setItem('lastAnnouncementCheck', Date.now());
+          updateNotificationBadge(false, 0);
+        }
+      }
+    });
+    
+  } catch (err) {
+    console.error("โหลดประกาศล้มเหลว:", err);
+    
+    // ปิด Loading
+    Swal.close();
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'โหลดประกาศไม่สำเร็จ',
+      html: `
+        <div style="text-align:center; padding:20px;">
+          <i class="fas fa-exclamation-triangle" style="font-size:60px; color:#e74c3c; margin-bottom:20px;"></i>
+          <p style="font-size:18px; color:#e67e22; font-weight:600;">ไม่สามารถโหลดข้อมูลประกาศได้</p>
+          <p style="color:#95a5a6; margin-top:10px;">${err.message || 'กรุณาลองใหม่ในภายหลัง'}</p>
+          <div style="margin-top:20px; padding:15px; background:#fff8e1; border-radius:10px; border-left:5px solid #ffb300;">
+            <p style="margin:0; font-size:14px; color:#5d4037;">
+              <i class="fas fa-lightbulb"></i> 
+              ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่อีกครั้ง
+            </p>
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'ลองอีกครั้ง',
+      confirmButtonColor: '#e74c3c',
+      showCancelButton: true,
+      cancelButtonText: 'ปิด',
+      width: window.innerWidth <= 480 ? '90%' : '500px'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        openAnnouncementDeck();
+      }
+    });
+  }
+}
+
+// ฟังก์ชันช่วยสำหรับเปิด/ปิดรายละเอียดประกาศ
+function toggleAnnouncementBody(element) {
+  const body = element.querySelector('.announcement-body');
+  const icon = element.querySelector('.fa-info-circle, .fa-exclamation-circle');
+  
+  if (body.style.display === 'none' || !body.style.display) {
+    body.style.display = 'block';
+    if (icon) {
+      icon.classList.remove('fa-info-circle', 'fa-exclamation-circle');
+      icon.classList.add('fa-chevron-up');
+    }
+    element.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
+  } else {
+    body.style.display = 'none';
+    if (icon) {
+      icon.classList.remove('fa-chevron-up');
+      const isNew = element.style.borderLeftColor.includes('e74c3c');
+      icon.classList.add(isNew ? 'fa-exclamation-circle' : 'fa-info-circle');
+    }
+    element.style.boxShadow = '0 4px 15px rgba(0,0,0,0.08)';
+  }
+}
+
+// ฟังก์ชันเปิดประกาศและเคลียร์ badge โดยอัตโนมัติ
+async function openAnnouncementDeckAndClear() {
+  console.log('เปิดประกาศและเคลียร์ badge');
+  
+  // อัปเดตเวลาตรวจสอบล่าสุดทันทีที่กดปุ่ม
+  localStorage.setItem('lastAnnouncementCheck', Date.now());
+  
+  // ซ่อน badge ทันที
+  updateNotificationBadge(false, 0);
+  
+  // เปิดหน้าต่างประกาศ
+  await openAnnouncementDeck();
+}
+
+// ฟังก์ชันเปิดประกาศแบบไม่เคลียร์ badge (สำหรับการตรวจสอบ)
+async function openAnnouncementDeckPreview() {
+  console.log('เปิดประกาศแบบดูเฉยๆ (ไม่เคลียร์ badge)');
+  await openAnnouncementDeck();
+}
+// ฟังก์ชันตรวจสอบประกาศใหม่
+async function checkNewAnnouncements() {
+  console.log('เริ่มตรวจสอบประกาศใหม่...');
+  
+  try {
+    // ดึงข้อมูลประกาศจาก Google Sheet
+    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    
+    const data = await res.json();
+    
+    if (!data || data.length === 0) {
+      console.log('ไม่มีประกาศในระบบ');
+      updateNotificationBadge(false, 0);
+      return;
+    }
+    
+    // ดึงประกาศล่าสุดที่ถูกกรองและเรียงลำดับ
+    const sorted = data
+      .filter(r => r.message && r.message.trim() !== "")
+      .sort((a, b) => {
+        const dateA = parseDateTimeToJSDate(a.updatedAt);
+        const dateB = parseDateTimeToJSDate(b.updatedAt);
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return dateB - dateA; // เรียงจากใหม่ไปเก่า
+      });
+    
+    if (sorted.length === 0) {
+      console.log('ไม่มีประกาศที่กรองแล้ว');
+      updateNotificationBadge(false, 0);
+      return;
+    }
+    
+    // ตรวจสอบประกาศล่าสุด
+    const latestAnnouncement = sorted[0];
+    const latestDate = parseDateTimeToJSDate(latestAnnouncement.updatedAt);
+    
+    if (!latestDate) {
+      console.log('ไม่สามารถแปลงวันที่ประกาศล่าสุดได้');
+      updateNotificationBadge(false, 0);
+      return;
+    }
+    
+    console.log('ประกาศล่าสุด:', {
+      subject: latestAnnouncement.subject,
+      date: latestAnnouncement.updatedAt,
+      timestamp: latestDate.getTime()
+    });
+    
+    // ตรวจสอบว่าประกาศใหม่ภายใน 2 วันหรือไม่
+    const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
+    const isNew = latestDate.getTime() > twoDaysAgo;
+    
+    console.log('ประกาศใหม่ภายใน 2 วัน?', isNew);
+    
+    // ตรวจสอบเวลาที่ผู้ใช้เคยเปิดดูล่าสุด
+    const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
+    console.log('เวลาที่เคยตรวจสอบล่าสุด:', new Date(parseInt(lastCheckTime)).toLocaleString());
+    
+    let newCount = 0;
+    
+    // นับจำนวนประกาศที่ใหม่กว่าที่เคยตรวจสอบ
+    sorted.forEach(item => {
+      const itemDate = parseDateTimeToJSDate(item.updatedAt);
+      if (itemDate && itemDate.getTime() > parseInt(lastCheckTime)) {
+        newCount++;
+      }
+    });
+    
+    console.log('จำนวนประกาศใหม่:', newCount);
+    
+    // อัปเดต badge
+    const shouldShowBadge = isNew && newCount > 0;
+    updateNotificationBadge(shouldShowBadge, newCount);
+    
+    // บันทึกเวลาตรวจสอบล่าสุด (เฉพาะถ้ามีการแสดง badge)
+    if (shouldShowBadge) {
+      console.log('แสดง badge สำหรับประกาศใหม่');
+    } else {
+      console.log('ไม่แสดง badge (ไม่มีประกาศใหม่)');
+    }
+    
+  } catch (err) {
+    console.error("ตรวจสอบประกาศล้มเหลว:", err);
+    updateNotificationBadge(false, 0);
+  }
+}
+
+// ฟังก์ชันอัปเดต badge แจ้งเตือน
+function updateNotificationBadge(show, count = 0) {
+  const badge = document.getElementById('notificationBadge');
+  if (!badge) {
+    console.warn('ไม่พบ element notificationBadge');
+    return;
+  }
+  
+  // สร้างหรืออัปเดต CSS สำหรับ badge ถ้ายังไม่มี
+  if (!document.getElementById('notificationBadgeStyles')) {
+    const style = document.createElement('style');
+    style.id = 'notificationBadgeStyles';
+    style.textContent = `
+      @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+        70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+      }
+      
+      .notification-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #e74c3c;
+        color: white;
+        border-radius: 10px;
+        min-width: 20px;
+        height: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        animation: pulse 2s infinite;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        border: 2px solid white;
+      }
+      
+      .notification-badge.small {
+        width: 12px;
+        height: 12px;
+        min-width: 12px;
+        font-size: 0;
+        top: 8px;
+        right: 8px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  if (show && count > 0) {
+    badge.style.display = 'flex';
+    
+    if (count > 9) {
+      badge.textContent = '9+';
+      badge.style.width = '24px';
+      badge.style.height = '20px';
+      badge.style.fontSize = '11px';
+      badge.classList.remove('small');
+    } else if (count === 1) {
+      badge.textContent = '';
+      badge.style.width = '12px';
+      badge.style.height = '12px';
+      badge.classList.add('small');
+    } else {
+      badge.textContent = count.toString();
+      badge.style.width = '20px';
+      badge.style.height = '20px';
+      badge.style.fontSize = '12px';
+      badge.classList.remove('small');
+    }
+    
+    badge.style.justifyContent = 'center';
+    badge.style.alignItems = 'center';
+    badge.style.animation = 'pulse 2s infinite';
+    
+    console.log(`แสดง badge: ${count} ประกาศใหม่`);
+  } else {
+    badge.style.display = 'none';
+    console.log('ซ่อน badge');
+  }
+}
+
+// ฟังก์ชันเคลียร์การแจ้งเตือน
+function clearNotificationBadge() {
+  console.log('เคลียร์การแจ้งเตือน');
+  
+  // บันทึกเวลาปัจจุบันเป็นเวลาที่ตรวจสอบล่าสุด
+  localStorage.setItem('lastAnnouncementCheck', Date.now());
+  
+  // ซ่อน badge
+  updateNotificationBadge(false, 0);
+  
+  // แสดงข้อความยืนยัน
+  Swal.fire({
+    icon: 'success',
+    title: 'เคลียร์การแจ้งเตือนแล้ว',
+    text: 'ปุ่มกระดิ่งจะไม่แสดงสัญลักษณ์จนกว่าจะมีประกาศใหม่',
+    timer: 2000,
+    showConfirmButton: false
+  });
+}
+
+// ฟังก์ชันตั้งค่าการตรวจสอบอัตโนมัติ
+function setupAnnouncementChecker() {
+  console.log('ตั้งค่าการตรวจสอบประกาศอัตโนมัติ');
+  
+  // ตรวจสอบประกาศใหม่เมื่อโหลดหน้าเว็บ
+  setTimeout(() => {
+    checkNewAnnouncements();
+  }, 2000);
+  
+  // ตรวจสอบทุก 10 นาที
+  const checkInterval = setInterval(() => {
+    checkNewAnnouncements();
+  }, 10 * 60 * 1000);
+  
+  // ตรวจสอบเมื่อผู้ใช้กลับมาที่แท็บ
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      console.log('ผู้ใช้กลับมาที่หน้าเว็บ → ตรวจสอบประกาศใหม่');
+      checkNewAnnouncements();
+    }
+  });
+  
+  // ตรวจสอบเมื่อผู้ใช้กลับมาที่หน้าต่าง
+  window.addEventListener('focus', () => {
+    console.log('ผู้ใช้กลับมาที่หน้าต่าง → ตรวจสอบประกาศใหม่');
+    checkNewAnnouncements();
+  });
+  
+  return checkInterval;
+}
+
+// ฟังก์ชันเปิดดูประกาศและเคลียร์ badge
+async function openAnnouncementDeckAndClear() {
+  // บันทึกเวลาที่เปิดดูประกาศ
+  localStorage.setItem('lastAnnouncementCheck', Date.now());
+  
+  // ซ่อน badge ทันที
+  updateNotificationBadge(false, 0);
+  
+  // เปิดหน้าต่างประกาศ
+  await openAnnouncementDeck();
+}
+
+// ฟังก์ชันแก้ไข openAnnouncementDeck() ให้รองรับการเคลียร์ badge
+async function openAnnouncementDeck() {
+  console.log('เปิดหน้าต่างประกาศ');
+  
   Swal.fire({
     title: 'กำลังโหลดประกาศ...',
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading()
   });
+  
   try {
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information`);
+    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`);
     const data = await res.json();
+    
     if (!data || data.length === 0) {
       Swal.fire({
         icon: 'info',
@@ -3439,7 +4030,6 @@ async function openAnnouncementDeck() {
       return;
     }
 
-    // เรียงจากล่าสุด → เก่าสุด (ใช้เวลาจริงจาก timestamp)
     const sorted = data
       .filter(r => r.message && r.message.trim() !== "")
       .sort((a, b) => {
@@ -3447,36 +4037,38 @@ async function openAnnouncementDeck() {
         const dateB = parseDateTimeToJSDate(b.updatedAt);
         if (!dateA) return 1;
         if (!dateB) return -1;
-        return dateB - dateA; // ใหม่ → เก่า
+        return dateB - dateA;
       });
 
     let html = '<div style="max-height:70vh;overflow-y:auto;padding:4px;">';
+    let newAnnouncements = 0;
+    
     sorted.forEach((item, idx) => {
       const subject = (item.subject || "ประกาศ").trim();
       const message = (item.message || "").trim().replace(/\n/g, '<br>');
       const rawDate = item.updatedAt || "";
       const by = item.updatedBy || "Admin";
 
-      // แปลงวันที่ให้สวย (แสดงวันที่ + เวลาเต็ม)
       const niceDate = formatDateTimeToThai(rawDate);
-
-      // เช็คว่าเป็นประกาศใหม่ (ภายใน 2 วัน)
       const itemDate = parseDateTimeToJSDate(rawDate);
-      const isNew = idx === 0 && itemDate && (Date.now() - itemDate.getTime()) / 86400000 <= 2;
+      const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
+      const isNew = itemDate && itemDate.getTime() > parseInt(lastCheckTime);
+
+      if (isNew) newAnnouncements++;
 
       html += `
         <div style="background:#fff;border-radius:16px;margin:12px 0;overflow:hidden;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isNew ? '#e74c3c' : '#3498db'};
+                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isNew?'#e74c3c':'#3498db'};
                     cursor:pointer;transition:transform 0.2s;" 
              onclick="this.querySelector('.ann-body').style.display=this.querySelector('.ann-body').style.display==='block'?'none':'block';">
-          <div style="padding:16px;background:${isNew ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : 'linear-gradient(135deg,#3498db,#2980b9)'};
+          <div style="padding:16px;background:${isNew?'linear-gradient(135deg,#e74c3c,#c0392b)':'linear-gradient(135deg,#3498db,#2980b9)'};
                       color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:16px;max-width:75%;">เรื่อง: ${subject}</span>
-            ${isNew ? '<span style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">ใหม่</span>' : ''}
+            ${isNew ? '<span style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">NEW</span>' : ''}
           </div>
           <div style="padding:0 16px 16px;font-size:15px;color:#2c3e50;line-height:1.8;">
             <div style="color:#7f8c8d;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-calendar-day" style="color:#e74c3c;"></i> ${niceDate}
+              <i class="fas fa-calendar-day" style="color:${isNew?'#e74c3c':'#3498db'};"></i> ${niceDate}
               ${by !== "Admin" ? ` • โดย ${by}` : ''}
             </div>
             <div class="ann-body" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #ddd;">
@@ -3485,27 +4077,38 @@ async function openAnnouncementDeck() {
           </div>
         </div>`;
     });
+    
     html += '</div>';
+    
+    // เพิ่มปุ่มเคลียร์การแจ้งเตือน
+    html += `
+      <div style="margin-top:20px; text-align:center;">
+        <button id="clearNotificationsBtn" 
+                style="background:linear-gradient(135deg, #2ecc71, #27ae60); color:white; border:none; padding:10px 20px; border-radius:25px; font-size:14px; cursor:pointer; font-weight:bold;">
+          <i class="fas fa-check-circle"></i> เคลียร์การแจ้งเตือน (${newAnnouncements} ใหม่)
+        </button>
+      </div>
+    `;
 
     Swal.fire({
       title: '<div style="font-size:21px;color:#e74c3c;"><i class="fas fa-bullhorn"></i> ข้อความแจ้งเตือน</div>',
       html: html,
-      width: '440px',
+      width: '480px',
       showConfirmButton: false,
       allowOutsideClick: true,
       customClass: { popup: 'animated fadeInDown faster' },
       didOpen: () => {
-        const badge = document.getElementById('notificationBadge');
-        if (sorted.length > 0 && badge) {
-          const latestDate = parseDateTimeToJSDate(sorted[0].updatedAt);
-          if (latestDate && (Date.now() - latestDate.getTime()) / 86400000 <= 2) {
-            badge.style.display = 'flex';
-          } else {
-            badge.style.display = 'none';
-          }
+        // เพิ่ม event listener ให้ปุ่มเคลียร์
+        const clearBtn = document.getElementById('clearNotificationsBtn');
+        if (clearBtn) {
+          clearBtn.onclick = () => {
+            clearNotificationBadge();
+            Swal.close();
+          };
         }
       }
     });
+    
   } catch (err) {
     console.error("โหลดประกาศล้มเหลว:", err);
     Swal.fire({
@@ -3516,6 +4119,48 @@ async function openAnnouncementDeck() {
     });
   }
 }
+
+// เรียกใช้เมื่อ DOM โหลดเสร็จ
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM โหลดเสร็จ → ตั้งค่าการตรวจสอบประกาศ');
+  
+  // ตั้งค่าการตรวจสอบประกาศอัตโนมัติ
+  setTimeout(() => {
+    setupAnnouncementChecker();
+  }, 1000);
+  
+  // อัปเดตปุ่ม notification ให้เรียกฟังก์ชันที่เคลียร์ badge ด้วย
+  const notificationBtn = document.getElementById('notificationBtn');
+  if (notificationBtn) {
+    notificationBtn.onclick = openAnnouncementDeckAndClear;
+  }
+});
+
+// เรียกใช้เมื่อผู้ใช้ล็อกอิน
+function setupNotificationAfterLogin() {
+  console.log('ผู้ใช้ล็อกอิน → ตั้งค่าการตรวจสอบประกาศ');
+  
+  setTimeout(() => {
+    checkNewAnnouncements();
+    setupAnnouncementChecker();
+  }, 2000);
+}
+
+// เพิ่ม animation CSS สำหรับ badge
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  #notificationBadge {
+    animation: pulse 2s infinite;
+  }
+`;
+document.head.appendChild(style);
+
 function showImageDetailModal(row) {
   // 1. ดึง File ID จาก row.UrlWeb
   let fileId = "";
@@ -3770,6 +4415,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
+ setTimeout(() => {
+    checkNewAnnouncements();
+  }, 1000);
+  
+  // ตรวจสอบประกาศใหม่ทุก 5 นาที
+  setInterval(() => {
+    checkNewAnnouncements();
+  }, 5 * 60 * 1000);
 // Initial calls (now safe after all variables defined)
 loadTheme();
 checkLoginStatus();
