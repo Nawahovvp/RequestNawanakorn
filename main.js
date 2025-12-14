@@ -2015,7 +2015,7 @@ Swal.fire({
                     document.body.dispatchEvent(event);
                   }
                 }, 100);
-              }, 4000);
+              }, 5000);
             }
           });
         } else {
