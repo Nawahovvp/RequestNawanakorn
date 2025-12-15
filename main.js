@@ -236,6 +236,7 @@ const nextPageButtonToday = document.getElementById("nextPageToday");
 const lastPageButtonToday = document.getElementById("lastPageToday");
 let allDataToday = [];
 let currentFilteredDataToday = [];
+let todayFetchController = null;
 // All tab variables (moved up)
 const modalAll = document.getElementById("detailModalAll");
 const modalContentAll = document.getElementById("modalContentAll");
@@ -613,6 +614,7 @@ passwordInput.addEventListener('keypress', (e) => {
 });
 // === showTab(tabId) เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
 function showTab(tabId) {
+  let tabPromise = null;
   document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
   const target = document.getElementById(tabId);
   if (!target) return;
@@ -647,10 +649,19 @@ function showTab(tabId) {
       applyFiltersImages(); // กรองจาก allData + มี id
       hideLoading();
       break;
-    case "today":
-      if (!todayDataLoaded) loadTodayData().then(() => { todayDataLoaded = true; hideLoading(); });
-      else hideLoading();
+    case "today": {
+      // แสดงข้อมูลเก่าทันที (ถ้ามี) แล้วไปดึงข้อมูลสดจาก opensheet
+      const hasCachedToday = allDataToday.length > 0;
+      if (hasCachedToday) {
+        updateTableToday();
+        hideLoading();
+      }
+      tabPromise = loadTodayData({ silent: hasCachedToday }).then(() => {
+        todayDataLoaded = true;
+        hideLoading();
+      });
       break;
+    }
     case "pending-calls":
       if (!pendingDataLoaded) loadPendingCallsData().then(() => { pendingDataLoaded = true; hideLoading(); });
       else hideLoading();
@@ -664,6 +675,7 @@ function showTab(tabId) {
     }, 500);
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  return tabPromise;
 }
 // ฟังก์ชันปิด Loading (ใช้ร่วมกับ showTab)
 function hideLoading() {
@@ -1999,23 +2011,25 @@ Swal.fire({
                 allowEscapeKey: false
               });
 
-              setTimeout(() => {
+              // รีเฟรชแท็บเบิกวันนี้ด้วยข้อมูลล่าสุดทันทีหลังบันทึก
+              todayDataLoaded = false;
+              allDataToday = [];
+              const todayPromise = showTab('today');
+
+              // โฟกัสช่องค้นหาเมื่อโหลดเสร็จ (รองรับ touch)
+              Promise.resolve(todayPromise).finally(() => {
+                document.body.style.overflow = 'auto';
+                const searchInputToday = document.getElementById('searchInputToday');
+                if (searchInputToday) {
+                  searchInputToday.focus();
+                  searchInputToday.blur();
+                }
+                if ('ontouchstart' in window) {
+                  const event = new Event('touchstart', { bubbles: true });
+                  document.body.dispatchEvent(event);
+                }
                 Swal.close();
-                showTab('today');
-                loadTodayData();
-                setTimeout(() => {
-                  document.body.style.overflow = 'auto';
-                  const searchInputToday = document.getElementById('searchInputToday');
-                  if (searchInputToday) {
-                    searchInputToday.focus();
-                    searchInputToday.blur();
-                  }
-                  if ('ontouchstart' in window) {
-                    const event = new Event('touchstart', { bubbles: true });
-                    document.body.dispatchEvent(event);
-                  }
-                }, 100);
-              }, 5000);
+              });
             }
           });
         } else {
@@ -2880,15 +2894,26 @@ async function loadVibhavadiStockMap() {
     // ถ้าโหลดไม่ได้ ให้ใช้ค่าเดิมต่อไป
   }
 }
-async function loadTodayData() {
-  // แสดง Loading
-  document.getElementById("loading").style.display = "flex";
+async function loadTodayData(options = {}) {
+  const { silent = false } = options;
+  // ถ้ามีการโหลดค้างอยู่ให้ยกเลิกก่อน แล้วโหลดรอบใหม่
+  if (todayFetchController) {
+    todayFetchController.abort();
+  }
+
+  const controller = new AbortController();
+  todayFetchController = controller;
+  let timeoutId = null;
+
+  // แสดง Loading (แบบเบาๆ ถ้ามีข้อมูลเดิมให้ดูทันที)
+  if (!silent) {
+    document.getElementById("loading").style.display = "flex";
+  }
   document.getElementById("loadingToday").style.display = "block";
   errorContainerToday.style.display = "none";
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 วินาที
+    timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 วินาที
 
     // โหลดข้อมูลคลังวิภาวดี (MainSap) ก่อนเสมอ แต่โหลดแค่ครั้งเดียว
     if (Object.keys(vibhavadiStockMap).length === 0) {
@@ -2902,7 +2927,7 @@ async function loadTodayData() {
     const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
     const response = await fetch(cacheBustUrl, {
       signal: controller.signal,
-      cache: 'no-cache' // บังคับดึงข้อมูลใหม่ทุกครั้ง
+      cache: 'no-store' // บังคับดึงข้อมูลใหม่ทุกครั้ง และไม่เก็บ cache เดิม
     });
 
     clearTimeout(timeoutId);
@@ -2920,22 +2945,21 @@ async function loadTodayData() {
     // บันทึกข้อมูลลงตัวแปร global
     allDataToday = data;
     currentPageToday = 1;
+    todayDataLoaded = true;
 
     // อัปเดตตาราง (จะดึงสต็อกวิภาวดีจริงมาแสดงอัตโนมัติ)
     updateTableToday();
-
-    // ซ่อน Loading
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("loadingToday").style.display = "none";
 
     console.log("โหลดข้อมูลวันนี้สำเร็จ!", data.length, "รายการ");
 
   } catch (error) {
     console.error("โหลดข้อมูลวันนี้ล้มเหลว:", error);
 
-    // ซ่อน Loading ทั้งหมด
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("loadingToday").style.display = "none";
+    // ถ้า abort เพราะมีคำขอใหม่ ไม่ต้องแจ้ง Error ซ้ำ
+    if (error.name === 'AbortError' && todayFetchController !== controller) {
+      return;
+    }
+
     errorContainerToday.style.display = "block";
 
     // ข้อความแจ้งเตือนผู้ใช้
@@ -2957,6 +2981,15 @@ async function loadTodayData() {
       text: msg,
       confirmButtonText: "ตกลง"
     });
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (todayFetchController === controller) {
+      todayFetchController = null;
+    }
+    document.getElementById("loadingToday").style.display = "none";
+    if (!silent) {
+      document.getElementById("loading").style.display = "none";
+    }
   }
 }
 // All tab functions (now after variables)
