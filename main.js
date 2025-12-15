@@ -237,6 +237,7 @@ const lastPageButtonToday = document.getElementById("lastPageToday");
 let allDataToday = [];
 let currentFilteredDataToday = [];
 let todayFetchController = null;
+let announcementCache = [];
 // All tab variables (moved up)
 const modalAll = document.getElementById("detailModalAll");
 const modalContentAll = document.getElementById("modalContentAll");
@@ -3460,6 +3461,43 @@ function formatDateTimeToThai(dateTimeStr) {
   return `${d} ${months[m]} ${yBE}, ${h}:${min}:${sec}`;
 }
 
+// === จัดการสถานะอ่านข้อความแจ้งเตือน (นับ badge แบบคลิกอ่านทีละข้อความ) ===
+function getReadAnnouncements() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('readAnnouncements') || '[]');
+    return Array.isArray(stored) ? stored : [];
+  } catch (e) {
+    return [];
+  }
+}
+function saveReadAnnouncements(list) {
+  const unique = Array.from(new Set(list));
+  // เก็บล่าสุดไม่ให้โตเกิน
+  const trimmed = unique.slice(-200);
+  localStorage.setItem('readAnnouncements', JSON.stringify(trimmed));
+}
+function markAnnouncementAsRead(updatedAt) {
+  if (!updatedAt) return;
+  const read = getReadAnnouncements();
+  if (read.includes(updatedAt)) return;
+  read.push(updatedAt);
+  saveReadAnnouncements(read);
+  updateAnnouncementBadgeFromCache();
+}
+function updateAnnouncementBadgeFromCache() {
+  if (!announcementCache || announcementCache.length === 0) {
+    updateNotificationBadge(false, 0);
+    return;
+  }
+  const readSet = new Set(getReadAnnouncements());
+  const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
+  const unreadCount = announcementCache.filter(item => {
+    const d = parseDateTimeToJSDate(item.updatedAt);
+    return d && d.getTime() > twoDaysAgo && !readSet.has(item.updatedAt);
+  }).length;
+  updateNotificationBadge(unreadCount > 0, unreadCount);
+}
+
 // ========== แสดงข้อความแจ้งเตือน ==========
 // ฟังก์ชันเปิดดูประกาศ
 async function openAnnouncementDeck() {
@@ -3519,6 +3557,7 @@ async function openAnnouncementDeck() {
       });
 
     console.log(`พบ ${sorted.length} ประกาศ`);
+    announcementCache = sorted;
 
     // สร้าง HTML สำหรับแสดงประกาศ
     let html = `
@@ -3529,8 +3568,9 @@ async function openAnnouncementDeck() {
         </div>
     `;
     
-    let newAnnouncementsCount = 0;
-    const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
+    let unreadCount = 0;
+    const readSet = new Set(getReadAnnouncements());
+    const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
 
     sorted.forEach((item, idx) => {
       const subject = (item.subject || "ประกาศ").trim();
@@ -3539,26 +3579,23 @@ async function openAnnouncementDeck() {
       const by = item.updatedBy || "Admin";
       const niceDate = formatDateTimeToThai(rawDate);
       const itemDate = parseDateTimeToJSDate(rawDate);
-      
-      // ตรวจสอบว่าประกาศนี้ใหม่หรือไม่
-      const isNew = itemDate && itemDate.getTime() > parseInt(lastCheckTime);
-      if (isNew) newAnnouncementsCount++;
 
-      // ตรวจสอบว่าประกาศใหม่ภายใน 2 วันหรือไม่
-      const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
+      // ใช้สถานะอ่าน/ยังไม่อ่าน ตามการคลิกจริง
       const isRecent = itemDate && itemDate.getTime() > twoDaysAgo;
+      const isUnread = isRecent && !readSet.has(rawDate);
+      if (isUnread) unreadCount++;
 
       html += `
-        <div class="announcement-item" 
+        <div class="announcement-item" data-updated-at="${rawDate}" 
              style="background:#fff; border-radius:16px; margin:0 0 15px 0; overflow:hidden;
-                    box-shadow:0 4px 15px rgba(0,0,0,0.08); border-left:6px solid ${isNew ? '#e74c3c' : (isRecent ? '#3498db' : '#95a5a6')};
-                    cursor:pointer; transition:all 0.3s ease;"
+                     box-shadow:0 4px 15px rgba(0,0,0,0.08); border-left:6px solid ${isUnread ? '#e74c3c' : (isRecent ? '#3498db' : '#95a5a6')};
+                     cursor:pointer; transition:all 0.3s ease;"
              onclick="toggleAnnouncementBody(this)">
-          <div style="padding:16px; background:${isNew ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : (isRecent ? 'linear-gradient(135deg,#3498db,#2980b9)' : 'linear-gradient(135deg,#95a5a6,#7f8c8d)')};
+          <div class="announcement-header" style="padding:16px; background:${isUnread ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : (isRecent ? 'linear-gradient(135deg,#3498db,#2980b9)' : 'linear-gradient(135deg,#95a5a6,#7f8c8d)')};
                       color:white; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
             <div style="flex:1;">
               <div style="font-size:16px; margin-bottom:4px;">
-                <i class="fas ${isNew ? 'fa-exclamation-circle' : 'fa-info-circle'}" style="margin-right:8px;"></i>
+                <i class="fas ${isUnread ? 'fa-exclamation-circle' : 'fa-info-circle'}" style="margin-right:8px;"></i>
                 ${subject}
               </div>
               <div style="font-size:12px; opacity:0.9; display:flex; align-items:center; gap:10px;">
@@ -3566,7 +3603,7 @@ async function openAnnouncementDeck() {
                 ${by !== "Admin" ? `<span><i class="fas fa-user"></i> ${by}</span>` : ''}
               </div>
             </div>
-            ${isNew ? '<span style="background:#fff; color:#e74c3c; padding:4px 10px; border-radius:15px; font-size:11px; font-weight:bold; white-space:nowrap;">NEW</span>' : ''}
+            ${isUnread ? '<span class="announcement-new-pill" style="background:#fff; color:#e74c3c; padding:4px 10px; border-radius:15px; font-size:11px; font-weight:bold; white-space:nowrap;">NEW</span>' : ''}
           </div>
           <div class="announcement-body" style="display:none; padding:16px; font-size:15px; color:#2c3e50; line-height:1.6; border-top:1px solid #eee;">
             <div style="white-space:pre-line;">${message}</div>
@@ -3589,12 +3626,14 @@ async function openAnnouncementDeck() {
       </div>
     `;
 
+    updateAnnouncementBadgeFromCache();
+
     // แสดงหน้าต่างประกาศ
     Swal.fire({
       title: `<div style="display:flex; align-items:center; gap:10px; color:#2c3e50;">
                 <i class="fas fa-bullhorn" style="color:#e74c3c; font-size:24px;"></i>
                 <span style="font-size:22px; font-weight:700;">ประกาศจากคลังวิภาวดี 62</span>
-                ${newAnnouncementsCount > 0 ? `<span style="background:#e74c3c; color:white; padding:2px 10px; border-radius:15px; font-size:14px;">${newAnnouncementsCount} ใหม่</span>` : ''}
+                ${unreadCount > 0 ? `<span style="background:#e74c3c; color:white; padding:2px 10px; border-radius:15px; font-size:14px;">${unreadCount} ใหม่</span>` : ''}
               </div>`,
       html: html,
       width: window.innerWidth <= 480 ? '95%' : '550px',
@@ -3610,114 +3649,10 @@ async function openAnnouncementDeck() {
       },
       didOpen: (popup) => {
         console.log('เปิดหน้าต่างประกาศแล้ว');
-        
-        // เพิ่มปุ่มเคลียร์การแจ้งเตือน
-        const clearBtn = document.createElement('button');
-        clearBtn.id = 'clearNotificationsBtn';
-        clearBtn.innerHTML = '<i class="fas fa-check-circle"></i> เคลียร์การแจ้งเตือน';
-        clearBtn.title = 'คลิกเพื่อปิดการแจ้งเตือนทั้งหมด';
-        clearBtn.style.cssText = `
-          position: absolute;
-          top: 20px;
-          right: 65px;
-          background: linear-gradient(135deg, #2ecc71, #27ae60);
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          z-index: 10000;
-          box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        `;
-        
-        clearBtn.onmouseenter = () => {
-          clearBtn.style.transform = 'translateY(-2px)';
-          clearBtn.style.boxShadow = '0 6px 15px rgba(46, 204, 113, 0.4)';
-        };
-        
-        clearBtn.onmouseleave = () => {
-          clearBtn.style.transform = 'translateY(0)';
-          clearBtn.style.boxShadow = '0 4px 12px rgba(46, 204, 113, 0.3)';
-        };
-        
-        clearBtn.onclick = () => {
-          console.log('เคลียร์การแจ้งเตือน');
-          
-          // บันทึกเวลาปัจจุบันเป็นเวลาที่ตรวจสอบล่าสุด
-          localStorage.setItem('lastAnnouncementCheck', Date.now());
-          
-          // อัปเดต badge
-          updateNotificationBadge(false, 0);
-          
-          // ปิดหน้าต่าง
-          Swal.close();
-          
-          // แสดงข้อความยืนยัน
-          Swal.fire({
-            icon: 'success',
-            title: 'เคลียร์การแจ้งเตือนแล้ว!',
-            html: `
-              <div style="text-align:center; padding:10px;">
-                <i class="fas fa-check-circle" style="font-size:50px; color:#2ecc71; margin-bottom:15px;"></i>
-                <p style="font-size:16px; color:#27ae60; font-weight:600;">ปุ่มกระดิ่งจะไม่แสดงสัญลักษณ์</p>
-                <p style="color:#7f8c8d; margin-top:8px;">จนกว่าจะมีประกาศใหม่จากคลังวิภาวดี 62</p>
-              </div>
-            `,
-            confirmButtonText: 'ตกลง',
-            timer: 2500,
-            timerProgressBar: true,
-            width: window.innerWidth <= 480 ? '90%' : '400px'
-          });
-        };
-        
-        // เพิ่มปุ่มลงใน container ของ Swal
-        const swalContainer = document.querySelector('.swal2-container');
-        if (swalContainer) {
-          swalContainer.appendChild(clearBtn);
-        }
-        
-        // เพิ่ม CSS สำหรับปุ่มปิด
-        const closeButton = document.querySelector('.swal2-close-custom');
-        if (closeButton) {
-          closeButton.style.cssText = `
-            font-size: 24px;
-            color: #95a5a6;
-            transition: all 0.3s;
-          `;
-          closeButton.onmouseenter = () => {
-            closeButton.style.color = '#e74c3c';
-            closeButton.style.transform = 'rotate(90deg)';
-          };
-          closeButton.onmouseleave = () => {
-            closeButton.style.color = '#95a5a6';
-            closeButton.style.transform = 'rotate(0deg)';
-          };
-        }
-        
         // Scroll to top
         const content = popup.querySelector('.swal2-html-container');
         if (content) {
           content.scrollTop = 0;
-        }
-      },
-      willClose: () => {
-        // ลบปุ่มเคลียร์เมื่อปิดหน้าต่าง
-        const clearBtn = document.getElementById('clearNotificationsBtn');
-        if (clearBtn && clearBtn.parentNode) {
-          clearBtn.parentNode.removeChild(clearBtn);
-        }
-        
-        // อัปเดตเวลาตรวจสอบล่าสุดเมื่อปิดหน้าต่าง (ถ้ามีประกาศใหม่)
-        if (newAnnouncementsCount > 0) {
-          console.log(`ปิดหน้าต่างประกาศ มี ${newAnnouncementsCount} ประกาศใหม่`);
-          localStorage.setItem('lastAnnouncementCheck', Date.now());
-          updateNotificationBadge(false, 0);
         }
       }
     });
@@ -3764,6 +3699,14 @@ function toggleAnnouncementBody(element) {
   
   if (body.style.display === 'none' || !body.style.display) {
     body.style.display = 'block';
+    // เมื่อเปิดอ่านถือว่าอ่านแล้ว → ลด badge
+    const updatedAt = element.dataset.updatedAt || '';
+    markAnnouncementAsRead(updatedAt);
+    const newPill = element.querySelector('.announcement-new-pill');
+    if (newPill) newPill.remove();
+    element.style.borderLeftColor = '#3498db';
+    const header = element.querySelector('.announcement-header');
+    if (header) header.style.background = 'linear-gradient(135deg,#3498db,#2980b9)';
     if (icon) {
       icon.classList.remove('fa-info-circle', 'fa-exclamation-circle');
       icon.classList.add('fa-chevron-up');
@@ -3780,17 +3723,25 @@ function toggleAnnouncementBody(element) {
   }
 }
 
+// สำหรับการ์ดแจ้งเตือนอีกชุดหนึ่ง (โค้ด legacy)
+function handleLegacyAnnouncementClick(el, updatedAt) {
+  const body = el.querySelector('.ann-body');
+  if (body) {
+    body.style.display = body.style.display === 'block' ? 'none' : 'block';
+  }
+  markAnnouncementAsRead(updatedAt);
+  const newPill = el.querySelector('.announcement-new-pill');
+  if (newPill) newPill.remove();
+  el.style.borderLeft = '6px solid #3498db';
+  const header = el.querySelector('div');
+  if (header) header.style.background = 'linear-gradient(135deg,#3498db,#2980b9)';
+}
+
 // ฟังก์ชันเปิดประกาศและเคลียร์ badge โดยอัตโนมัติ
 async function openAnnouncementDeckAndClear() {
   console.log('เปิดประกาศและเคลียร์ badge');
   
-  // อัปเดตเวลาตรวจสอบล่าสุดทันทีที่กดปุ่ม
-  localStorage.setItem('lastAnnouncementCheck', Date.now());
-  
-  // ซ่อน badge ทันที
-  updateNotificationBadge(false, 0);
-  
-  // เปิดหน้าต่างประกาศ
+  // เปิดหน้าต่างประกาศ (badge จะลดเมื่อกดอ่านข้อความ)
   await openAnnouncementDeck();
 }
 
@@ -3835,55 +3786,18 @@ async function checkNewAnnouncements() {
       updateNotificationBadge(false, 0);
       return;
     }
-    
-    // ตรวจสอบประกาศล่าสุด
-    const latestAnnouncement = sorted[0];
-    const latestDate = parseDateTimeToJSDate(latestAnnouncement.updatedAt);
-    
-    if (!latestDate) {
-      console.log('ไม่สามารถแปลงวันที่ประกาศล่าสุดได้');
-      updateNotificationBadge(false, 0);
-      return;
-    }
-    
-    console.log('ประกาศล่าสุด:', {
-      subject: latestAnnouncement.subject,
-      date: latestAnnouncement.updatedAt,
-      timestamp: latestDate.getTime()
-    });
-    
-    // ตรวจสอบว่าประกาศใหม่ภายใน 2 วันหรือไม่
+    announcementCache = sorted;
+    const readSet = new Set(getReadAnnouncements());
     const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
-    const isNew = latestDate.getTime() > twoDaysAgo;
-    
-    console.log('ประกาศใหม่ภายใน 2 วัน?', isNew);
-    
-    // ตรวจสอบเวลาที่ผู้ใช้เคยเปิดดูล่าสุด
-    const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
-    console.log('เวลาที่เคยตรวจสอบล่าสุด:', new Date(parseInt(lastCheckTime)).toLocaleString());
-    
-    let newCount = 0;
-    
-    // นับจำนวนประกาศที่ใหม่กว่าที่เคยตรวจสอบ
-    sorted.forEach(item => {
+    const unreadCount = sorted.filter(item => {
       const itemDate = parseDateTimeToJSDate(item.updatedAt);
-      if (itemDate && itemDate.getTime() > parseInt(lastCheckTime)) {
-        newCount++;
-      }
-    });
-    
-    console.log('จำนวนประกาศใหม่:', newCount);
-    
-    // อัปเดต badge
-    const shouldShowBadge = isNew && newCount > 0;
-    updateNotificationBadge(shouldShowBadge, newCount);
-    
-    // บันทึกเวลาตรวจสอบล่าสุด (เฉพาะถ้ามีการแสดง badge)
-    if (shouldShowBadge) {
-      console.log('แสดง badge สำหรับประกาศใหม่');
-    } else {
-      console.log('ไม่แสดง badge (ไม่มีประกาศใหม่)');
-    }
+      return itemDate && itemDate.getTime() > twoDaysAgo && !readSet.has(item.updatedAt);
+    }).length;
+
+    console.log('จำนวนประกาศใหม่ (ยังไม่อ่าน):', unreadCount);
+
+    // อัปเดต badge ตามจำนวนที่ยังไม่อ่าน
+    updateNotificationBadge(unreadCount > 0, unreadCount);
     
   } catch (err) {
     console.error("ตรวจสอบประกาศล้มเหลว:", err);
@@ -3979,11 +3893,14 @@ function updateNotificationBadge(show, count = 0) {
 function clearNotificationBadge() {
   console.log('เคลียร์การแจ้งเตือน');
   
-  // บันทึกเวลาปัจจุบันเป็นเวลาที่ตรวจสอบล่าสุด
-  localStorage.setItem('lastAnnouncementCheck', Date.now());
-  
-  // ซ่อน badge
-  updateNotificationBadge(false, 0);
+  // ทำเครื่องหมายว่าข่าวประกาศปัจจุบันถูกอ่านทั้งหมด
+  const read = getReadAnnouncements();
+  const allIds = [
+    ...read,
+    ...((announcementCache || []).map(item => item.updatedAt).filter(Boolean))
+  ];
+  saveReadAnnouncements(allIds);
+  updateAnnouncementBadgeFromCache();
   
   // แสดงข้อความยืนยัน
   Swal.fire({
@@ -4028,13 +3945,7 @@ function setupAnnouncementChecker() {
 
 // ฟังก์ชันเปิดดูประกาศและเคลียร์ badge
 async function openAnnouncementDeckAndClear() {
-  // บันทึกเวลาที่เปิดดูประกาศ
-  localStorage.setItem('lastAnnouncementCheck', Date.now());
-  
-  // ซ่อน badge ทันที
-  updateNotificationBadge(false, 0);
-  
-  // เปิดหน้าต่างประกาศ
+  // เปิดหน้าต่างประกาศ (จะลด badge ทีละรายการเมื่อผู้ใช้กดอ่าน)
   await openAnnouncementDeck();
 }
 
@@ -4072,6 +3983,10 @@ async function openAnnouncementDeck() {
         if (!dateB) return -1;
         return dateB - dateA;
       });
+    announcementCache = sorted;
+    const readSet = new Set(getReadAnnouncements());
+    const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
+    let unreadCount = 0;
 
     let html = '<div style="max-height:70vh;overflow-y:auto;padding:4px;">';
     let newAnnouncements = 0;
@@ -4084,24 +3999,22 @@ async function openAnnouncementDeck() {
 
       const niceDate = formatDateTimeToThai(rawDate);
       const itemDate = parseDateTimeToJSDate(rawDate);
-      const lastCheckTime = localStorage.getItem('lastAnnouncementCheck') || 0;
-      const isNew = itemDate && itemDate.getTime() > parseInt(lastCheckTime);
-
-      if (isNew) newAnnouncements++;
+      const isUnread = itemDate && itemDate.getTime() > twoDaysAgo && !readSet.has(rawDate);
+      if (isUnread) unreadCount++;
 
       html += `
         <div style="background:#fff;border-radius:16px;margin:12px 0;overflow:hidden;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isNew?'#e74c3c':'#3498db'};
+                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isUnread?'#e74c3c':'#3498db'};
                     cursor:pointer;transition:transform 0.2s;" 
-             onclick="this.querySelector('.ann-body').style.display=this.querySelector('.ann-body').style.display==='block'?'none':'block';">
-          <div style="padding:16px;background:${isNew?'linear-gradient(135deg,#e74c3c,#c0392b)':'linear-gradient(135deg,#3498db,#2980b9)'};
+              onclick="handleLegacyAnnouncementClick(this, '${rawDate}')">
+          <div style="padding:16px;background:${isUnread?'linear-gradient(135deg,#e74c3c,#c0392b)':'linear-gradient(135deg,#3498db,#2980b9)'};
                       color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:16px;max-width:75%;">เรื่อง: ${subject}</span>
-            ${isNew ? '<span style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">NEW</span>' : ''}
+            ${isUnread ? '<span class="announcement-new-pill" style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">NEW</span>' : ''}
           </div>
           <div style="padding:0 16px 16px;font-size:15px;color:#2c3e50;line-height:1.8;">
             <div style="color:#7f8c8d;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-calendar-day" style="color:${isNew?'#e74c3c':'#3498db'};"></i> ${niceDate}
+              <i class="fas fa-calendar-day" style="color:${isUnread?'#e74c3c':'#3498db'};"></i> ${niceDate}
               ${by !== "Admin" ? ` • โดย ${by}` : ''}
             </div>
             <div class="ann-body" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #ddd;">
@@ -4113,34 +4026,15 @@ async function openAnnouncementDeck() {
     
     html += '</div>';
     
-    // เพิ่มปุ่มเคลียร์การแจ้งเตือน
-    html += `
-      <div style="margin-top:20px; text-align:center;">
-        <button id="clearNotificationsBtn" 
-                style="background:linear-gradient(135deg, #2ecc71, #27ae60); color:white; border:none; padding:10px 20px; border-radius:25px; font-size:14px; cursor:pointer; font-weight:bold;">
-          <i class="fas fa-check-circle"></i> เคลียร์การแจ้งเตือน (${newAnnouncements} ใหม่)
-        </button>
-      </div>
-    `;
-
     Swal.fire({
       title: '<div style="font-size:21px;color:#e74c3c;"><i class="fas fa-bullhorn"></i> ข้อความแจ้งเตือน</div>',
       html: html,
       width: '480px',
       showConfirmButton: false,
       allowOutsideClick: true,
-      customClass: { popup: 'animated fadeInDown faster' },
-      didOpen: () => {
-        // เพิ่ม event listener ให้ปุ่มเคลียร์
-        const clearBtn = document.getElementById('clearNotificationsBtn');
-        if (clearBtn) {
-          clearBtn.onclick = () => {
-            clearNotificationBadge();
-            Swal.close();
-          };
-        }
-      }
+      customClass: { popup: 'animated fadeInDown faster' }
     });
+    updateAnnouncementBadgeFromCache();
     
   } catch (err) {
     console.error("โหลดประกาศล้มเหลว:", err);
