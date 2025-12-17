@@ -137,6 +137,7 @@ let globalSearch1 = '';
 let globalSearch2 = '';
 // Global for today tab: toggle pending only
 let showOnlyPending = true; // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
+let currentFilter = 'pending';
 // Sort config for today tab
 let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
 // Pagination config for today tab
@@ -205,26 +206,29 @@ const searchInputToday = document.getElementById("searchInputToday");
 const tableBodyToday = document.querySelector("#data-table-today tbody");
 const errorContainerToday = document.getElementById("error-container-today");
 const retryButtonToday = document.getElementById("retry-button-today");
+const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
 // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
-toggleAllDataBtn.addEventListener("click", () => {
-  showOnlyPending = !showOnlyPending;
-  if (showOnlyPending) {
-    // โหมด: แสดงเฉพาะรอเบิก
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ทั้งหมด</span>';
-    toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
-    toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
-    toggleAllDataBtn.style.color = "white";
-  } else {
-    // โหมด: แสดงประวัติทั้งหมด
-    toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>รอเบิก</span>';
-    toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
-    toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
-    toggleAllDataBtn.style.color = "white";
-  }
-  // รีเซ็ตหน้าแรก + อัปเดตตารางทันที
-  currentPageToday = 1;
-  updateTableToday();
-});
+if (toggleAllDataBtn) {
+  toggleAllDataBtn.addEventListener("click", () => {
+    showOnlyPending = !showOnlyPending;
+    if (showOnlyPending) {
+      // โหมด: แสดงเฉพาะรอเบิก
+      toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ทั้งหมด</span>';
+      toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
+      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+      toggleAllDataBtn.style.color = "white";
+    } else {
+      // โหมด: แสดงประวัติทั้งหมด
+      toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>รอเบิก</span>';
+      toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
+      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+      toggleAllDataBtn.style.color = "white";
+    }
+    // รีเซ็ตหน้าแรก + อัปเดตตารางทันที
+    currentPageToday = 1;
+    updateTableToday();
+  });
+}
 
 // Pagination elements for today tab
 const paginationToday = document.getElementById("paginationToday");
@@ -816,51 +820,6 @@ function showDetailModal(row, modalId, contentId) {
 // === ฟังก์ชัน Swipe (ต้องมีด้วย) ===
 // ตัวแปรเก็บ index ปัจจุบันของแต่ละ Modal
 let currentSwiperIndex = {};
-// เริ่มระบบ Swipe เมื่อมีหลายรูป
-function initSwiper(modal, totalSlides) {
-  const container = modal.querySelector('.image-swiper-container');
-  if (!container) return;
-  const wrapper = container.querySelector('.image-swiper-wrapper');
-  const prevBtn = container.querySelector('.swiper-prev');
-  const nextBtn = container.querySelector('.swiper-next');
-  const counter = container.querySelector('.swiper-counter');
-  const modalId = modal.id;
-  if (imageIds.length > 1) {
-    setTimeout(() => initSwiper(modal, imageIds.length), 100);
-  }
-  // เริ่มที่รูปแรก
-  currentSwiperIndex[modalId] = currentSwiperIndex[modalId] || 0;
-  const update = () => {
-    const idx = currentSwiperIndex[modalId];
-    wrapper.style.transform = `translateX(-${idx * 100}%)`;
-    counter.textContent = `${idx + 1} / ${totalSlides}`;
-  };
-  prevBtn.onclick = () => {
-    currentSwiperIndex[modalId] = currentSwiperIndex[modalId] > 0
-      ? currentSwiperIndex[modalId] - 1
-      : totalSlides - 1;
-    update();
-  };
-  nextBtn.onclick = () => {
-    currentSwiperIndex[modalId] = (currentSwiperIndex[modalId] + 1) % totalSlides;
-    update();
-  };
-  // รองรับการปัดนิ้วบนมือถือ
-  let startX = 0;
-  container.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-  }, { passive: true });
-
-  container.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = startX - endX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) nextBtn.click();
-      else prevBtn.click();
-    }
-  }, { passive: true });
-  update(); // แสดงรูปแรก
-}
 function initSwiper(modal) {
   const container = modal.querySelector('.image-swiper-container');
   if (!container) return;
@@ -2510,7 +2469,7 @@ async function loadImageDatabase() {
   const cacheKey = "image-database-mainsapimage";
   try {
     imageDatabase = await getCachedData(cacheKey, async () => {
-      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage`);
+      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/imageMIx`);
       const data = await res.json();
       const db = {};
       let count = 0;
@@ -2995,9 +2954,6 @@ async function loadTodayData(options = {}) {
 }
 // All tab functions (now after variables)
 closeModalAll.onclick = () => modalAll.style.display = "none";
-window.onclick = event => {
-  if (event.target == modalAll) modalAll.style.display = "none";
-};
 itemsPerPageSelectAll.addEventListener("change", (e) => {
   itemsPerPageAll = parseInt(e.target.value);
   currentPageAll = 1;
@@ -3421,18 +3377,6 @@ function formatTimestamp(dateTimeStr) {
   const formattedTime = timePart || '';
   return `${formattedDate} ${formattedTime}`;
 }
-// Register Service Worker for PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
 // ========== ฟังก์ชันช่วยสำหรับการจัดการวันที่ไทย ==========
 // ========== ฟังก์ชันช่วยสำหรับการแปลงวันที่ค.ศ. ที่มีเวลา ==========
 function parseDateTimeToJSDate(dateTimeStr) {
@@ -3740,8 +3684,6 @@ function handleLegacyAnnouncementClick(el, updatedAt) {
 // ฟังก์ชันเปิดประกาศและเคลียร์ badge โดยอัตโนมัติ
 async function openAnnouncementDeckAndClear() {
   console.log('เปิดประกาศและเคลียร์ badge');
-  
-  // เปิดหน้าต่างประกาศ (badge จะลดเมื่อกดอ่านข้อความ)
   await openAnnouncementDeck();
 }
 
@@ -3750,27 +3692,21 @@ async function openAnnouncementDeckPreview() {
   console.log('เปิดประกาศแบบดูเฉยๆ (ไม่เคลียร์ badge)');
   await openAnnouncementDeck();
 }
+
 // ฟังก์ชันตรวจสอบประกาศใหม่
 async function checkNewAnnouncements() {
   console.log('เริ่มตรวจสอบประกาศใหม่...');
-  
   try {
-    // ดึงข้อมูลประกาศจาก Google Sheet
     const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`);
-    
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
-    
     const data = await res.json();
-    
     if (!data || data.length === 0) {
       console.log('ไม่มีประกาศในระบบ');
       updateNotificationBadge(false, 0);
       return;
     }
-    
-    // ดึงประกาศล่าสุดที่ถูกกรองและเรียงลำดับ
     const sorted = data
       .filter(r => r.message && r.message.trim() !== "")
       .sort((a, b) => {
@@ -3778,9 +3714,8 @@ async function checkNewAnnouncements() {
         const dateB = parseDateTimeToJSDate(b.updatedAt);
         if (!dateA) return 1;
         if (!dateB) return -1;
-        return dateB - dateA; // เรียงจากใหม่ไปเก่า
+        return dateB - dateA;
       });
-    
     if (sorted.length === 0) {
       console.log('ไม่มีประกาศที่กรองแล้ว');
       updateNotificationBadge(false, 0);
@@ -3793,12 +3728,8 @@ async function checkNewAnnouncements() {
       const itemDate = parseDateTimeToJSDate(item.updatedAt);
       return itemDate && itemDate.getTime() > twoDaysAgo && !readSet.has(item.updatedAt);
     }).length;
-
     console.log('จำนวนประกาศใหม่ (ยังไม่อ่าน):', unreadCount);
-
-    // อัปเดต badge ตามจำนวนที่ยังไม่อ่าน
     updateNotificationBadge(unreadCount > 0, unreadCount);
-    
   } catch (err) {
     console.error("ตรวจสอบประกาศล้มเหลว:", err);
     updateNotificationBadge(false, 0);
@@ -3812,8 +3743,6 @@ function updateNotificationBadge(show, count = 0) {
     console.warn('ไม่พบ element notificationBadge');
     return;
   }
-  
-  // สร้างหรืออัปเดต CSS สำหรับ badge ถ้ายังไม่มี
   if (!document.getElementById('notificationBadgeStyles')) {
     const style = document.createElement('style');
     style.id = 'notificationBadgeStyles';
@@ -3823,7 +3752,6 @@ function updateNotificationBadge(show, count = 0) {
         70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
       }
-      
       .notification-badge {
         position: absolute;
         top: 5px;
@@ -3843,7 +3771,6 @@ function updateNotificationBadge(show, count = 0) {
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         border: 2px solid white;
       }
-      
       .notification-badge.small {
         width: 12px;
         height: 12px;
@@ -3855,10 +3782,8 @@ function updateNotificationBadge(show, count = 0) {
     `;
     document.head.appendChild(style);
   }
-  
   if (show && count > 0) {
     badge.style.display = 'flex';
-    
     if (count > 9) {
       badge.textContent = '9+';
       badge.style.width = '24px';
@@ -3877,11 +3802,9 @@ function updateNotificationBadge(show, count = 0) {
       badge.style.fontSize = '12px';
       badge.classList.remove('small');
     }
-    
     badge.style.justifyContent = 'center';
     badge.style.alignItems = 'center';
     badge.style.animation = 'pulse 2s infinite';
-    
     console.log(`แสดง badge: ${count} ประกาศใหม่`);
   } else {
     badge.style.display = 'none';
@@ -3892,8 +3815,6 @@ function updateNotificationBadge(show, count = 0) {
 // ฟังก์ชันเคลียร์การแจ้งเตือน
 function clearNotificationBadge() {
   console.log('เคลียร์การแจ้งเตือน');
-  
-  // ทำเครื่องหมายว่าข่าวประกาศปัจจุบันถูกอ่านทั้งหมด
   const read = getReadAnnouncements();
   const allIds = [
     ...read,
@@ -3901,8 +3822,6 @@ function clearNotificationBadge() {
   ];
   saveReadAnnouncements(allIds);
   updateAnnouncementBadgeFromCache();
-  
-  // แสดงข้อความยืนยัน
   Swal.fire({
     icon: 'success',
     title: 'เคลียร์การแจ้งเตือนแล้ว',
@@ -3915,136 +3834,23 @@ function clearNotificationBadge() {
 // ฟังก์ชันตั้งค่าการตรวจสอบอัตโนมัติ
 function setupAnnouncementChecker() {
   console.log('ตั้งค่าการตรวจสอบประกาศอัตโนมัติ');
-  
-  // ตรวจสอบประกาศใหม่เมื่อโหลดหน้าเว็บ
   setTimeout(() => {
     checkNewAnnouncements();
   }, 2000);
-  
-  // ตรวจสอบทุก 10 นาที
   const checkInterval = setInterval(() => {
     checkNewAnnouncements();
   }, 10 * 60 * 1000);
-  
-  // ตรวจสอบเมื่อผู้ใช้กลับมาที่แท็บ
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       console.log('ผู้ใช้กลับมาที่หน้าเว็บ → ตรวจสอบประกาศใหม่');
       checkNewAnnouncements();
     }
   });
-  
-  // ตรวจสอบเมื่อผู้ใช้กลับมาที่หน้าต่าง
   window.addEventListener('focus', () => {
     console.log('ผู้ใช้กลับมาที่หน้าต่าง → ตรวจสอบประกาศใหม่');
     checkNewAnnouncements();
   });
-  
   return checkInterval;
-}
-
-// ฟังก์ชันเปิดดูประกาศและเคลียร์ badge
-async function openAnnouncementDeckAndClear() {
-  // เปิดหน้าต่างประกาศ (จะลด badge ทีละรายการเมื่อผู้ใช้กดอ่าน)
-  await openAnnouncementDeck();
-}
-
-// ฟังก์ชันแก้ไข openAnnouncementDeck() ให้รองรับการเคลียร์ badge
-async function openAnnouncementDeck() {
-  console.log('เปิดหน้าต่างประกาศ');
-  
-  Swal.fire({
-    title: 'กำลังโหลดประกาศ...',
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading()
-  });
-  
-  try {
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`);
-    const data = await res.json();
-    
-    if (!data || data.length === 0) {
-      Swal.fire({
-        icon: 'info',
-        title: 'ยังไม่มีประกาศ',
-        text: 'คลังวิภาวดี 62 ยังไม่ได้ส่งประกาศล่าสุด',
-        confirmButtonText: 'ปิด',
-        width: '380px'
-      });
-      return;
-    }
-
-    const sorted = data
-      .filter(r => r.message && r.message.trim() !== "")
-      .sort((a, b) => {
-        const dateA = parseDateTimeToJSDate(a.updatedAt);
-        const dateB = parseDateTimeToJSDate(b.updatedAt);
-        if (!dateA) return 1;
-        if (!dateB) return -1;
-        return dateB - dateA;
-      });
-    announcementCache = sorted;
-    const readSet = new Set(getReadAnnouncements());
-    const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
-    let unreadCount = 0;
-
-    let html = '<div style="max-height:70vh;overflow-y:auto;padding:4px;">';
-    let newAnnouncements = 0;
-    
-    sorted.forEach((item, idx) => {
-      const subject = (item.subject || "ประกาศ").trim();
-      const message = (item.message || "").trim().replace(/\n/g, '<br>');
-      const rawDate = item.updatedAt || "";
-      const by = item.updatedBy || "Admin";
-
-      const niceDate = formatDateTimeToThai(rawDate);
-      const itemDate = parseDateTimeToJSDate(rawDate);
-      const isUnread = itemDate && itemDate.getTime() > twoDaysAgo && !readSet.has(rawDate);
-      if (isUnread) unreadCount++;
-
-      html += `
-        <div style="background:#fff;border-radius:16px;margin:12px 0;overflow:hidden;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.1);border-left:6px solid ${isUnread?'#e74c3c':'#3498db'};
-                    cursor:pointer;transition:transform 0.2s;" 
-              onclick="handleLegacyAnnouncementClick(this, '${rawDate}')">
-          <div style="padding:16px;background:${isUnread?'linear-gradient(135deg,#e74c3c,#c0392b)':'linear-gradient(135deg,#3498db,#2980b9)'};
-                      color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:16px;max-width:75%;">เรื่อง: ${subject}</span>
-            ${isUnread ? '<span class="announcement-new-pill" style="background:#fff;color:#e74c3c;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;">NEW</span>' : ''}
-          </div>
-          <div style="padding:0 16px 16px;font-size:15px;color:#2c3e50;line-height:1.8;">
-            <div style="color:#7f8c8d;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-calendar-day" style="color:${isUnread?'#e74c3c':'#3498db'};"></i> ${niceDate}
-              ${by !== "Admin" ? ` • โดย ${by}` : ''}
-            </div>
-            <div class="ann-body" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #ddd;">
-              ${message}
-            </div>
-          </div>
-        </div>`;
-    });
-    
-    html += '</div>';
-    
-    Swal.fire({
-      title: '<div style="font-size:21px;color:#e74c3c;"><i class="fas fa-bullhorn"></i> ข้อความแจ้งเตือน</div>',
-      html: html,
-      width: '480px',
-      showConfirmButton: false,
-      allowOutsideClick: true,
-      customClass: { popup: 'animated fadeInDown faster' }
-    });
-    updateAnnouncementBadgeFromCache();
-    
-  } catch (err) {
-    console.error("โหลดประกาศล้มเหลว:", err);
-    Swal.fire({
-      icon: 'error',
-      title: 'โหลดประกาศไม่สำเร็จ',
-      text: 'กรุณาลองใหม่ในภายหลัง',
-      width: '380px'
-    });
-  }
 }
 
 // เรียกใช้เมื่อ DOM โหลดเสร็จ
