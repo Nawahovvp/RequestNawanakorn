@@ -384,7 +384,7 @@ function checkAuthForRequisition() {
   // ถ้าไม่ใช่ ให้แสดง Popup และ return false
   Swal.fire({
     icon: 'warning',
-    title: 'สิทธิ์ไม่เพียงพอ!',
+    title: 'เวลคุณยังไม่ถึง!',
     html: `
       <div style="text-align:center; padding:10px;">
         <i class="fas fa-lock" style="font-size:60px; color:#f39c12; margin-bottom:15px;"></i>
