@@ -61,7 +61,7 @@ function updateAppVersionDisplay() {
   }
 }
 // รับเวอร์ชันจาก sw.js
-navigator.serviceWorker.addEventListener('message', event => {
+navigator.serviceWorker.addEventListener('message', async event => {
   if (event.data && event.data.type === 'VERSION') {
     const versionElement = document.getElementById('appVersion');
     if (versionElement) {
@@ -69,6 +69,7 @@ navigator.serviceWorker.addEventListener('message', event => {
       versionElement.style.fontWeight = 'bold';
       versionElement.style.color = '#00ff88';
     }
+    await ensureCacheFreshForVersion(event.data.version);
   }
 });
 // เรียกอัปเดตเวอร์ชันทุกครั้งที่เปิดหน้า
@@ -87,6 +88,27 @@ window.showSettings = function () {
 // ========== ระบบ Cache ขั้นเทพ (2025) สำหรับ Parts + Images ==========
 const CACHE_VERSION = "v18";
 const CACHE_NAME = `partgo-cache-${CACHE_VERSION}`;
+const DATA_CACHE_PREFIX = 'partgo-cache-';
+const DATA_CACHE_VERSION_KEY = 'dataCacheVersion';
+
+async function clearDataCaches() {
+  try {
+    const keys = await caches.keys();
+    const targets = keys.filter(name => name.startsWith(DATA_CACHE_PREFIX));
+    await Promise.all(targets.map(name => caches.delete(name)));
+    console.log('ล้าง cache ข้อมูลเสร็จสิ้น:', targets);
+  } catch (err) {
+    console.warn('ล้าง cache ข้อมูลไม่สำเร็จ', err);
+  }
+}
+
+async function ensureCacheFreshForVersion(version) {
+  if (!version) return;
+  const storedVersion = localStorage.getItem(DATA_CACHE_VERSION_KEY);
+  if (storedVersion === version) return;
+  await clearDataCaches();
+  localStorage.setItem(DATA_CACHE_VERSION_KEY, version);
+}
 
 async function getCachedData(key, fetchFn, expireHours = 1) {
   try {
@@ -2264,7 +2286,7 @@ async function loadData() {
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return await res.json();
-    }, 24); // Cache 24 ชม.
+    }, 6); // Cache 6 ชม.
 
     tempFilteredData = [...allData];
     currentFilteredData = [...allData];
@@ -2282,7 +2304,7 @@ itemsPerPageSelectImages.addEventListener("change", () => {
   itemsPerPageImages = parseInt(itemsPerPageSelectImages.value, 10);
   currentPageImages = 1;
   renderTableDataImages();
-  renderPaginationImages(allDataImages.length);
+  renderPaginationImages(currentFilteredDataImages.length);
 });
 retryButtonImages.addEventListener("click", () => {
   errorContainerImages.style.display = "none";
