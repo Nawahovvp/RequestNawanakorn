@@ -315,6 +315,21 @@ function ensureTodayImageColumn() {
   }
 }
 ensureTodayImageColumn();
+// บังคับให้หัวคอลัมน์ "image" (imageMIx) โผล่เสมอในแท็บ parts
+function ensurePartsImageDbColumn() {
+  const table = document.getElementById("data-table");
+  if (!table) return;
+  const headerRow = table.querySelector("thead tr");
+  if (!headerRow) return;
+  const headers = Array.from(headerRow.children).map(th => th.textContent.trim());
+  if (!headers.includes("image")) {
+    const th = document.createElement("th");
+    th.textContent = "image";
+    const insertBeforeNode = headerRow.children[1] || null; // ถัดจากคอลัมน์ "เบิก"
+    headerRow.insertBefore(th, insertBeforeNode);
+  }
+}
+ensurePartsImageDbColumn();
 // All tab variables (moved up)
 const modalAll = document.getElementById("detailModalAll");
 const modalContentAll = document.getElementById("modalContentAll");
@@ -2136,6 +2151,13 @@ function changePage(page) {
   renderTableData();
   renderPagination(currentFilteredData.length);
 }
+function getPreferredImageId(row) {
+  const material = (row.Material || "").toString().trim();
+  if (material && imageDatabase[material] && imageDatabase[material].length > 0) {
+    return imageDatabase[material][0]; // ใช้รูปแรกใน imageMIx ตาม Material
+  }
+  return extractIdFromUrlWeb(row.UrlWeb); // fallback ถ้าไม่มีใน imageMIx
+}
 // ✅ ประกาศ renderTable แบบ function declaration (hoist ได้)
 function renderTable(data) {
   const tableBody = document.querySelector("#data-table tbody");
@@ -2174,7 +2196,7 @@ function renderTable(data) {
 
     // คอลัมน์หลัก
     const columns = [
-      "UrlWeb", "Material", "Description", "วิภาวดี", "Unrestricted",
+      "ImageDb", "Material", "Description", "วิภาวดี", "Unrestricted",
       "Rebuilt", "หมายเหตุ", "Product", "OCRTAXT"
     ];
 
@@ -2211,22 +2233,20 @@ function renderTable(data) {
         if (fontWeight) td.style.fontWeight = fontWeight;
       }
 
-      if (col === "UrlWeb" && value) {
-        let fileId = "";
-        if (value.includes("/d/")) {
-          fileId = value.split("/d/")[1].split("/")[0];
-        } else if (value.includes("id=")) {
-          fileId = value.split("id=")[1].split("&")[0];
-        } else if (/^[a-zA-Z0-9-_]+$/.test(value.trim())) {
-          fileId = value.trim();
-        }
-        if (fileId) {
+      if (col === "ImageDb") {
+        const fileIdDb = (() => {
+          const material = (row.Material || "").toString().trim();
+          const ids = imageDatabase[material];
+          if (ids && ids.length > 0) return ids[0]; // ใช้รูปแรกใน imageMIx
+          return "";
+        })();
+        if (fileIdDb) {
           const imgContainer = document.createElement("div");
           imgContainer.style.cursor = "pointer";
           imgContainer.title = "คลิกเพื่อดูรายละเอียด";
           const img = document.createElement("img");
-          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w100-h100`;
-          img.alt = "รูปอะไหล่";
+          img.src = `https://drive.google.com/thumbnail?id=${fileIdDb}&sz=w100-h100`;
+          img.alt = "รูป (imageMIx)";
           img.style.width = "60px";
           img.style.height = "60px";
           img.style.objectFit = "cover";
@@ -2241,11 +2261,13 @@ function renderTable(data) {
           imgContainer.appendChild(img);
           td.appendChild(imgContainer);
         } else {
-          td.textContent = value;
+          td.textContent = "-";
         }
-      } else {
-        td.textContent = value;
+        tr.appendChild(td);
+        return;
       }
+
+      td.textContent = value;
       tr.appendChild(td);
     });
     fragment.appendChild(tr);
@@ -2583,6 +2605,12 @@ async function loadImageDatabase() {
     }, 6); // Cache 6 ชั่วโมง
 
     imageDbLoaded = true;
+    if (partsDataLoaded && typeof applyFilters === "function") {
+      applyFilters();
+    }
+    if (allData.length > 0 && typeof applyFiltersImages === "function") {
+      applyFiltersImages();
+    }
   } catch (err) {
     console.error("โหลดฐานข้อมูลรูปภาพล้มเหลว:", err);
     imageDbLoaded = false;
@@ -4331,6 +4359,7 @@ document.addEventListener('DOMContentLoaded', () => {
   closeModal.addEventListener('click', () => modal.style.display = 'none');
   closeModalAll.addEventListener('click', () => modalAll.style.display = 'none');
   closeModalPending.addEventListener('click', () => modalPending.style.display = 'none');
+  ensurePartsImageDbColumn();
 
   // Close modals by clicking backdrop
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
