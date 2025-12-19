@@ -437,7 +437,7 @@ async function showSettings() {
   // แสดงปุ่มประกาศสำหรับ admin (7512411)
   const adminSection = document.getElementById('adminAnnouncementSection');
   if (savedUsername === '7512411' && adminSection) {
-    adminSection.style.display = 'block';
+    adminSection.style.display = 'flex';
   } else if (adminSection) {
     adminSection.style.display = 'none';
   }
@@ -787,6 +787,24 @@ function showQRCode() {
       title: 'swal2-title',
       confirmButton: 'swal2-confirm'
     }
+  });
+}
+// แสดงคู่มือการใช้งานแบบย่อสำหรับผู้ใช้ใหม่
+function showHelp() {
+  Swal.fire({
+    title: 'วิธีใช้งาน PartsGo',
+    html: `
+      <div style="text-align:left;font-size:15px;line-height:1.5;">
+        <p><strong>วัตถุประสงค์</strong><br>ค้นหาอะไหล่ ดูรูป เช็กสต็อก และส่งคำขอเบิกได้ด้วยตัวเอง</p>
+        <p><strong>เริ่มต้น</strong><br>1) ล็อกอินด้วยรหัสพนักงานและรหัสผ่าน 4 หลักท้าย<br>2) เลือกแท็บที่ต้องการด้านล่าง (ค้นหาอะไหล่ / รูปภาพ / เบิกวันนี้ / Call)</p>
+        <p><strong>ค้นหาอะไหล่</strong><br>- พิมพ์คำค้นในช่อง ค้นหา1/ค้นหา2 แล้วผลจะกรองอัตโนมัติ<br>- คลิกรูปหรือแถวเพื่อดูรายละเอียดและกด “เบิกเลย” (ถ้ามีสิทธิ์)</p>
+        <p><strong>ค้นหารูป</strong><br>- ใช้คำค้นเหมือนแท็บอะไหล่ ภาพจะแสดงเป็นการ์ด<br>- คลิกรูปเพื่อเปิด popup ดูข้อมูลอะไหล่</p>
+        <p><strong>เบิกวันนี้ / Call</strong><br>- ดูสถานะการเบิกวันนี้หรือรายการ Call ที่รอ<br>- ใช้ปุ่มตัวกรองและค้นหาเพื่อตรวจสอบรายละเอียด</p>
+        <p><strong>ทริก</strong><br>- ปุ่ม Clear ล้างคำค้นทั้งสองช่อง<br>- ปุ่ม Update ในเมนูช่วยรีเฟรชแคชหากข้อมูลไม่อัปเดต</p>
+      </div>
+    `,
+    confirmButtonText: 'รับทราบ',
+    width: '650px'
   });
 }
 
@@ -4098,7 +4116,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // อัปเดตปุ่ม notification ให้เรียกฟังก์ชันที่เคลียร์ badge ด้วย
   const notificationBtn = document.getElementById('notificationBtn');
   if (notificationBtn) {
-    notificationBtn.onclick = openAnnouncementDeckAndClear;
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername === '7512411') {
+      notificationBtn.onclick = openAnnouncementEditor;
+      notificationBtn.title = "จัดการ/สร้างประกาศ";
+    } else {
+      notificationBtn.onclick = openAnnouncementDeckAndClear;
+    }
   }
 });
 

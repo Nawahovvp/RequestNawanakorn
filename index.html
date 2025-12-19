@@ -378,73 +378,122 @@
     </div>
     <!-- Settings Modal -->
     <div id="settingsModal" class="settings-modal">
-      <div class="settings-modal-content">
-        <span class="close-settings" id="closeSettings">&times;</span>
-        <h2>การตั้งค่า</h2>
-        <!-- ข้อมูลผู้ใช้ -->
-        <div
-          style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 16px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 15px rgba(24,118,242,0.15);">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <div
-              style="width: 60px; height: 60px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              <i class="fas fa-user"></i>
-            </div>
+      <div class="settings-modal-content settings-mobile">
+        <div class="settings-topbar">
+          <span class="close-settings" id="closeSettings">&times;</span>
+          <h2>การตั้งค่า</h2>
+        </div>
+
+        <div class="settings-hero">
+          <div class="settings-hero-left">
+            <div class="settings-hero-icon"><i class="fas fa-cog"></i></div>
             <div>
-              <div style="font-weight: bold; font-size: 16px; color: #0d47a1;" id="modalUserName">ชื่อผู้ใช้</div>
-              <div style="font-size: 13px; color: #555;">รหัสพนักงาน: <span id="modalUserID">-</span></div>
+              <div class="settings-hero-title">ตั้งค่า</div>
+              <div class="settings-hero-sub">จัดการบัญชีและปรับแต่งการใช้งาน</div>
             </div>
           </div>
-          <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; font-size: 14px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <i class="fas fa-building" style="color: #1976d2;"></i>
-              <strong></strong> <span id="modalUserTeam" style="color: #1976d2; font-weight: 500;">กำลังโหลด...</span>
-            </div>
-            <div class="modal-info-row">
-              <span class="modal-label">สถานะ:</span>
-              <span id="modalUserAuth" class="modal-value">กำลังโหลด...</span>
-            </div>
+          <div class="settings-hero-badge">
+            <i class="fas fa-shield-alt"></i> Secure
           </div>
         </div>
-        <!-- ปุ่มประกาศ (เฉพาะ 7512411) -->
-        <div id="adminAnnouncementSection" style="display: none; margin: 20px 0;">
-          <button id="notificationBtn" onclick="openAnnouncementDeck()" class="notification-btn"
-            title="ข้อความแจ้งเตือน">
-            <i class="fas fa-bell"></i>
-            <!-- Badge สำหรับแสดงข้อความใหม่ -->
-            <span id="notificationBadge" class="notification-badge"></span>
-          </button>
+
+        <div class="settings-user-card">
+          <div class="user-main">
+            <div class="user-main-left">
+              <div class="settings-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="user-text">
+                <div class="user-name" id="modalUserName">ชื่อผู้ใช้</div>
+                <div class="user-meta">
+                  <span class="user-id">รหัสพนักงาน: <span id="modalUserID">-</span></span>
+                  <span class="user-team" id="modalUserTeam">กำลังโหลด...</span>
+                </div>
+              </div>
+            </div>
+            <div class="user-chip" id="modalUserAuth">กำลังโหลด...</div>
+          </div>
+          <div class="user-subtext">
+            <span class="user-sub-pill"><i class="fas fa-user-shield"></i> สถานะบัญชี</span>
+            <span class="user-sub-pill"><i class="fas fa-map-marker-alt"></i> Spare part วิภาวดี 62</span>
+          </div>
         </div>
-        <!-- เลือกธีม -->
-        <div style="margin: 20px 0;">
-          <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">
-            <i class="fas fa-palette"></i> โหมดธีม
-          </label>
-          <select id="themeSelect"
-            style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 15px; background: white;">
-            <option value="light">โหมดสว่าง (Light)</option>
-            <option value="dark">โหมดมืด (Dark)</option>
-          </select>
+
+        <div class="settings-card list-card">
+          <div class="setting-item">
+            <div class="setting-left">
+              <span class="setting-icon bg-blue"><i class="fas fa-palette"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">ธีม</div>
+                <div class="setting-sub"></div>
+              </div>
+            </div>
+            <select id="themeSelect" class="theme-select">
+              <option value="light">สว่าง</option>
+              <option value="dark">มืด</option>
+            </select>
+          </div>
+
+          <div class="setting-item" id="adminAnnouncementSection" style="display: none;">
+            <button id="notificationBtn" onclick="openAnnouncementEditor()" class="setting-button">
+              <span class="setting-icon bg-orange"><i class="fas fa-bullhorn"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">ประกาศใหม่</div>
+                <div class="setting-sub">สร้าง/แก้ไขประกาศ</div>
+              </div>
+              <span id="notificationBadge" class="notification-badge"></span>
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <button class="setting-button" onclick="showQRCode()">
+              <span class="setting-icon bg-green"><i class="fas fa-qrcode"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">QR Code</div>
+                <div class="setting-sub">เปิดหน้าสแกนเข้าใช้งาน</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <button class="setting-button" onclick="showHelp()">
+              <span class="setting-icon bg-purple"><i class="fas fa-question-circle"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">วิธีใช้งาน</div>
+                <div class="setting-sub">คู่มือใช้งานฉบับย่อ</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <button class="setting-button" onclick="handleClearCacheAndReload()">
+              <span class="setting-icon bg-yellow"><i class="fas fa-broom"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">รีเฟรชข้อมูล</div>
+                <div class="setting-sub">ล้างแคชและโหลดใหม่</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <button class="setting-button danger" onclick="handleLogout()">
+              <span class="setting-icon bg-red"><i class="fas fa-sign-out-alt"></i></span>
+              <div class="setting-text">
+                <div class="setting-title">ออกจากระบบ</div>
+                <div class="setting-sub">ปิดเซสชันผู้ใช้</div>
+              </div>
+            </button>
+          </div>
         </div>
-        <div style="display: flex; gap: 12px; margin-top: 20px;">
-          <button class="modal-qr-btn" onclick="showQRCode()"
-            style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
-            <i class="fas fa-qrcode"></i> QR Code
-          </button>
-          <button class="modal-clear-cache-btn" onclick="handleClearCacheAndReload()"
-            style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px; background: #ff7043; color: white; border: none;">
-            <i class="fas fa-broom"></i> Update
-          </button>
-          <button class="modal-logout-btn" onclick="handleLogout()"
-            style="flex: 1; padding: 14px; font-size: 15px; border-radius: 16px;">
-            <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-          </button>
-        </div>
-        <div
-          style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; border-radius: 16px; text-align: center; font-size: 11px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-          <p style="margin: 6px 0; font-weight: bold; font-size: 13px;">PartsGo Ver. <span id="appVersion">v10</span>
-          </p>
-          <p style="margin: 4px 0; opacity: 0.9;">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
-          <p style="margin: 4px 0; opacity: 0.8; font-size: 10px;">สงวนลิขสิทธิ์ • ระบบภายในสำหรับพนักงานเท่านั้น</p>
+
+        <div class="settings-footer-card">
+          <div class="settings-footer-stack">
+            <div class="settings-footer-tile">
+              <p class="footer-title">PartsGo Ver. <span id="appVersion">v18.5.5</span></p>
+              <p class="footer-sub">© 2025 คลังสินค้า SparePart วิภาวดี 62</p>
+              <p class="footer-sub">ระบบภายในสำหรับพนักงานเท่านั้น</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
