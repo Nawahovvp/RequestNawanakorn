@@ -264,6 +264,14 @@ body.dark-mode .modal-qr-btn:hover {
   background: linear-gradient(135deg, #16a085, #1abc9c);
 }
 
+body.dark-mode .modal-clear-cache-btn {
+  background: linear-gradient(135deg, #ff9f43, #ff7f0e);
+}
+
+body.dark-mode .modal-clear-cache-btn:hover {
+  background: linear-gradient(135deg, #ff7f0e, #ff9f43);
+}
+
 body.dark-mode .modal-logout-btn {
   background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
@@ -1190,25 +1198,46 @@ body.dark-mode #toggleAllDataBtn.active {
   color: #333;
 }
 
-.modal-qr-btn, .modal-logout-btn {
-  width: 100%;
-  padding: 12px;
+.modal-qr-btn,
+.modal-clear-cache-btn,
+.modal-logout-btn {
+  padding: 14px 12px;
   margin: 8px 0;
   border: none;
-  border-radius: 8px;
-  font-size: 20px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.2px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .modal-qr-btn {
-  background: linear-gradient(135deg, #4caf50, #388e3c);
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
 }
 
 .modal-qr-btn:hover {
-  background: linear-gradient(135deg, #388e3c, #4caf50);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(76, 175, 80, 0.35);
+}
+
+.modal-clear-cache-btn {
+  background: linear-gradient(135deg, #ff9f43, #ff7043);
+}
+
+.modal-clear-cache-btn:hover {
+  background: linear-gradient(135deg, #ff7043, #ff9f43);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(255, 159, 67, 0.35);
 }
 
 .modal-logout-btn {
@@ -1217,7 +1246,8 @@ body.dark-mode #toggleAllDataBtn.active {
 
 .modal-logout-btn:hover {
   background: linear-gradient(135deg, #d32f2f, #b71c1c);
-  transform: translateY(-2px);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(244, 67, 54, 0.35);
 }
 
 /* Container and Tabs */

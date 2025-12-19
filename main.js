@@ -110,6 +110,39 @@ async function ensureCacheFreshForVersion(version) {
   localStorage.setItem(DATA_CACHE_VERSION_KEY, version);
 }
 
+async function handleClearCacheAndReload() {
+  try {
+    Swal.fire({
+      title: 'กำลังล้างแคช...',
+      text: 'โปรดรอสักครู่',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading()
+    });
+    const keys = await caches.keys();
+    await Promise.all(keys.map(name => caches.delete(name)));
+    localStorage.removeItem(DATA_CACHE_VERSION_KEY);
+    Swal.fire({
+      icon: 'success',
+      title: 'ล้างแคชแล้ว',
+      text: 'กำลังรีโหลดข้อมูลใหม่',
+      timer: 1200,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    console.error('ล้างแคชไม่สำเร็จ:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'ล้างแคชไม่สำเร็จ',
+      text: 'จะรีโหลดเพื่อพยายามใหม่',
+      timer: 1200,
+      showConfirmButton: false
+    });
+  } finally {
+    setTimeout(() => window.location.reload(true), 1300);
+  }
+}
+
 async function getCachedData(key, fetchFn, expireHours = 1) {
   try {
     const cache = await caches.open(CACHE_NAME);
