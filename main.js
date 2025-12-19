@@ -64,7 +64,7 @@ function updateAppVersionDisplay() {
 navigator.serviceWorker.addEventListener('message', async event => {
   if (event.data && event.data.type === 'VERSION') {
     const versionElement = document.getElementById('appVersion');
-   if (versionElement) {
+    if (versionElement) {
       versionElement.textContent = event.data.version;
       versionElement.style.fontWeight = 'bold';
       versionElement.style.color = '#1e88e5'; // ใช้โทนสีน้ำเงินให้ตรงกับดีไซน์
@@ -497,7 +497,7 @@ function checkAuthForRequisition() {
 document.getElementById('closeSettings').onclick = () => {
   document.getElementById('settingsModal').style.display = 'none';
 };
-window.onclick = (event) => {
+window.addEventListener('click', (event) => {
   const settingsModal = document.getElementById('settingsModal');
   if (event.target === settingsModal) {
     settingsModal.style.display = 'none';
@@ -513,7 +513,7 @@ window.onclick = (event) => {
   if (event.target === imageModalImages) {
     imageModalImages.style.display = 'none';
   }
-};
+});
 // Login System
 const loginModal = document.getElementById('loginModal');
 const appContent = document.getElementById('appContent');
@@ -3322,9 +3322,9 @@ async function loadAllData() {
 }
 // Pending-calls tab functions (now after variables)
 closeModalPending.onclick = () => modalPending.style.display = "none";
-window.onclick = event => {
+window.addEventListener('click', event => {
   if (event.target == modalPending) modalPending.style.display = "none";
-};
+});
 itemsPerPageSelectPending.addEventListener("change", (e) => {
   itemsPerPagePending = parseInt(e.target.value);
   currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนจำนวนรายการต่อหน้า
