@@ -64,10 +64,10 @@ function updateAppVersionDisplay() {
 navigator.serviceWorker.addEventListener('message', async event => {
   if (event.data && event.data.type === 'VERSION') {
     const versionElement = document.getElementById('appVersion');
-    if (versionElement) {
+   if (versionElement) {
       versionElement.textContent = event.data.version;
       versionElement.style.fontWeight = 'bold';
-      versionElement.style.color = '#00ff88';
+      versionElement.style.color = '#1e88e5'; // ใช้โทนสีน้ำเงินให้ตรงกับดีไซน์
     }
     await ensureCacheFreshForVersion(event.data.version);
   }
