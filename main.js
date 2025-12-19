@@ -253,6 +253,8 @@ function extractIdFromUrlWeb(url) {
   return match ? match[1] : '';
 }
 let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
+let vibhavadiUrlWebMap = {}; // { "Material": UrlWeb } สำหรับดึงรูปในแท็บเบิกวันนี้
+let navanakornStockMap = {}; // { "Material": จำนวนสต็อกนวนคร (Unrestricted) }
 // Today tab variables (moved up)
 const modal = document.getElementById("detailModal");
 const modalContent = document.getElementById("modalContent");
@@ -297,6 +299,22 @@ let allDataToday = [];
 let currentFilteredDataToday = [];
 let todayFetchController = null;
 let announcementCache = [];
+// บังคับให้หัวคอลัมน์ "รูป" โผล่เสมอ (กัน cache หน้าเก่า)
+function ensureTodayImageColumn() {
+  const table = document.getElementById("data-table-today");
+  if (!table) return;
+  const headerRow = table.querySelector("thead tr");
+  if (!headerRow) return;
+  const hasImageHeader = Array.from(headerRow.children).some(th => th.textContent.trim() === "รูป");
+  if (!hasImageHeader) {
+    const th = document.createElement("th");
+    th.textContent = "รูป";
+    // แทรกหลังคอลัมน์ลำดับ (index 2 รวม status/idRow)
+    const insertBeforeNode = headerRow.children[2] || null;
+    headerRow.insertBefore(th, insertBeforeNode);
+  }
+}
+ensureTodayImageColumn();
 // All tab variables (moved up)
 const modalAll = document.getElementById("detailModalAll");
 const modalContentAll = document.getElementById("modalContentAll");
@@ -757,9 +775,21 @@ function showQRCode() {
   });
 }
 
+// ย้าย modal ออกจาก .tab-content ถ้าถูกซ่อนอยู่ เพื่อให้แสดงได้ทุกแท็บ
+function getModalElement(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return null;
+  const parent = modal.parentElement;
+  if (parent && parent.classList.contains('tab-content')) {
+    document.body.appendChild(modal);
+  }
+  return modal;
+}
+
 // === แทนที่ฟังก์ชัน showDetailModal ทั้งหมด ===
 // === showDetailModal เวอร์ชันสมบูรณ์ 100% (คัดลอกแทนที่ทั้งหมด) ===
-function showDetailModal(row, modalId, contentId) {
+function showDetailModal(row, modalId, contentId, options = {}) {
+  const { showInfo = true } = options;
   const material = (row.Material || "").toString().trim();
   console.log("เปิด Modal รายละเอียด → Material:", material);
   
@@ -816,25 +846,27 @@ function showDetailModal(row, modalId, contentId) {
     </div>`;
   }
   
-  // สร้างปุ่ม "เบิกเลย" ตามสิทธิ์
+  // สร้างปุ่ม "เบิกเลย" ตามสิทธิ์ (แสดงเฉพาะกรณี showInfo)
   let requisitionButtonHtml = '';
-  if (hasPermission) {
-    requisitionButtonHtml = `
-      <button class="requisition-button header-btn" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
-        เบิกเลย
-      </button>
-    `;
-  } else {
-    requisitionButtonHtml = `
-      <button class="requisition-button-disabled header-btn" onclick="checkAuthForRequisition()" 
-              title="ไม่มีสิทธิ์เบิกอะไหล่" style="opacity:0.7; cursor:not-allowed;">
-        เบิกเลย
-      </button>
-    `;
+  if (showInfo) {
+    if (hasPermission) {
+      requisitionButtonHtml = `
+        <button class="requisition-button header-btn" onclick="showRequisitionDialog(${JSON.stringify(row).replace(/"/g, '&quot;')})">
+          เบิกเลย
+        </button>
+      `;
+    } else {
+      requisitionButtonHtml = `
+        <button class="requisition-button-disabled header-btn" onclick="checkAuthForRequisition()" 
+                title="ไม่มีสิทธิ์เบิกอะไหล่" style="opacity:0.7; cursor:not-allowed;">
+          เบิกเลย
+        </button>
+      `;
+    }
   }
   
-  // ส่วนข้อมูลด้านล่าง
-  const infoHtml = `
+  // ส่วนข้อมูลด้านล่าง (ซ่อนเมื่อ showInfo = false)
+  const infoHtml = showInfo ? `
     <div class="detail-info">
       <div class="detail-header-row">
         <h2>รายละเอียดอะไหล่</h2>
@@ -857,11 +889,15 @@ function showDetailModal(row, modalId, contentId) {
         </span>
       </div>
     </div>
-  `;
+  ` : '';
   
   // แสดง Modal
-  const modal = document.getElementById(modalId);
+  const modal = getModalElement(modalId);
   const content = document.getElementById(contentId);
+  if (!modal || !content) {
+    console.error("ไม่พบ modal สำหรับแสดงรูป", modalId, contentId);
+    return;
+  }
   content.innerHTML = galleryHtml + infoHtml;
   modal.style.display = 'block';
   modal.scrollTop = 0;
@@ -2711,6 +2747,98 @@ function updateTableToday() {
   renderPaginationToday(filteredData.length);
 }
 
+// ดึงไอดีรูปที่ใช้ในแท็บเบิกวันนี้ (รองรับทั้ง UrlWeb และฐานรูป imageDatabase)
+function getTodayImageId(row) {
+  const directId = (row.imageId || row.ImageId || row.image || row.Image || "").toString().trim();
+  if (directId.length > 10) return directId;
+
+  const material = (row.material || row.Material || "").toString().trim();
+  if (material && imageDatabase[material] && imageDatabase[material].length > 0) {
+    return imageDatabase[material][0];
+  }
+
+  const urlCandidate =
+    row.UrlWeb ||
+    row.urlWeb ||
+    row.urlweb ||
+    row.Url ||
+    row.url ||
+    vibhavadiUrlWebMap[material] ||
+    "";
+  const parsedId = extractIdFromUrlWeb(urlCandidate);
+  return parsedId || "";
+}
+
+// สร้างเซลล์รูป (ใช้ thumbnail และ fallback เมื่อไม่มีรูป)
+function createTodayImageCell(row) {
+  const td = document.createElement("td");
+  td.style.textAlign = "center";
+
+  const fileId = getTodayImageId(row);
+  if (!fileId) {
+    td.textContent = "-";
+    td.style.color = "#999";
+    return td;
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.style.display = "inline-flex";
+  wrapper.style.cursor = "pointer";
+  wrapper.title = "คลิกเพื่อดูรายละเอียด";
+
+  const img = document.createElement("img");
+  img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w100-h100`;
+  img.alt = "รูปอะไหล่";
+  img.loading = "lazy";
+  img.style.width = "60px";
+  img.style.height = "60px";
+  img.style.objectFit = "cover";
+  img.style.borderRadius = "6px";
+  img.onerror = () => {
+    img.src = "https://via.placeholder.com/60/ccc/999?text=NOIMG";
+  };
+
+  wrapper.appendChild(img);
+  wrapper.onclick = async () => {
+    // โหลดฐานรูปให้พร้อมก่อนเปิด
+    try {
+      await loadImageDatabase();
+    } catch (e) {
+      console.warn("โหลดฐานรูปไม่สำเร็จแต่จะพยายามเปิดรูปต่อ", e);
+    }
+    openTodayImageViewer(row);
+  };
+
+  td.appendChild(wrapper);
+  return td;
+}
+
+// เปิด modal รูปใหญ่พร้อมเลื่อนซ้ายขวา (ใช้โครงสร้างเดียวกับแท็บรูปภาพ)
+function openTodayImageViewer(row) {
+  const material = (row.material || row.Material || "").toString().trim();
+  const urlWeb =
+    row.UrlWeb ||
+    row.urlWeb ||
+    row.url ||
+    row.urlweb ||
+    vibhavadiUrlWebMap[material] ||
+    "";
+
+  const mappedRow = {
+    Material: material,
+    Description: row.description || row.Description || "",
+    UrlWeb: urlWeb,
+    "วิภาวดี": row.vibhavadi || vibhavadiStockMap[material] || 0,
+    Unrestricted: row.Unrestricted || row.unrestricted || 0,
+    Rebuilt: row.Rebuilt || row.rebuilt || "",
+    หมายเหตุ: row.remark || row["หมายเหตุ"] || "",
+    Product: row.Product || "",
+    OCRTAXT: row.OCRTAXT || "",
+  };
+
+  showDetailModal(mappedRow, "imageModalImages", "imageModalContentImages", { showInfo: false });
+}
+
 function renderTableToday(data) {
   tableBodyToday.innerHTML = "";
   data.forEach((row) => {
@@ -2726,12 +2854,16 @@ function renderTableToday(data) {
     idRowTd.textContent = row["IDRow"] || "";
     tr.appendChild(idRowTd);
 
+    // Image (thumbnail)
+    tr.appendChild(createTodayImageCell(row));
+
     const columns = [
       "Timestamp",
       "material",
       "description",
       "quantity",
       "vibhavadi",        // ← เราจะแทนที่ค่านี้ใหม่
+      "navanakorn",
       "employeeName",
       "team",
       "CallNumber",
@@ -2751,10 +2883,17 @@ function renderTableToday(data) {
         td.style.color = realStock > 0 ? "#27ae60" : "#e74c3c";
         td.style.fontWeight = "bold";
       }
+      if (col === "navanakorn") {
+        const material = (row["material"] || "").toString().trim();
+        const realStockNava = navanakornStockMap[material];
+        value = typeof realStockNava === 'number' ? realStockNava.toLocaleString() : "0";
+        td.style.color = realStockNava > 0 ? "#2196f3" : "#e74c3c";
+        td.style.fontWeight = "bold";
+      }
       if (col === "Timestamp") {
         value = formatTimestamp(value); // เพิ่มบรรทัดนี้
       }
-      if (col === "quantity" || col === "vibhavadi") {
+      if (col === "quantity" || col === "vibhavadi" || col === "navanakorn") {
         if (value && !isNaN(value)) {
           value = Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
         } else if (value === "0" || value === 0) {
@@ -2803,6 +2942,7 @@ function renderTableToday(data) {
             case "CallNumber": label = "📄 Call"; break;
             case "CallType": label = "🗳️ CallType"; break;
             case "vibhavadi": label = "📦 คลังวิภาวดี"; break;
+            case "navanakorn": label = "🏭 คลังนวนคร"; break;
             case "remark": label = "📝 หมายเหตุ"; break;
             default: label = col;
           }
@@ -2898,8 +3038,13 @@ async function loadVibhavadiStockMap() {
     data.forEach(row => {
       const material = (row.Material || "").toString().trim();
       const vibhavadi = parseInt(row["วิภาวดี"] || 0, 10);
+      const navanakorn = parseInt(row["Unrestricted"] || 0, 10);
       if (material) {
         vibhavadiStockMap[material] = vibhavadi;
+        if (row.UrlWeb) {
+          vibhavadiUrlWebMap[material] = row.UrlWeb;
+        }
+        navanakornStockMap[material] = isNaN(navanakorn) ? 0 : navanakorn;
       }
     });
 
@@ -2929,6 +3074,10 @@ async function loadTodayData(options = {}) {
 
   try {
     timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 วินาที
+    const imageDbPromise = loadImageDatabase().catch(err => {
+      console.error("โหลดฐานข้อมูลรูปภาพไม่สำเร็จ:", err);
+      return null;
+    });
 
     // โหลดข้อมูลคลังวิภาวดี (MainSap) ก่อนเสมอ แต่โหลดแค่ครั้งเดียว
     if (Object.keys(vibhavadiStockMap).length === 0) {
@@ -2962,6 +3111,7 @@ async function loadTodayData(options = {}) {
     currentPageToday = 1;
     todayDataLoaded = true;
 
+    await imageDbPromise;
     // อัปเดตตาราง (จะดึงสต็อกวิภาวดีจริงมาแสดงอัตโนมัติ)
     updateTableToday();
 
