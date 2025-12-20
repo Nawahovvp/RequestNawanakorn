@@ -2256,6 +2256,7 @@ iframe {
   display: flex;
   align-items: center;
   gap: 8px;
+  transform: translateY(-4px);
 }
 
 .today-icon-btn {
@@ -2274,6 +2275,34 @@ iframe {
     inset 0 1px 0 rgba(255,255,255,0.8);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+#exportTodayBtn {
+  border-color: rgba(22, 163, 74, 0.35);
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.95), rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #d9fbe6, #8fe2b0);
+  color: #0f7a3f;
+}
+
+#saveTodayBtn {
+  border-color: rgba(251, 146, 60, 0.35);
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.95), rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #ffe8cc, #ffc48b);
+  color: #b45309;
+}
+
+#exportTodayBtn:hover {
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,1), rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #c7f5dc, #7ad69f);
+}
+
+#saveTodayBtn:hover {
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,1), rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #ffdcb8, #ffb16f);
 }
 
 .today-icon-btn:hover {
