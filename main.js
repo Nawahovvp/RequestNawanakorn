@@ -2920,32 +2920,43 @@ function exportTodayData() {
     });
     return;
   }
+  const materialMap = new Map();
+  data.forEach(row => {
+    const material = (row.material || row.Material || '').toString().trim();
+    if (!material) return;
+    const description = (row.description || row.Description || '').toString().trim();
+    const quantityValue = parseFloat(row.quantity || row.Quantity || 0);
+    const entry = materialMap.get(material);
+    if (!entry) {
+      materialMap.set(material, {
+        material,
+        description,
+        quantity: isNaN(quantityValue) ? 0 : quantityValue
+      });
+    } else {
+      entry.quantity += isNaN(quantityValue) ? 0 : quantityValue;
+      if (!entry.description && description) {
+        entry.description = description;
+      }
+    }
+  });
   const columns = [
-    { key: "status", label: "Status" },
-    { key: "IDRow", label: "ลำดับ" },
-    { key: "Timestamp", label: "Timestamp" },
-    { key: "material", alt: "Material", label: "Material" },
-    { key: "description", alt: "Description", label: "Description" },
-    { key: "quantity", label: "จำนวน" },
-    { key: "vibhavadi", alt: "วิภาวดี", label: "วิภาวดี" },
-    { key: "employeeName", label: "ชื่อช่าง" },
-    { key: "team", label: "หน่วยงาน" },
-    { key: "callNumber", alt: "CallNumber", label: "Call" },
-    { key: "callType", alt: "CallType", label: "Call Type" },
-    { key: "remark", alt: "หมายเหตุ", label: "หมายเหตุ" }
+    { key: "material", label: "material" },
+    { key: "description", label: "description" },
+    { key: "quantity", label: "quantity" },
+    { key: "storage", label: "Stroage" }
   ];
   const csvRows = [];
   csvRows.push(columns.map(col => `"${col.label}"`).join(','));
-  data.forEach(row => {
+  Array.from(materialMap.values()).forEach(item => {
     const values = columns.map(col => {
-      const rawValue = row[col.key] ?? (col.alt ? row[col.alt] : '');
-      let value = rawValue === undefined || rawValue === null ? '' : rawValue;
-      if (col.key === "Timestamp") {
-        value = formatTimestamp(value) || value;
-      }
-      if (col.key === "quantity" || col.key === "vibhavadi") {
-        const num = parseFloat(value);
-        if (!isNaN(num)) value = num;
+      let value = '';
+      if (col.key === 'storage') {
+        value = 'S001';
+      } else if (col.key === 'quantity') {
+        value = item.quantity;
+      } else {
+        value = item[col.key] || '';
       }
       const safeValue = value.toString().replace(/"/g, '""').replace(/\r?\n/g, ' ');
       return `"${safeValue}"`;
