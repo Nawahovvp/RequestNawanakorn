@@ -1169,15 +1169,22 @@ body.dark-mode #toggleAllDataBtn.active {
 
 .settings-modal-content {
   background: linear-gradient(135deg, #ffffff, #f5f7fa);
-  margin: 7% auto;
+  margin: 0;
   padding: 0;
   width: 92%;
   max-width: 360px;
   border-radius: 18px;
   text-align: left;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.16);
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   transition: background 0.3s ease;
+}
+
+.settings-modal-content.dragging {
+  cursor: grabbing;
 }
 
 .settings-modal-content.settings-mobile {
@@ -1197,6 +1204,13 @@ body.dark-mode #toggleAllDataBtn.active {
   border-bottom: none;
   box-shadow: none;
   border-radius: 18px 18px 0 0;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.settings-topbar:active {
+  cursor: grabbing;
 }
 
 .settings-topbar h2 {
@@ -2222,12 +2236,55 @@ iframe {
   box-shadow: inset 0 -2px 0 #1877f2 !important;
 }
 
+.today-warning-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .today-warning {
   font-size: 18px;
   color: #e74c3c;
   font-weight: 600;
   margin-bottom: 6px;
   text-align: left;
+}
+
+.today-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.today-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #d9e3ef;
+  background: linear-gradient(135deg, #f6f9fc, #e9f0f9);
+  color: #1e88e5;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.today-icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(135deg, #eef4fb, #dfe9f7);
+}
+
+.today-icon-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.today-icon-btn i {
+  font-size: 16px;
 }
 
 /* All Tab */

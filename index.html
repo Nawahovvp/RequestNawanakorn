@@ -191,8 +191,18 @@
       </div>
       <div id="today" class="tab-content">
         <!-- ข้อความเตือนใหม่ -->
-        <div class="today-warning">
-          ระบบจะตัดรอบการเบิกในเวลา 14.50น.
+        <div class="today-warning-row">
+          <div class="today-warning">
+            ระบบจะตัดรอบการเบิกในเวลา 14.50น.
+          </div>
+          <div class="today-admin-actions" id="todayAdminActions" style="display: none;">
+            <button id="exportTodayBtn" class="today-icon-btn" title="Export รายการวันนี้">
+              <i class="fas fa-file-export"></i>
+            </button>
+            <button id="saveTodayBtn" class="today-icon-btn" title="บันทึกข้อมูล">
+              <i class="fas fa-save"></i>
+            </button>
+          </div>
         </div>
         <div id="searchContainer">
           <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
