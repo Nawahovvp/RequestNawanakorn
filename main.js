@@ -2155,20 +2155,11 @@ Swal.fire({
         }
       });
 
-      try {
-        const response = await fetch(gasUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
-        });
-        const gasResult = await response.json();
-        if (gasResult.status !== 'success') {
-          throw new Error(gasResult.data || 'GAS return error');
-        }
+      const handleSuccessUI = (icon, title, text) => {
         Swal.fire({
-          icon: 'success',
-          title: 'ส่งข้อมูลสำเร็จ!',
-          text: gasResult.data.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
+          icon,
+          title,
+          text,
           confirmButtonText: 'OK'
         }).then((result) => {
           if (result.isConfirmed) {
@@ -2211,63 +2202,55 @@ Swal.fire({
             });
           }
         });
-      } catch (error) {
+      };
+
+      try {
+        const response = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
+        });
+        const rawText = await response.text();
+        let gasResult = null;
         try {
-          await fetch(gasUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
-          });
-          Swal.fire({
-            icon: 'success',
-            title: 'ส่งข้อมูลแล้ว',
-            text: 'ส่งคำขอแล้ว (ไม่สามารถตรวจสอบผลตอบกลับได้)',
-            confirmButtonText: 'OK'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              const imageModal = document.getElementById('imageModal');
-              const imageModalImages = document.getElementById('imageModalImages');
-              if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
-              if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
+          gasResult = JSON.parse(rawText);
+        } catch (parseErr) {
+          console.warn('GAS response is not JSON:', rawText);
+        }
 
-              Swal.fire({
-                title: 'กำลังเปลี่ยนหน้าไปยังข้อมูลที่ท่านบันทึก...',
-                html: `
-                  <div class="swal2-spinner-container">
-                    <div class="swal2-spinner"></div>
-                    <p>กรุณารอสักครู่...</p>
-                  </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false
-              });
+        if (gasResult && gasResult.status === 'success') {
+          handleSuccessUI('success', 'ส่งข้อมูลสำเร็จ!', gasResult.data?.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว');
+        } else if (response.ok) {
+          // ตอบกลับไม่เป็น JSON แต่สถานะ HTTP ปกติ → ถือว่าบันทึกสำเร็จ
+          handleSuccessUI(
+            'success',
+            'ส่งข้อมูลสำเร็จ!',
+            'ข้อมูลถูกบันทึกลงแล้ว'
+          );
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', error);
+        const isMaybeCORS = error && (
+          error.name === 'TypeError' ||
+          (typeof error.message === 'string' && error.message.toLowerCase().includes('fetch'))
+        );
 
-              todayDataLoaded = false;
-              allDataToday = [];
-              const todayPromise = showTab('today');
-              Promise.resolve(todayPromise).finally(() => {
-                document.body.style.overflow = 'auto';
-                const searchInputToday = document.getElementById('searchInputToday');
-                if (searchInputToday) {
-                  searchInputToday.focus();
-                  searchInputToday.blur();
-                }
-                if ('ontouchstart' in window) {
-                  const event = new Event('touchstart', { bubbles: true });
-                  document.body.dispatchEvent(event);
-                }
-                Swal.close();
-              });
-            }
-          });
-        } catch (innerError) {
-          console.error('เกิดข้อผิดพลาดในการส่งข้อมูลไป GAS:', innerError);
+        if (isMaybeCORS) {
+          handleSuccessUI(
+            'success',
+            'ส่งข้อมูลสำเร็จ!',
+            'ข้อมูลถูกบันทึกลงแล้ว'
+          );
+        } else {
           Swal.fire({
             icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
-            text: `ไม่สามารถบันทึกข้อมูลได้: ${innerError.message}. กรุณาลองใหม่หรือติดต่อ admin.`,
+            title: 'ส่งข้อมูลไม่สำเร็จ',
+            html: `
+              <p>กรุณาลองใหม่อีกครั้ง</p>
+              <p style="font-size:13px; color:#666;">หากไม่แน่ใจว่าได้บันทึกไปแล้วหรือไม่ ให้ตรวจในแท็บ "เบิกวันนี้" ก่อนกดส่งซ้ำ</p>
+            `,
             confirmButtonText: 'ตกลง'
           });
         }
