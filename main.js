@@ -273,6 +273,29 @@ function isAdminUser() {
   const userAuth = localStorage.getItem('userAuth');
   return savedUsername === '7512411' || userAuth === 'Admin';
 }
+
+function getTodayRowKey(row) {
+  const rowIdRaw = row.row_id || row.id || row.IDRow || row.idRow || row.IdRow || '';
+  if (rowIdRaw !== '') {
+    return `id:${rowIdRaw}`;
+  }
+  const idRow = row.IDRow || row.idRow || '';
+  const timestamp = row.timestamp || row.Timestamp || '';
+  const material = row.material || row.Material || '';
+  return `fallback:${idRow}|${timestamp}|${material}`;
+}
+
+function getSelectedTodayRows() {
+  const checkboxes = document.querySelectorAll('#data-table-today tbody .today-select-checkbox:checked');
+  if (!checkboxes.length) return [];
+  const rowMap = new Map();
+  allDataToday.forEach(row => {
+    rowMap.set(getTodayRowKey(row), row);
+  });
+  return Array.from(checkboxes)
+    .map(cb => rowMap.get(cb.dataset.rowKey))
+    .filter(Boolean);
+}
 function syncTodayAdminActionsVisibility() {
   if (!todayAdminActions) return;
   todayAdminActions.style.display = isAdminUser() ? 'flex' : 'none';
@@ -1168,6 +1191,17 @@ function renderTableToday(data) {
   data.forEach((row) => {
     const tr = document.createElement("tr");
 
+    // Checkbox selection (admin only)
+    const selectTd = document.createElement("td");
+    if (isAdminUser()) {
+      const selectCheckbox = document.createElement("input");
+      selectCheckbox.type = "checkbox";
+      selectCheckbox.className = "today-select-checkbox";
+      selectCheckbox.dataset.rowKey = getTodayRowKey(row);
+      selectTd.appendChild(selectCheckbox);
+    }
+    tr.appendChild(selectTd);
+
     // Status (สีเขียว/แดง)
     const statusTd = document.createElement("td");
     const status = row["status"] || "";
@@ -1202,6 +1236,11 @@ function renderTableToday(data) {
         if (!isNaN(num)) {
           value = num.toLocaleString("en-US", { maximumFractionDigits: 0 });
         }
+      }
+
+      // จัดแนวซ้ายสำหรับบางคอลัมน์อ่านง่าย
+      if (["description", "employeeName", "team"].includes(col)) {
+        td.classList.add("today-left");
       }
 
       // ไฮไลต์ remark
@@ -2968,9 +3007,12 @@ function sendUpdateByIdBeacon(item) {
   img.src = url;
 }
 async function saveTodayDataSnapshot() {
-  const data = (currentFilteredDataToday && currentFilteredDataToday.length > 0)
-    ? currentFilteredDataToday
-    : allDataToday;
+  const selectedRows = getSelectedTodayRows();
+  const data = selectedRows.length > 0
+    ? selectedRows
+    : (currentFilteredDataToday && currentFilteredDataToday.length > 0)
+      ? currentFilteredDataToday
+      : allDataToday;
   const pendingRows = data.filter(row => (row.status || '').trim() === 'รอเบิก');
   if (pendingRows.length === 0) {
     Swal.fire({
@@ -3182,6 +3224,15 @@ function renderTableToday(data) {
   tableBodyToday.innerHTML = "";
   data.forEach((row) => {
     const tr = document.createElement("tr");
+    const selectTd = document.createElement("td");
+    if (isAdminUser()) {
+      const selectCheckbox = document.createElement("input");
+      selectCheckbox.type = "checkbox";
+      selectCheckbox.className = "today-select-checkbox";
+      selectCheckbox.dataset.rowKey = getTodayRowKey(row);
+      selectTd.appendChild(selectCheckbox);
+    }
+    tr.appendChild(selectTd);
     const statusTd = document.createElement("td");
     const status = row["status"] || "";
     statusTd.textContent = status;

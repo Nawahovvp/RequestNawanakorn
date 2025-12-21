@@ -1786,6 +1786,11 @@ iframe {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* Align specific columns to the left in เบิกวันนี้ table for readability */
+#today table tbody td.today-left {
+  text-align: left !important;
+}
+
 #parts th, #images th, #today th {
   background: linear-gradient(135deg, #2196f3, #1976d2);
   color: white;
