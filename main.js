@@ -3478,8 +3478,7 @@ async function loadTodayData(options = {}) {
     }
 
     // ดึงข้อมูลรายการเบิกวันนี้ (Request Sheet)
-    const cacheBustUrl = `${requestSheetUrl}?_t=${Date.now()}`;
-    const response = await fetch(cacheBustUrl, {
+    const response = await fetch(requestSheetUrl, {
       signal: controller.signal,
       cache: 'no-store' // บังคับดึงข้อมูลใหม่ทุกครั้ง และไม่เก็บ cache เดิม
     });
@@ -3942,9 +3941,9 @@ async function loadPendingCallsData() {
     allDataPending = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(urlPending + "?_=" + Date.now(), {
+      const res = await fetch(urlPending, {
         signal: controller.signal,
-        cache: 'no-cache'
+        cache: 'no-store'
       });
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4062,7 +4061,7 @@ async function openAnnouncementDeck() {
   
   try {
     // ดึงข้อมูลประกาศจาก Google Sheet
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`, {
+    const res = await fetch('https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information', {
       cache: 'no-cache'
     });
     
@@ -4300,7 +4299,9 @@ async function openAnnouncementDeckPreview() {
 async function checkNewAnnouncements() {
   console.log('เริ่มตรวจสอบประกาศใหม่...');
   try {
-    const res = await fetch(`https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information?_t=${Date.now()}`);
+    const res = await fetch('https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information', {
+      cache: 'no-store'
+    });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
