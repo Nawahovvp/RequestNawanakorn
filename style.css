@@ -1785,6 +1785,28 @@ iframe {
   font-size: 12px;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+.stock-zero-chip {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #ef5350, #e53935);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 3px rgba(229, 57, 53, 0.25);
+}
+#parts table th:nth-child(1), #parts table td:nth-child(1) { width: 64px; }
+#parts table th:nth-child(2), #parts table td:nth-child(2) { width: 86px; }
+#parts table th:nth-child(3), #parts table td:nth-child(3) { min-width: 110px; }
+#parts table th:nth-child(4), #parts table td:nth-child(4) { min-width: 220px; text-align: left; }
+#parts table th:nth-child(5), #parts table td:nth-child(5) { width: 85px; min-width: 85px; max-width: 85px; text-align: left; font-size: 13px; }
+#parts table th:nth-child(6), #parts table td:nth-child(6) { width: 50px; min-width: 50px; max-width: 50px; text-align: center; }
+#parts table th:nth-child(7), #parts table td:nth-child(7) { width: 50px; min-width: 50px; max-width: 50px; text-align: center; }
+#parts table th:nth-child(8), #parts table td:nth-child(8) { width: 90px; }
+#parts table th:nth-child(9), #parts table td:nth-child(9) { min-width: 140px; text-align: left; }
+#parts table th:nth-child(10), #parts table td:nth-child(10) { min-width: 110px; }
+#parts table th:nth-child(11), #parts table td:nth-child(11) { min-width: 110px; }
 
 /* Align specific columns to the left in เบิกวันนี้ table for readability */
 #today table tbody td.today-left {
@@ -1899,15 +1921,19 @@ iframe {
 }
 
 #parts th:nth-child(5), #parts td:nth-child(5), #images th:nth-child(5), #images td:nth-child(5) {
-  min-width: 50px;
+  min-width: 85px;
+  max-width: 85px;
+  font-size: 13px;
 }
 
 #parts th:nth-child(6), #parts td:nth-child(6), #images th:nth-child(6), #images td:nth-child(6) {
   min-width: 50px;
+  max-width: 50px;
 }
 
 #parts th:nth-child(7), #parts td:nth-child(7), #images th:nth-child(7), #images td:nth-child(7) {
-  min-width: 250px;
+  min-width: 50px;
+  max-width: 50px;
 }
 
 #parts th:nth-child(8), #parts td:nth-child(8), #images th:nth-child(8), #images td:nth-child(8) {

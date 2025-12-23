@@ -253,6 +253,15 @@ function extractIdFromUrlWeb(url) {
   const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/) || url.match(/uc\?id=([a-zA-Z0-9-_]+)/);
   return match ? match[1] : '';
 }
+function getStorageBinValue(row) {
+  const raw =
+    row["Storage bin"] ||
+    row["Storage Bin"] ||
+    row["storage bin"] ||
+    row["Storage_bin"] ||
+    "";
+  return raw == null ? "" : raw;
+}
 let vibhavadiStockMap = {}; // { "Material": จำนวนวิภาวดี }
 let vibhavadiUrlWebMap = {}; // { "Material": UrlWeb } สำหรับดึงรูปในแท็บเบิกวันนี้
 let navanakornStockMap = {}; // { "Material": จำนวนสต็อกนวนคร (Unrestricted) }
@@ -1023,6 +1032,7 @@ function showDetailModal(row, modalId, contentId, options = {}) {
       </div>
       <div class="detail-row"><span class="label">Material</span><span class="value">${material}</span></div>
       <div class="detail-row"><span class="label">Description</span><span class="value">${row.Description || '-'}</span></div>
+      <div class="detail-row"><span class="label">Storage bin</span><span class="value">${getStorageBinValue(row) || '-'}</span></div>
       <div class="detail-row"><span class="label">วิภาวดี</span><span class="value">${row["วิภาวดี"] ? Number(row["วิภาวดี"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
       <div class="detail-row"><span class="label">นวนคร</span><span class="value">${row["Unrestricted"] ? Number(row["Unrestricted"]).toLocaleString() + ' ชิ้น' : '0 ชิ้น'}</span></div>
       ${row["Rebuilt"] ? `<div class="detail-row"><span class="label">Rebuilt</span><span class="value rebuilt-text">${row["Rebuilt"]}</span></div>` : ''}
@@ -2380,7 +2390,7 @@ function renderTable(data) {
 
     // คอลัมน์หลัก
     const columns = [
-      "ImageDb", "Material", "Description", "วิภาวดี", "Unrestricted",
+      "ImageDb", "Material", "Description", "Storage bin", "วิภาวดี", "Unrestricted",
       "Rebuilt", "หมายเหตุ", "Product", "OCRTAXT"
     ];
 
@@ -2398,7 +2408,7 @@ function renderTable(data) {
 
     columns.forEach(col => {
       const td = document.createElement("td");
-      let value = row[col] || "";
+      let value = col === "Storage bin" ? getStorageBinValue(row) : (row[col] || "");
 
       if ((col === "วิภาวดี" || col === "Unrestricted") && value !== "") {
         const num = parseFloat(value);
@@ -2412,9 +2422,18 @@ function renderTable(data) {
         td.style.fontWeight = "bold";
       }
 
-      if (["Material", "Description", "วิภาวดี", "Unrestricted"].includes(col)) {
+      if (["Material", "Description", "Storage bin", "วิภาวดี", "Unrestricted"].includes(col)) {
         if (textColor) td.style.color = textColor;
         if (fontWeight) td.style.fontWeight = fontWeight;
+      }
+
+      if ((col === "วิภาวดี" || col === "Unrestricted") && value !== "") {
+        const numericValue = parseFloat(value.toString().replace(/,/g, ""));
+        if (!isNaN(numericValue) && numericValue === 0) {
+          td.innerHTML = `<span class="stock-zero-chip">0</span>`;
+          tr.appendChild(td);
+          return;
+        }
       }
 
       if (col === "ImageDb") {
@@ -2467,21 +2486,21 @@ function renderTableData() {
 function applyFilters() {
   const keyword1 = (globalSearch1 || "").trim().toLowerCase();
   const keyword2 = (globalSearch2 || "").trim().toLowerCase();
+  const fieldsToSearch = ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"];
+  const matchesKeyword = (row, keyword) => {
+    const storageBin = getStorageBinValue(row).toString().toLowerCase();
+    const baseMatch = fieldsToSearch.some(field => (row[field] || "").toString().toLowerCase().includes(keyword));
+    return baseMatch || storageBin.includes(keyword);
+  };
 
   let filtered = allData;
 
   if (keyword1) {
-    filtered = filtered.filter(row =>
-      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
-        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword1))
-    );
+    filtered = filtered.filter(row => matchesKeyword(row, keyword1));
   }
 
   if (keyword2) {
-    filtered = filtered.filter(row =>
-      ["Material", "Description", "Product", "OCRTAXT", "หมายเหตุ", "Rebuilt", "วิภาวดี", "Unrestricted"]
-        .some(field => (row[field] || "").toString().toLowerCase().includes(keyword2))
-    );
+    filtered = filtered.filter(row => matchesKeyword(row, keyword2));
   }
 
   currentFilteredData = filtered;
@@ -3419,7 +3438,7 @@ async function loadVibhavadiStockMap() {
     return;
   }
 
-  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap`;
+  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapX`;
 
   try {
     const res = await fetch(mainSapUrl);
@@ -4530,6 +4549,7 @@ function showImageDetailModal(row) {
     <div style="font-size:16px; line-height:1.6;">
       <div><strong>Material:</strong> ${row.Material || '-'}</div>
       <div><strong>Description:</strong> ${row.Description || '-'}</div>
+      <div><strong>Storage bin:</strong> ${getStorageBinValue(row) || '-'}</div>
       <div><strong>วิภาวดี:</strong> ${(parseFloat(row.วิภาวดี) || 0).toLocaleString()} ชิ้น</div>
       <div><strong>Unrestricted:</strong> ${(parseFloat(row.Unrestricted) || 0).toLocaleString()} ชิ้น</div>
       <div><strong>Rebuilt:</strong> ${row.Rebuilt || '-'}</div>
