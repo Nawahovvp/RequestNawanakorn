@@ -193,6 +193,8 @@ let globalSearch2 = '';
 // Global for today tab: toggle pending only
 let showOnlyPending = true; // true = แสดงเฉพาะรอเบิก, false = แสดงทั้งหมด
 let currentFilter = 'pending';
+// ควบคุมการสลับแท็บเบิกวันนี้แบบไม่ต้องรีเฟรชข้อมูลทั้งก้อนหลังบันทึก
+let skipTodayReloadOnce = false;
 // Sort config for today tab
 let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to descending IDRow
 // Pagination config for today tab
@@ -292,6 +294,65 @@ function getTodayRowKey(row) {
   const timestamp = row.timestamp || row.Timestamp || '';
   const material = row.material || row.Material || '';
   return `fallback:${idRow}|${timestamp}|${material}`;
+}
+function getNextTodayRowId() {
+  const numericIds = allDataToday
+    .map(row => Number(row.IDRow || row.id || row.row_id))
+    .filter(num => !Number.isNaN(num) && num > 0);
+  if (!numericIds.length) return 1;
+  return Math.max(...numericIds) + 1;
+}
+function normalizeTodayRow(rawRow, fallbackPayload = {}) {
+  if (!rawRow && !fallbackPayload) return null;
+  const source = rawRow || {};
+  const fallback = fallbackPayload || {};
+  const resolvedId =
+    source.IDRow ||
+    source.id ||
+    source.row_id ||
+    fallback.IDRow ||
+    fallback.id ||
+    fallback.row_id ||
+    getNextTodayRowId();
+  const resolvedTimestamp =
+    source.Timestamp ||
+    source.timestamp ||
+    fallback.Timestamp ||
+    fallback.timestamp ||
+    new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' });
+  const resolvedStatus = source.status || fallback.status || 'รอเบิก';
+
+  return {
+    ...fallback,
+    ...source,
+    IDRow: resolvedId,
+    row_id: resolvedId,
+    id: resolvedId,
+    Timestamp: resolvedTimestamp,
+    status: resolvedStatus,
+    material: source.material || source.Material || fallback.material || '',
+    description: source.description || source.Description || fallback.description || '',
+    quantity: source.quantity ?? fallback.quantity ?? '',
+    vibhavadi: source.vibhavadi ?? fallback.vibhavadi ?? '',
+    navanakorn: source.navanakorn ?? fallback.navanakorn ?? '',
+    employeeName: source.employeeName || source.EmployeeName || fallback.employeeName || '',
+    employeeCode: source.employeeCode || source.EmployeeCode || fallback.employeeCode || '',
+    team: source.team || source.Team || fallback.team || '',
+    CallNumber: source.CallNumber || source.callNumber || fallback.callNumber || '',
+    CallType: source.CallType || source.callType || fallback.callType || '',
+    remark: source.remark || fallback.remark || ''
+  };
+}
+function prependTodayRow(rawRow, fallbackPayload = {}) {
+  const normalized = normalizeTodayRow(rawRow, fallbackPayload);
+  if (!normalized) return null;
+  const keyToAdd = getTodayRowKey(normalized);
+  const existingIndex = allDataToday.findIndex(row => getTodayRowKey(row) === keyToAdd);
+  if (existingIndex >= 0) {
+    allDataToday.splice(existingIndex, 1);
+  }
+  allDataToday.unshift(normalized);
+  return normalized;
 }
 
 function getSelectedTodayRows() {
@@ -870,6 +931,13 @@ function showTab(tabId) {
     case "today": {
       // แสดงข้อมูลเก่าทันที (ถ้ามี) แล้วไปดึงข้อมูลสดจาก opensheet
       const hasCachedToday = allDataToday.length > 0;
+      if (skipTodayReloadOnce && hasCachedToday) {
+        updateTableToday();
+        hideLoading();
+        skipTodayReloadOnce = false;
+        tabPromise = Promise.resolve();
+        break;
+      }
       if (hasCachedToday) {
         updateTableToday();
         hideLoading();
@@ -877,6 +945,8 @@ function showTab(tabId) {
       tabPromise = loadTodayData({ silent: hasCachedToday }).then(() => {
         todayDataLoaded = true;
         hideLoading();
+      }).finally(() => {
+        skipTodayReloadOnce = false;
       });
       break;
     }
@@ -2150,6 +2220,12 @@ Swal.fire({
         remark: formValues.remark || '',
         vibhavadi: vibhavadiValue.toString()
       };
+      const baseTodayRow = {
+        ...jsonPayload,
+        Timestamp: new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }),
+        status: 'รอเบิก'
+      };
+      let newTodayRowPayload = null;
 
       Swal.fire({
         title: 'กำลังบันทึกข้อมูล...',
@@ -2204,7 +2280,10 @@ Swal.fire({
         }
       });
 
-      const handleSuccessUI = (icon, title, text) => {
+      const handleSuccessUI = (icon, title, text, newRowData = null) => {
+        if (newRowData) {
+          newTodayRowPayload = newRowData;
+        }
         Swal.fire({
           icon,
           title,
@@ -2216,6 +2295,15 @@ Swal.fire({
             const imageModalImages = document.getElementById('imageModalImages');
             if (imageModal && imageModal.style.display === 'block') imageModal.style.display = 'none';
             if (imageModalImages && imageModalImages.style.display === 'block') imageModalImages.style.display = 'none';
+
+            const rowForToday = newTodayRowPayload || newRowData || baseTodayRow;
+            const normalizedRow = prependTodayRow(rowForToday, baseTodayRow);
+            if (normalizedRow) {
+              todayDataLoaded = true;
+              currentPageToday = 1;
+              updateTableToday();
+              skipTodayReloadOnce = true;
+            }
 
             Swal.fire({
               title: 'กำลังเปลี่ยนหน้าไปยังข้อมูลที่ท่านบันทึก...',
@@ -2230,9 +2318,6 @@ Swal.fire({
               allowEscapeKey: false
             });
 
-            // รีเฟรชแท็บเบิกวันนี้ด้วยข้อมูลล่าสุดทันทีหลังบันทึก
-            todayDataLoaded = false;
-            allDataToday = [];
             const todayPromise = showTab('today');
 
             // โฟกัสช่องค้นหาเมื่อโหลดเสร็จ (รองรับ touch)
@@ -2268,13 +2353,15 @@ Swal.fire({
         }
 
         if (gasResult && gasResult.status === 'success') {
-          handleSuccessUI('success', 'ส่งข้อมูลสำเร็จ!', gasResult.data?.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว');
+          newTodayRowPayload = gasResult.data || null;
+          handleSuccessUI('success', 'ส่งข้อมูลสำเร็จ!', gasResult.data?.message || 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว', gasResult.data);
         } else if (response.ok) {
           // ตอบกลับไม่เป็น JSON แต่สถานะ HTTP ปกติ → ถือว่าบันทึกสำเร็จ
           handleSuccessUI(
             'success',
             'ส่งข้อมูลสำเร็จ!',
-            'ข้อมูลถูกบันทึกลงแล้ว'
+            'ข้อมูลถูกบันทึกลงแล้ว',
+            baseTodayRow
           );
         } else {
           throw new Error(`HTTP ${response.status}`);
@@ -2290,7 +2377,8 @@ Swal.fire({
           handleSuccessUI(
             'success',
             'ส่งข้อมูลสำเร็จ!',
-            'ข้อมูลถูกบันทึกลงแล้ว'
+            'ข้อมูลถูกบันทึกลงแล้ว',
+            baseTodayRow
           );
         } else {
           Swal.fire({
