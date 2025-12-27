@@ -2204,15 +2204,19 @@ Swal.fire({
       const jsonPayload = {
         material: row.Material || '',
         description: row.Description || '',
-        quantity: parseInt(formValues.quantity),
+        quantity: parseInt(formValues.quantity, 10),
         contact: formValues.contact,
         employeeCode: formValues.employeeCode,
         team: formValues.team,
         employeeName: formValues.employeeName,
-        callNumber: formValues.callNumber || '',
-        callType: formValues.callType || '',
+        CallNumber: formValues.callNumber || '',
+        CallType: formValues.callType || '',
         remark: formValues.remark || '',
-        vibhavadi: vibhavadiValue.toString()
+        status: 'รอเบิก',
+        vibhavadi: '0',
+        // สำรองเพื่อให้ UI ที่ใช้ camelCase ยังแสดงได้
+        callNumber: formValues.callNumber || '',
+        callType: formValues.callType || ''
       };
       const baseTodayRow = {
         ...jsonPayload,
