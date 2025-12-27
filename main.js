@@ -4073,12 +4073,26 @@ if (appContent.classList.contains('logged-in')) {
 // เพิ่มฟังก์ชัน formatTimestamp หลังจากตัวแปร global (เช่น หลัง let sortConfigToday = { ... };)
 function formatTimestamp(dateTimeStr) {
   if (!dateTimeStr) return "";
-  const [datePart, timePart] = dateTimeStr.split(' ');
-  const [month, day, year] = datePart.split('/').map(Number);
-  const yearBE = year + 543;
+  const trimmed = dateTimeStr.trim();
+  const parts = trimmed.split(' ');
+  const datePart = parts[0] || "";
+  const timePart = parts[1] || "";
+  const dateMatch = datePart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!dateMatch) return trimmed;
+
+  const a = parseInt(dateMatch[1], 10);
+  const b = parseInt(dateMatch[2], 10);
+  const y = parseInt(dateMatch[3], 10);
+  if (!a || !b || !y) return trimmed;
+
+  // รองรับทั้ง MM/DD/YYYY และ DD/MM/YYYY
+  const isMonthFirst = a <= 12 && b > 12;
+  const day = isMonthFirst ? b : a;
+  const month = isMonthFirst ? a : b;
+  const yearBE = y + 543;
   const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${yearBE}`;
-  const formattedTime = timePart || '';
-  return `${formattedDate} ${formattedTime}`;
+  const formattedTime = timePart ? ` ${timePart}` : '';
+  return `${formattedDate}${formattedTime}`;
 }
 // ========== ฟังก์ชันช่วยสำหรับการจัดการวันที่ไทย ==========
 // ========== ฟังก์ชันช่วยสำหรับการแปลงวันที่ค.ศ. ที่มีเวลา ==========
