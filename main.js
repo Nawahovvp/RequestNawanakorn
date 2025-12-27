@@ -202,9 +202,9 @@ let currentPageToday = 1;
 let itemsPerPageToday = 20; // Default to 20 items per page
 // API endpoint (Vercel)
 const requestSheetUrl = '/api/request';
-// GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
-const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
-const bulkUpdateUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec';
+// GAS URL (ผ่าน Vercel API proxy)
+const gasUrl = '/api/gas';
+const bulkUpdateUrl = '/api/gas';
 // Parts tab variables (moved up to avoid initialization error)
 const url = '/api/main-sap';
 const searchInput1 = document.getElementById("searchInput1");
