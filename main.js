@@ -925,15 +925,20 @@ function showTab(tabId) {
     case "today": {
       // แสดงข้อมูลเก่าทันที (ถ้ามี) แล้วไปดึงข้อมูลสดจาก opensheet
       const hasCachedToday = allDataToday.length > 0;
-      if (skipTodayReloadOnce) {
+      const skipAt = Number(sessionStorage.getItem('skipTodayReloadOnceAt') || '0');
+      const shouldSkip = skipTodayReloadOnce && skipAt && (Date.now() - skipAt) < 30000;
+      if (shouldSkip) {
         if (hasCachedToday) {
           updateTableToday();
         }
         hideLoading();
         skipTodayReloadOnce = false;
+        sessionStorage.removeItem('skipTodayReloadOnceAt');
         tabPromise = Promise.resolve();
         break;
       }
+      skipTodayReloadOnce = false;
+      sessionStorage.removeItem('skipTodayReloadOnceAt');
       if (hasCachedToday) {
         updateTableToday();
         hideLoading();
@@ -2303,6 +2308,7 @@ Swal.fire({
               currentPageToday = 1;
               updateTableToday();
               skipTodayReloadOnce = true;
+              sessionStorage.setItem('skipTodayReloadOnceAt', Date.now().toString());
             }
 
             Swal.fire({
