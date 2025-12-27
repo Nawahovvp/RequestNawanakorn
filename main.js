@@ -925,8 +925,10 @@ function showTab(tabId) {
     case "today": {
       // แสดงข้อมูลเก่าทันที (ถ้ามี) แล้วไปดึงข้อมูลสดจาก opensheet
       const hasCachedToday = allDataToday.length > 0;
-      if (skipTodayReloadOnce && hasCachedToday) {
-        updateTableToday();
+      if (skipTodayReloadOnce) {
+        if (hasCachedToday) {
+          updateTableToday();
+        }
         hideLoading();
         skipTodayReloadOnce = false;
         tabPromise = Promise.resolve();
