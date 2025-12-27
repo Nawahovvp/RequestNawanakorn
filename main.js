@@ -200,15 +200,13 @@ let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to desc
 // Pagination config for today tab
 let currentPageToday = 1;
 let itemsPerPageToday = 20; // Default to 20 items per page
-// Opensheet URL for Request sheet
-const requestSheetUrl = 'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request';
+// API endpoint (Vercel)
+const requestSheetUrl = '/api/request';
 // GAS URL for the new Code.gs deployment (update with your new script ID after deployment)
 const gasUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec'; // Replace with new deployment URL if different
 const bulkUpdateUrl = 'https://script.google.com/macros/s/AKfycbwVF2HAC8EYARt6Ku2ThUZWgeVxXWDhRQCQ0vCgGvilEMg8h5Hg3BlrcJJn2qMMqpGr/exec';
 // Parts tab variables (moved up to avoid initialization error)
-const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
-const sheetName = "MainSap";
-const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+const url = '/api/main-sap';
 const searchInput1 = document.getElementById("searchInput1");
 const searchInput2 = document.getElementById("searchInput2");
 const searchButton = document.getElementById("searchButton");
@@ -466,9 +464,7 @@ let allDataAll = [];
 let currentPageAll = 1;
 let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
 // Pending calls tab variables (moved up)
-const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
-const sheetNamePending = 'Call_Report';
-const urlPending = `https://opensheet.elk.sh/${sheetIDPending}/${sheetNamePending}`;
+const urlPending = '/api/pending';
 const modalPending = document.getElementById("detailModalPending");
 const modalContentPending = document.getElementById("modalContentPending");
 const closeModalPending = document.getElementById("closeModalPending");
@@ -723,9 +719,7 @@ async function loadEmployeeData() {
     return employeeDataPromise;
   }
   
-  const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
-  const employeeSheetName = "Employee_Auth";
-  const employeeUrl = `https://opensheet.elk.sh/${employeeSheetID}/${employeeSheetName}`;
+  const employeeUrl = '/api/employee';
   
   employeeDataPromise = fetch(employeeUrl)
     .then(res => res.json())
@@ -2873,7 +2867,7 @@ async function loadImageDatabase() {
   const cacheKey = "image-database-mainsapimage";
   try {
     imageDatabase = await getCachedData(cacheKey, async () => {
-      const res = await fetch(`https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/imageMIx`);
+      const res = await fetch('/api/image-db');
       const data = await res.json();
       const db = {};
       let count = 0;
@@ -3526,7 +3520,7 @@ async function loadVibhavadiStockMap() {
     return;
   }
 
-  const mainSapUrl = `https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapX`;
+  const mainSapUrl = '/api/main-sap';
 
   try {
     const res = await fetch(mainSapUrl);
@@ -4168,7 +4162,7 @@ async function openAnnouncementDeck() {
   
   try {
     // ดึงข้อมูลประกาศจาก Google Sheet
-    const res = await fetch('https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information', {
+    const res = await fetch('/api/announcement', {
       cache: 'no-cache'
     });
     
@@ -4406,7 +4400,7 @@ async function openAnnouncementDeckPreview() {
 async function checkNewAnnouncements() {
   console.log('เริ่มตรวจสอบประกาศใหม่...');
   try {
-    const res = await fetch('https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information', {
+    const res = await fetch('/api/announcement', {
       cache: 'no-store'
     });
     if (!res.ok) {
