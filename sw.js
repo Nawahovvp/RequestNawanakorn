@@ -1,5 +1,5 @@
 // sw.js — PartsGo v15.8.8 (29 พ.ย. 2568) — แก้ comma + เพิ่มความเสถียร
-const VERSION = 'v18.6.2';
+const VERSION = 'v18.5.4';
 const CACHE = `partgo-${VERSION}`;
 
 const SHELL = [
@@ -21,12 +21,13 @@ const SHELL_EXTERNAL = [
   'https://fonts.googleapis.com/css2?family=Itim&family=Poppins:wght@300;400;600&family=Kanit:wght@300;400;600&display=swap'
 ];
 
-const DATA_URLS = [
-  'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSap',
-  'https://opensheet.elk.sh/1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE/Request',
-  'https://opensheet.elk.sh/1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk/Call_Report',
-  'https://opensheet.elk.sh/1aeGgka5ZQs3SLASOs6mOZdPJ2XotxxMbeb1-qotDZ2o/information',
-  'https://opensheet.elk.sh/1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw/MainSapimage'
+const DATA_PATHS = [
+  '/api/main-sap',
+  '/api/request',
+  '/api/pending',
+  '/api/announcement',
+  '/api/image-db',
+  '/api/employee'
 ];
 
 self.addEventListener('install', event => {
@@ -84,8 +85,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 2. ข้อมูล opensheet → Stale-While-Revalidate
-  const isDataUrl = DATA_URLS.some(base => url.startsWith(base.split('?')[0]));
+  // 2. ข้อมูลจาก API → Stale-While-Revalidate
+  const isDataUrl = isSameOrigin && DATA_PATHS.includes(requestUrl.pathname);
   if (isDataUrl) {
     event.respondWith(
       fetch(request)

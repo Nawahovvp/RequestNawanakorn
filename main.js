@@ -4814,7 +4814,7 @@ function openAnnouncementEditor() {
         }
       });
       // ส่งไป GAS (เปลี่ยน URL เป็นของคุณ)
-      fetch('https://script.google.com/macros/s/AKfycbxnMuSOihH3dotoqP7w5ty6bghdbPEkJYbbUDNTSSfkLthY-YChHHD7_QW5-W-BA46K/exec', {
+      fetch('/api/gas-announcement', {
         method: 'POST',
         mode: 'no-cors',
         headers: {
