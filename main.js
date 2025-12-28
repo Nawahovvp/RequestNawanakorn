@@ -209,7 +209,9 @@ let sortConfigToday = { column: 'IDRow', direction: 'desc' }; // Default to desc
 let currentPageToday = 1;
 let itemsPerPageToday = 20; // Default to 20 items per page
 // API endpoint (Vercel)
-const requestSheetUrl = '/api/request';
+const requestSheetBaseUrl = '/api/request';
+const requestSheetPendingUrl = `${requestSheetBaseUrl}?type=pending`;
+const requestSheetAllUrl = `${requestSheetBaseUrl}?type=all`;
 // GAS URL (ผ่าน Vercel API proxy)
 const gasUrl = '/api/gas';
 const bulkUpdateUrl = '/api/gas';
@@ -256,6 +258,10 @@ let itemsPerPageImages = 20;
 let currentFilteredDataImages = [];
 let imageDatabase = {}; // { Material: ["id1", "id2", ...] }
 let imageDbLoaded = false;
+
+function getRequestSheetUrl() {
+  return showOnlyPending ? requestSheetPendingUrl : requestSheetAllUrl;
+}
 function extractIdFromUrlWeb(url) {
   if (!url || typeof url !== 'string') return '';
   const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/) || url.match(/uc\?id=([a-zA-Z0-9-_]+)/);
@@ -285,6 +291,28 @@ const saveTodayBtn = document.getElementById("saveTodayBtn");
 const errorContainerToday = document.getElementById("error-container-today");
 const retryButtonToday = document.getElementById("retry-button-today");
 const toggleAllDataBtn = document.getElementById("toggleAllDataBtn");
+function setTodayMode(isPending, { reload = true } = {}) {
+  showOnlyPending = isPending;
+  if (toggleAllDataBtn) {
+    if (showOnlyPending) {
+      toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ทั้งหมด</span>';
+      toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
+      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+      toggleAllDataBtn.style.color = "white";
+    } else {
+      toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>รอเบิก</span>';
+      toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
+      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
+      toggleAllDataBtn.style.color = "white";
+    }
+  }
+  currentPageToday = 1;
+  if (reload) {
+    loadTodayData({ silent: false });
+  } else {
+    updateTableToday();
+  }
+}
 function isAdminUser() {
   const savedUsername = localStorage.getItem('username');
   const userAuth = localStorage.getItem('userAuth');
@@ -393,24 +421,10 @@ if (saveTodayBtn) {
 // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
 if (toggleAllDataBtn) {
   toggleAllDataBtn.addEventListener("click", () => {
-    showOnlyPending = !showOnlyPending;
-    if (showOnlyPending) {
-      // โหมด: แสดงเฉพาะรอเบิก
-      toggleAllDataBtn.innerHTML = '<i class="fas fa-clock"></i> <span>ทั้งหมด</span>';
-      toggleAllDataBtn.title = "กำลังแสดงเฉพาะรายการที่รอเบิก";
-      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
-      toggleAllDataBtn.style.color = "white";
-    } else {
-      // โหมด: แสดงประวัติทั้งหมด
-      toggleAllDataBtn.innerHTML = '<i class="fas fa-history"></i> <span>รอเบิก</span>';
-      toggleAllDataBtn.title = "กำลังแสดงประวัติเบิกทั้งหมด";
-      toggleAllDataBtn.style.background = "linear-gradient(135deg, #ccd3db, #e3e7ed)";
-      toggleAllDataBtn.style.color = "white";
-    }
-    // รีเซ็ตหน้าแรก + อัปเดตตารางทันที
-    currentPageToday = 1;
-    updateTableToday();
+    setTodayMode(!showOnlyPending, { reload: true });
   });
+  // ตั้งค่าเริ่มต้นให้เป็นโหมดรอเบิกเสมอ
+  setTodayMode(true, { reload: false });
 }
 
 // Pagination elements for today tab
@@ -944,6 +958,12 @@ function showTab(tabId) {
       hideLoading();
       break;
     case "today": {
+      // บังคับโหมดเริ่มต้นเป็น "รอเบิก" และใช้ชีท Request_wait
+      if (!showOnlyPending) {
+        setTodayMode(true, { reload: false });
+      } else if (toggleAllDataBtn && toggleAllDataBtn.innerHTML.trim() === '') {
+        setTodayMode(true, { reload: false });
+      }
       // แสดงข้อมูลเก่าทันที (ถ้ามี) แล้วไปดึงข้อมูลสดจาก opensheet
       const hasCachedToday = allDataToday.length > 0;
       const skipAt = Number(sessionStorage.getItem('skipTodayReloadOnceAt') || '0');
@@ -3589,6 +3609,15 @@ async function loadTodayData(options = {}) {
   todayFetchController = controller;
   let timeoutId = null;
 
+  // ถ้ายังไม่ล็อกอินให้ข้าม
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const savedUsername = localStorage.getItem('username');
+  if (!isLoggedIn || !savedUsername) {
+    console.warn('ยังไม่ล็อกอิน ข้ามการโหลดข้อมูลเบิกวันนี้');
+    document.getElementById("loadingToday").style.display = "none";
+    return;
+  }
+
   // แสดง Loading (แบบเบาๆ ถ้ามีข้อมูลเดิมให้ดูทันที)
   if (!silent) {
     document.getElementById("loading").style.display = "flex";
@@ -3612,18 +3641,26 @@ async function loadTodayData(options = {}) {
     }
 
     // ดึงข้อมูลรายการเบิกวันนี้ (Request Sheet)
-    const response = await apiFetch(requestSheetUrl, {
+    const response = await apiFetch(getRequestSheetUrl(), {
       signal: controller.signal,
       cache: 'no-store' // บังคับดึงข้อมูลใหม่ทุกครั้ง และไม่เก็บ cache เดิม
     });
 
     clearTimeout(timeoutId);
 
+    if (response.status === 401) {
+      console.warn('session หมดอายุ/ไม่ได้รับสิทธิ์ (โหลดข้อมูลวันนี้) → ล็อกเอาท์');
+      handleLogout();
+      return;
+    }
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
+    if (!Array.isArray(data)) {
+      console.warn("รูปแบบข้อมูลเบิกวันนี้ไม่เป็น array (จะใช้ข้อมูลว่างแทน)", data);
+    }
     const normalizedData = (Array.isArray(data) ? data : []).map((row, index) => {
       const rowId = row.row_id || row.id || (index + 2);
       return {
@@ -3633,8 +3670,8 @@ async function loadTodayData(options = {}) {
       };
     });
 
-    if (!Array.isArray(normalizedData) || normalizedData.length === 0) {
-      throw new Error("ไม่พบข้อมูลการเบิกวันนี้");
+    if (normalizedData.length === 0) {
+      console.warn("ไม่พบข้อมูลในชีทเบิกวันนี้ (อาจว่างเปล่า)");
     }
 
     // บันทึกข้อมูลลงตัวแปร global
@@ -3666,6 +3703,8 @@ async function loadTodayData(options = {}) {
       msg = "ไม่สามารถเข้าถึง Google Sheets ได้ (ตรวจสอบการแชร์เป็น Public)";
     } else if (error.message.includes('Failed to fetch')) {
       msg = "ไม่มีการเชื่อมต่ออินเทอร์เน็ต";
+    } else if (error.message.includes('401')) {
+      msg = "หมดเวลาการล็อกอิน กรุณาเข้าสู่ระบบใหม่";
     }
 
     document.getElementById("error-message-today").textContent = msg;
