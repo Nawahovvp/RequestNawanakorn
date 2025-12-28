@@ -418,16 +418,7 @@ if (saveTodayBtn) {
     }
   });
 }
-// === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
-if (toggleAllDataBtn) {
-  toggleAllDataBtn.addEventListener("click", () => {
-    setTodayMode(!showOnlyPending, { reload: true });
-  });
-  // ตั้งค่าเริ่มต้นให้เป็นโหมดรอเบิกเสมอ
-  setTodayMode(true, { reload: false });
-}
-
-// Pagination elements for today tab
+// ตัวแปรของแท็บ Today ต้องถูกประกาศก่อนเรียก setTodayMode
 const paginationToday = document.getElementById("paginationToday");
 const pageNumbersToday = document.getElementById("pageNumbersToday");
 const itemsPerPageSelectToday = document.getElementById("itemsPerPageToday");
@@ -439,6 +430,14 @@ let allDataToday = [];
 let currentFilteredDataToday = [];
 let todayFetchController = null;
 let announcementCache = [];
+// === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
+if (toggleAllDataBtn) {
+  toggleAllDataBtn.addEventListener("click", () => {
+    setTodayMode(!showOnlyPending, { reload: true });
+  });
+  // ตั้งค่าเริ่มต้นให้เป็นโหมดรอเบิกเสมอ
+  setTodayMode(true, { reload: false });
+}
 // บังคับให้หัวคอลัมน์ "รูป" โผล่เสมอ (กัน cache หน้าเก่า)
 function ensureTodayImageColumn() {
   const table = document.getElementById("data-table-today");
