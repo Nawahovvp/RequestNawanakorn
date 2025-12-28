@@ -29,4 +29,4 @@ const fetchOpenSheet = async (sheetIdEnv, sheetNameEnv, req, res) => {
   res.status(200).json(data);
 };
 
-module.exports = { fetchOpenSheet };
+module.exports = { fetchOpenSheet, buildOpenSheetUrl };

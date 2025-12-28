@@ -84,7 +84,15 @@ window.showSettings = function () {
   // แล้วค่อยอัปเดตเวอร์ชัน
   updateAppVersionDisplay();
 };
-'use strict'; // เพิ่ม strict mode เพื่อจับ error เร็วขึ้น
+'use strict'; // Strict mode for earlier error detection
+
+const apiFetch = (input, init = {}) => {
+  const options = { ...init };
+  if (!options.credentials) {
+    options.credentials = 'same-origin';
+  }
+  return fetch(input, options);
+};
 // ========== ระบบ Cache ขั้นเทพ (2025) สำหรับ Parts + Images ==========
 const CACHE_VERSION = "v18";
 const CACHE_NAME = `partgo-cache-${CACHE_VERSION}`;
@@ -721,8 +729,13 @@ async function loadEmployeeData() {
   
   const employeeUrl = '/api/employee';
   
-  employeeDataPromise = fetch(employeeUrl)
-    .then(res => res.json())
+  employeeDataPromise = apiFetch(employeeUrl)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       console.log("ข้อมูลพนักงานที่ดึงมา:", data); // เพิ่มบรรทัดนี้เพื่อ debug
       employeeData = data;
@@ -765,42 +778,49 @@ async function handleLogin() {
   }
   
   try {
-    employeeData = await loadEmployeeData();
-    const expectedPassword = username.slice(-4);
-    const employee = employeeData.find(e => 
-      e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password
-    );
-    
-    if (employee && employee.Name) {
-      // บันทึกข้อมูลผู้ใช้รวมถึง Auth
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', username);
-      localStorage.setItem('userName', employee.Name);
-      localStorage.setItem('userAuth', employee.Auth || 'None'); // ✅ บันทึก Auth
-      
-      console.log(`ผู้ใช้ ${username} ล็อกอินสำเร็จ, Auth = ${employee.Auth || 'None'}`); // Debug
-      
-      if (rememberMeCheckbox.checked) {
-        localStorage.setItem('savedUsername', username);
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('savedUsername');
-        localStorage.removeItem('rememberMe');
-      }
-      
-      checkLoginStatus();
-      setTimeout(() => {
-        const searchInput = document.getElementById('searchInput1');
-        if (searchInput) searchInput.focus();
-      }, 500);
-    } else {
-      loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
-      loginError.style.display = 'block';
-      passwordInput.value = '';
+    const response = await apiFetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+
+    const result = await response.json();
+    if (!result || result.status !== 'success' || !result.user) {
+      throw new Error('Invalid response');
+    }
+
+    const user = result.user;
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('username', username);
+    localStorage.setItem('userName', user.name || username);
+    localStorage.setItem('userAuth', user.auth || 'None');
+
+    console.log(`ผู้ใช้ ${username} ล็อกอินสำเร็จ, Auth = ${user.auth || 'None'}`);
+
+    if (rememberMeCheckbox.checked) {
+      localStorage.setItem('savedUsername', username);
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      localStorage.removeItem('savedUsername');
+      localStorage.removeItem('rememberMe');
+    }
+
+    checkLoginStatus();
+    setTimeout(() => {
+      const searchInput = document.getElementById('searchInput1');
+      if (searchInput) searchInput.focus();
+    }, 500);
   } catch (error) {
-    loginError.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลพนักงาน กรุณาลองใหม่';
+    const message = error.message && error.message.includes('401')
+      ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!'
+      : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่';
+    loginError.textContent = message;
     loginError.style.display = 'block';
+    passwordInput.value = '';
     console.error('Login error:', error);
   }
 }
@@ -867,6 +887,7 @@ async function checkLoginStatus() {
     setupNotificationAfterLogin();
 }
 function handleLogout() {
+  apiFetch('/api/logout', { method: 'POST' }).catch(() => {});
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('username');
   localStorage.removeItem('userName');
@@ -2345,7 +2366,7 @@ Swal.fire({
       };
 
       try {
-        const response = await fetch(gasUrl, {
+        const response = await apiFetch(gasUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `action=insertRequest&payload=${encodeURIComponent(JSON.stringify(jsonPayload))}`
@@ -2670,7 +2691,7 @@ async function loadData() {
     allData = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(url, { signal: controller.signal });
+      const res = await apiFetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return await res.json();
@@ -2879,7 +2900,7 @@ async function loadImageDatabase() {
   const cacheKey = "image-database-mainsapimage";
   try {
     imageDatabase = await getCachedData(cacheKey, async () => {
-      const res = await fetch('/api/image-db');
+      const res = await apiFetch('/api/image-db');
       const data = await res.json();
       const db = {};
       let count = 0;
@@ -3169,7 +3190,7 @@ async function saveTodayDataSnapshot() {
 
       let json = null;
       try {
-        const res = await fetch(bulkUpdateUrl, {
+        const res = await apiFetch(bulkUpdateUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `action=bulkUpdateStatus&payload=${encodeURIComponent(JSON.stringify(payload))}`
@@ -3179,7 +3200,7 @@ async function saveTodayDataSnapshot() {
           throw new Error(json.data || `HTTP ${res.status}`);
         }
       } catch (fetchError) {
-        await fetch(bulkUpdateUrl, {
+        await apiFetch(bulkUpdateUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -3535,7 +3556,7 @@ async function loadVibhavadiStockMap() {
   const mainSapUrl = '/api/main-sap';
 
   try {
-    const res = await fetch(mainSapUrl);
+    const res = await apiFetch(mainSapUrl);
     const data = await res.json();
 
     data.forEach(row => {
@@ -3591,7 +3612,7 @@ async function loadTodayData(options = {}) {
     }
 
     // ดึงข้อมูลรายการเบิกวันนี้ (Request Sheet)
-    const response = await fetch(requestSheetUrl, {
+    const response = await apiFetch(requestSheetUrl, {
       signal: controller.signal,
       cache: 'no-store' // บังคับดึงข้อมูลใหม่ทุกครั้ง และไม่เก็บ cache เดิม
     });
@@ -3771,7 +3792,7 @@ searchInputAll.addEventListener("input", e => {
 });
 async function loadAllData() {
   try {
-    const response = await fetch(`${gasUrl}?action=getRequests`);
+    const response = await apiFetch(`${gasUrl}?action=getRequests`);
     const res = await response.json();
     if (res.status === 'success') {
       allDataAll = res.data;
@@ -4054,7 +4075,7 @@ async function loadPendingCallsData() {
     allDataPending = await getCachedData(cacheKey, async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(urlPending, {
+      const res = await apiFetch(urlPending, {
         signal: controller.signal,
         cache: 'no-store'
       });
@@ -4188,7 +4209,7 @@ async function openAnnouncementDeck() {
   
   try {
     // ดึงข้อมูลประกาศจาก Google Sheet
-    const res = await fetch('/api/announcement', {
+    const res = await apiFetch('/api/announcement', {
       cache: 'no-cache'
     });
     
@@ -4426,7 +4447,7 @@ async function openAnnouncementDeckPreview() {
 async function checkNewAnnouncements() {
   console.log('เริ่มตรวจสอบประกาศใหม่...');
   try {
-    const res = await fetch('/api/announcement', {
+    const res = await apiFetch('/api/announcement', {
       cache: 'no-store'
     });
     if (!res.ok) {
@@ -4820,7 +4841,7 @@ function openAnnouncementEditor() {
         }
       });
       // ส่งไป GAS (เปลี่ยน URL เป็นของคุณ)
-      fetch('/api/gas-announcement', {
+      apiFetch('/api/gas-announcement', {
         method: 'POST',
         mode: 'no-cors',
         headers: {

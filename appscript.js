@@ -9,13 +9,7 @@ const HEADERS = [
   'contact', 'employeeCode', 'team', 'employeeName', 'callNumber',
   'callType', 'remark', 'status', 'vibhavadi'
 ];
-const ALLOW_ORIGIN = '*';
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': ALLOW_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Max-Age': '86400'
-};
+// whitelist origin ที่อนุญาต (เพิ่ม/แก้ได้); '*' เป็น fallback
 
 // ========== Utils ==========
 function sendTelegramMessage(message) {
@@ -47,7 +41,6 @@ function shouldNotifyTelegram(timestamp) {
 function corsResponse(obj) {
   const out = ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-  Object.entries(CORS_HEADERS).forEach(([k, v]) => out.setHeader(k, v));
   return out;
 }
 
@@ -207,8 +200,8 @@ function handle(e) {
             const materialCell = (data[i][materialIndex] || '').toString().trim();
             if (rowIdCell == idRowValue && materialCell === materialValueStr) {
               sheet.getRange(i + 1, statusIndex + 1).setValue(newStatus);
-              response = { status: 'success', data: `อัปเดต IDRow ${idRowValue} เป็น ${newStatus}` };
-              return corsResponse(response);
+            response = { status: 'success', data: `อัปเดต IDRow ${idRowValue} เป็น ${newStatus}` };
+            return corsResponse(response);
             }
           }
         }

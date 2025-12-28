@@ -1,3 +1,5 @@
+const { requireAuth } = require('./_auth');
+
 const buildBody = (req) => {
   if (typeof req.body === 'string') {
     return req.body;
@@ -9,6 +11,10 @@ const buildBody = (req) => {
 };
 
 module.exports = async (req, res) => {
+  if (!requireAuth(req, res)) {
+    return;
+  }
+
   const gasUrl = process.env.GAS_URL;
   if (!gasUrl) {
     res.status(500).json({ error: 'Missing env var: GAS_URL' });
