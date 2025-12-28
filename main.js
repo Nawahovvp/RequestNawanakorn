@@ -214,7 +214,7 @@ const requestSheetPendingUrl = `${requestSheetBaseUrl}?type=pending`;
 const requestSheetAllUrl = `${requestSheetBaseUrl}?type=all`;
 // GAS URL (ผ่าน Vercel API proxy)
 const gasUrl = '/api/gas';
-const bulkUpdateUrl = '/api/gas';
+const bulkUpdateUrl = gasUrl; // ใช้ตัวเดียวกันให้ Save ยิงผ่าน GAS เสมอ
 // Parts tab variables (moved up to avoid initialization error)
 const url = '/api/main-sap';
 const searchInput1 = document.getElementById("searchInput1");
