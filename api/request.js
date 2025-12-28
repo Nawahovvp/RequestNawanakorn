@@ -3,14 +3,15 @@ const { buildOpenSheetUrl } = require('./_opensheet');
 
 const FALLBACK_SHEET_ID = '1xyy70cq2vAxGv4gPIGiL_xA5czDXqS2i6YYqW4yEVbE';
 
+// ใช้ชีทเดียวกับ GAS (Request) เสมอ เพื่อให้ load/save ตรงกัน
 const sheetConfig = {
   pending: {
-    sheetId: process.env.SHEET_ID_REQUEST_WAIT || FALLBACK_SHEET_ID,
-    sheetName: process.env.SHEET_NAME_REQUEST_WAIT || 'Request_wait'
+    sheetId: process.env.SHEET_ID_REQUEST || FALLBACK_SHEET_ID,
+    sheetName: process.env.SHEET_NAME_REQUEST || 'Request'
   },
   all: {
-    sheetId: process.env.SHEET_ID_REQUEST_COM || FALLBACK_SHEET_ID,
-    sheetName: process.env.SHEET_NAME_REQUEST_COM || 'Request_Com'
+    sheetId: process.env.SHEET_ID_REQUEST || FALLBACK_SHEET_ID,
+    sheetName: process.env.SHEET_NAME_REQUEST || 'Request'
   }
 };
 
