@@ -4446,10 +4446,22 @@ async function openAnnouncementDeckPreview() {
 // ฟังก์ชันตรวจสอบประกาศใหม่
 async function checkNewAnnouncements() {
   console.log('เริ่มตรวจสอบประกาศใหม่...');
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const savedUsername = localStorage.getItem('username');
+  if (!isLoggedIn || !savedUsername) {
+    console.log('ยังไม่ล็อกอิน ข้ามการตรวจสอบประกาศ');
+    updateNotificationBadge(false, 0);
+    return;
+  }
   try {
     const res = await apiFetch('/api/announcement', {
       cache: 'no-store'
     });
+    if (res.status === 401) {
+      console.warn('session หมดอายุหรือไม่ได้รับอนุญาต → บังคับให้ออกจากระบบ');
+      handleLogout();
+      return;
+    }
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
