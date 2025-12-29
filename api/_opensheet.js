@@ -1,3 +1,5 @@
+require('./_env');
+
 const buildOpenSheetUrl = (sheetId, sheetName) => {
   const base = process.env.OPEN_SHEET_BASE || 'https://opensheet.elk.sh';
   const normalized = base.endsWith('/') ? base : `${base}/`;

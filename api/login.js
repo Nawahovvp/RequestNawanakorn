@@ -1,3 +1,4 @@
+require('./_env');
 const { buildOpenSheetUrl } = require('./_opensheet');
 const { signSession, setSessionCookie } = require('./_auth');
 

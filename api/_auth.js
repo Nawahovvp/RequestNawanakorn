@@ -1,3 +1,4 @@
+require('./_env');
 const crypto = require('crypto');
 
 const base64UrlEncode = (input) => {

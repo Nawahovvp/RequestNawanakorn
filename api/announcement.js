@@ -1,3 +1,4 @@
+require('./_env');
 const { requireAuth } = require('./_auth');
 
 const { fetchOpenSheet } = require('./_opensheet');

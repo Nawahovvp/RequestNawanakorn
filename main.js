@@ -430,6 +430,8 @@ let allDataToday = [];
 let currentFilteredDataToday = [];
 let todayFetchController = null;
 let announcementCache = [];
+let announcementCheckerInterval = null;
+let announcementCheckerInitialized = false;
 // === ปุ่มสลับ รอเบิก ↔ ประวัติเบิก (เวอร์ชันสมบูรณ์ 100%) ===
 if (toggleAllDataBtn) {
   toggleAllDataBtn.addEventListener("click", () => {
@@ -508,16 +510,20 @@ let employeeDataPromise = null;
 const imageModal = document.getElementById('imageModal');
 const imageModalContent = document.getElementById('imageModalContent');
 const closeImageModal = document.getElementById('closeImageModal');
-closeImageModal.onclick = () => {
-  imageModal.style.display = 'none';
-};
+if (closeImageModal && imageModal) {
+  closeImageModal.onclick = () => {
+    imageModal.style.display = 'none';
+  };
+}
 // Image Modal Handling for #images (moved up)
 const imageModalImages = document.getElementById('imageModalImages');
 const imageModalContentImages = document.getElementById('imageModalContentImages');
 const closeImageModalImages = document.getElementById('closeImageModalImages');
-closeImageModalImages.onclick = () => {
-  imageModalImages.style.display = 'none';
-};
+if (closeImageModalImages && imageModalImages) {
+  closeImageModalImages.onclick = () => {
+    imageModalImages.style.display = 'none';
+  };
+}
 // Theme Management
 function setTheme(theme) {
   localStorage.setItem('theme', theme);
@@ -703,14 +709,14 @@ window.addEventListener('click', (event) => {
     settingsModal.style.display = 'none';
   }
   // Existing modals...
-  if (event.target == modal) closeModal.click();
-  if (event.target == modalAll) closeModalAll.click();
-  if (event.target == modalPending) closeModalPending.click();
+  if (modal && closeModal && event.target == modal) closeModal.click();
+  if (modalAll && closeModalAll && event.target == modalAll) closeModalAll.click();
+  if (modalPending && closeModalPending && event.target == modalPending) closeModalPending.click();
   // Image modals
-  if (event.target === imageModal) {
+  if (imageModal && event.target === imageModal) {
     imageModal.style.display = 'none';
   }
-  if (event.target === imageModalImages) {
+  if (imageModalImages && event.target === imageModalImages) {
     imageModalImages.style.display = 'none';
   }
 });
@@ -894,10 +900,7 @@ async function checkLoginStatus() {
       rememberMeCheckbox.checked = true;
     }
   }
-   setTimeout(() => {
-      checkNewAnnouncements();
-    }, 1500);
-    setupNotificationAfterLogin();
+  setupNotificationAfterLogin();
 }
 function handleLogout() {
   apiFetch('/api/logout', { method: 'POST' }).catch(() => {});
@@ -997,11 +1000,6 @@ function showTab(tabId) {
       break;
     default:
       hideLoading();
-  }
-   if (tabId !== 'loading') {
-    setTimeout(() => {
-      checkNewAnnouncements();
-    }, 500);
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
   return tabPromise;
@@ -3727,7 +3725,9 @@ async function loadTodayData(options = {}) {
   }
 }
 // All tab functions (now after variables)
-closeModalAll.onclick = () => modalAll.style.display = "none";
+if (closeModalAll && modalAll) {
+  closeModalAll.onclick = () => modalAll.style.display = "none";
+}
 itemsPerPageSelectAll.addEventListener("change", (e) => {
   itemsPerPageAll = parseInt(e.target.value);
   currentPageAll = 1;
@@ -3844,9 +3844,11 @@ async function loadAllData() {
   }
 }
 // Pending-calls tab functions (now after variables)
-closeModalPending.onclick = () => modalPending.style.display = "none";
+if (closeModalPending && modalPending) {
+  closeModalPending.onclick = () => modalPending.style.display = "none";
+}
 window.addEventListener('click', event => {
-  if (event.target == modalPending) modalPending.style.display = "none";
+  if (modalPending && event.target == modalPending) modalPending.style.display = "none";
 });
 itemsPerPageSelectPending.addEventListener("change", (e) => {
   itemsPerPagePending = parseInt(e.target.value);
@@ -4635,11 +4637,15 @@ function clearNotificationBadge() {
 
 // ฟังก์ชันตั้งค่าการตรวจสอบอัตโนมัติ
 function setupAnnouncementChecker() {
+  if (announcementCheckerInitialized) {
+    return announcementCheckerInterval;
+  }
+  announcementCheckerInitialized = true;
   console.log('ตั้งค่าการตรวจสอบประกาศอัตโนมัติ');
   setTimeout(() => {
     checkNewAnnouncements();
   }, 2000);
-  const checkInterval = setInterval(() => {
+  announcementCheckerInterval = setInterval(() => {
     checkNewAnnouncements();
   }, 10 * 60 * 1000);
   document.addEventListener('visibilitychange', () => {
@@ -4652,7 +4658,7 @@ function setupAnnouncementChecker() {
     console.log('ผู้ใช้กลับมาที่หน้าต่าง → ตรวจสอบประกาศใหม่');
     checkNewAnnouncements();
   });
-  return checkInterval;
+  return announcementCheckerInterval;
 }
 
 // เรียกใช้เมื่อ DOM โหลดเสร็จ
@@ -4680,11 +4686,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // เรียกใช้เมื่อผู้ใช้ล็อกอิน
 function setupNotificationAfterLogin() {
   console.log('ผู้ใช้ล็อกอิน → ตั้งค่าการตรวจสอบประกาศ');
-  
+  setupAnnouncementChecker();
   setTimeout(() => {
     checkNewAnnouncements();
-    setupAnnouncementChecker();
-  }, 2000);
+  }, 500);
 }
 
 // เพิ่ม animation CSS สำหรับ badge
@@ -4932,15 +4937,27 @@ function openAnnouncementEditor() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   // Close modals by clicking 'X'
-  closeModal.addEventListener('click', () => modal.style.display = 'none');
-  closeModalAll.addEventListener('click', () => modalAll.style.display = 'none');
-  closeModalPending.addEventListener('click', () => modalPending.style.display = 'none');
+  if (closeModal && modal) {
+    closeModal.addEventListener('click', () => modal.style.display = 'none');
+  }
+  if (closeModalAll && modalAll) {
+    closeModalAll.addEventListener('click', () => modalAll.style.display = 'none');
+  }
+  if (closeModalPending && modalPending) {
+    closeModalPending.addEventListener('click', () => modalPending.style.display = 'none');
+  }
   ensurePartsImageDbColumn();
 
   // Close modals by clicking backdrop
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-  modalAll.addEventListener('click', (e) => { if (e.target === modalAll) modalAll.style.display = 'none'; });
-  modalPending.addEventListener('click', (e) => { if (e.target === modalPending) modalPending.style.display = 'none'; });
+  if (modal) {
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+  }
+  if (modalAll) {
+    modalAll.addEventListener('click', (e) => { if (e.target === modalAll) modalAll.style.display = 'none'; });
+  }
+  if (modalPending) {
+    modalPending.addEventListener('click', (e) => { if (e.target === modalPending) modalPending.style.display = 'none'; });
+  }
 });
 // ลบปุ่มออกจาก DOM ถาวรทันทีที่ติดตั้ง
 window.addEventListener('appinstalled', () => {
@@ -4958,14 +4975,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.remove();
   }
 });
- setTimeout(() => {
-    checkNewAnnouncements();
-  }, 1000);
-  
-  // ตรวจสอบประกาศใหม่ทุก 5 นาที
-  setInterval(() => {
-    checkNewAnnouncements();
-  }, 5 * 60 * 1000);
 // Initial calls (now safe after all variables defined)
 loadTheme();
 checkLoginStatus();

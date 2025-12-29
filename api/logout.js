@@ -1,3 +1,4 @@
+require('./_env');
 const { clearSessionCookie } = require('./_auth');
 
 module.exports = async (req, res) => {
